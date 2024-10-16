@@ -18,12 +18,24 @@ def changevolume(volume):
     pygame.mixer.music.set_volume(volume)
             
 root = Tk()
+img = PhotoImage(file='/Users/bartek/Desktop/Politechnika/Praca inżynierska/WaveForm/WaveForm/Pictures/Logo.png')
+background = PhotoImage(file='/Users/bartek/Desktop/Politechnika/Praca inżynierska/WaveForm/WaveForm/Pictures/Background.png')
+#favicon = PhotoImage(file='/Users/bartek/Desktop/Politechnika/Praca inżynierska/WaveForm/WaveForm/Pictures/favicon.ico')
+root.iconphoto(False, img)
+#root.wm_iconbitmap(False, favicon)
+
+canvas=Canvas(root, width=500, height=400)
+canvas.grid(row=0, column=0, columnspan=4, rowspan=2, sticky="nsew")
+canvas_background = canvas.create_image(0, 0, image=background, anchor="nw")
+
 root.title("WaveForm")
 root.geometry("500x400")
+root.iconbitmap("/Users/bartek/Desktop/Politechnika/Praca inżynierska/WaveForm/WaveForm/Pictures/favicon2.ico")
 pygame.mixer.init()
 pygame.mixer.init(channels=2)
-playlist = Listbox(root,selectmode=SINGLE,bg = "purple")
-playlist.grid(row=0, column=0, columnspan=4, sticky="nsew")
+playlist = Listbox(root,selectmode=SINGLE)
+#playlist.grid(row=0, column=0, columnspan=4, sticky="nsew")
+playlist_window = canvas.create_window(50,50, anchor="nw", window=playlist, width=400, height=100)
 os.chdir('/Users/bartek/Desktop/Politechnika/Praca inżynierska/WaveForm/WaveForm/Music')
 song = os.listdir()
 for s in song:
