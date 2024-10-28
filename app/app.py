@@ -120,17 +120,19 @@ for s in songs:
     song_listbox.insert(END, s)
     
 # Global variables
-global is_playing
+global is_playing, current_song_position, song_start_time
 is_playing = False
 global song_length
 song_length = 0
 global user_sliding 
 user_sliding = False
+current_song_position = 0
+song_start_time = 0
 
 
 # Manipulate song functions
 def play_pause_song(event=None):
-    global is_playing, song_length
+    global is_playing, song_length, current_song_position, song_start_time
     currentsong = song_listbox.get(ACTIVE)
     if is_playing:
         pygame.mixer.music.pause()
@@ -138,6 +140,8 @@ def play_pause_song(event=None):
     else:
         if not pygame.mixer.music.get_busy():
             pygame.mixer.music.load(currentsong)
+            current_song_position = 0
+            song_start_time = 0
             pygame.mixer.music.play()
             song_length = int(pygame.mixer.Sound(currentsong).get_length())
             now_playing()
@@ -199,28 +203,38 @@ def control_volume(value):
     volume_label.configure(text=f"Volume: {int(value)}%")
 
 def progress_bar():
+    global current_song_position
+    
     if not user_sliding:
         current_time_ms = pygame.mixer.music.get_pos()
-        current_time = int(current_time_ms / 1000)
-        remaining_time = song_length - current_time
-        time_elapsed_label.configure(text=time.strftime("%M:%S", time.gmtime(current_time)))
+        if current_time_ms != -1:  # Check if music is playing
+            current_song_position = int(current_time_ms / 1000) + song_start_time
+        
+        remaining_time = song_length - current_song_position
+        time_elapsed_label.configure(text=time.strftime("%M:%S", time.gmtime(current_song_position)))
         time_remaining_label.configure(text=time.strftime("-%M:%S", time.gmtime(remaining_time)))
 
         if song_length > 0:
-            progress_slider.set((current_time / song_length) * 100)
+            progress_slider.set((current_song_position / song_length) * 100)
                 
     if pygame.mixer.music.get_busy():
         bottom_center_widget.after(1000, progress_bar)
 
 def slide_music(value):
-    global user_sliding
+    global user_sliding, current_song_position, song_start_time
     user_sliding = True
     new_time = (float(value) / 100) * song_length
+    
+    pygame.mixer.music.stop()
     pygame.mixer.music.play(start=new_time)
+    song_start_time = new_time  # Store the start time for get_pos() calculations
+    current_song_position = new_time
+    
     time_elapsed_label.configure(text=time.strftime("%M:%S", time.gmtime(new_time)))
     time_remaining_label.configure(text=time.strftime("-%M:%S", time.gmtime(song_length - new_time)))
     
     bottom_center_widget.after(500, lambda: set_user_sliding(False))
+
     
 def set_user_sliding(value):
     global user_sliding
