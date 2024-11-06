@@ -31,12 +31,20 @@ main_frame.grid(row=0, column=0, sticky='nsew', padx=1, pady=1)
 top_frame = Frame(main_frame, bg='#1E052A')
 top_frame.grid(row=0, column=0, columnspan=3, sticky='ew', padx=1, pady=1)
 #Left pannel
-left_frame = Frame(main_frame, bg='#3C0F64')
+left_frame = Frame(main_frame, bg='#3A0C60')
 left_frame.grid(row=1, column=0, sticky='nsew', padx=1, pady=1)
+search_frame = Frame(left_frame, bg='#3A0C60')
+search_frame.grid(row=0, column=0, sticky='nsew', padx=1, pady=1)
+search_type_frame = Frame(search_frame, bg='#3A0C60')
+search_type_frame.grid(row=0, column=0, sticky='nsew', padx=1, pady=1)
+search_buttons_frame = Frame(search_frame, bg='blue')
+search_buttons_frame.grid(row=1, column=0, sticky='nsew', padx=1, pady=1)
+pinned_playlist_frame = Frame(left_frame, bg='red')
+pinned_playlist_frame.grid(row=1, column=0, sticky='nsew', padx=1, pady=1)
 # Mid pannel
 middle_frame = Frame(main_frame, bg='#3C0F64')
 middle_frame.grid(row=1, column=1, sticky='nsew', padx=1, pady=1)
-header_frame = Frame(middle_frame, bg='#3C0F64')
+header_frame = Frame(middle_frame, bg='#3A0C60')
 header_frame.grid(row=0, columnspan=3, sticky='nsew', padx=1, pady=1)
 songlist_frame = Frame(middle_frame, bg='black')
 songlist_frame.grid(row=1, columnspan=3, sticky='nsew', padx=1, pady=1)
@@ -45,23 +53,23 @@ right_frame = Frame(main_frame, bg='#3A0C60')
 right_frame.grid(row=1, column=2, sticky='nsew', padx=1, pady=1)
 #  Bottom left pannel
 bottom_frame_left = Frame(main_frame, bg='#1E052A')
-bottom_frame_left.grid(row=2, column=0, sticky='nsew', padx=1, pady=1)
+bottom_frame_left.grid(row=2, column=0, sticky='nsew', pady=1)
 # Bottom midlle panel
 bottom_frame_mid = Frame(main_frame, bg='#1E052A')
-bottom_frame_mid.grid(row=2, column=1, sticky='nsew', padx=1, pady=1)
+bottom_frame_mid.grid(row=2, column=1, sticky='nsew', pady=1)
 
 # Bottom right panel
 bottom_frame_right = Frame(main_frame, bg='#1E052A')
-bottom_frame_right.grid(row=2, column=2, sticky='ew', padx=1, pady=1)
+bottom_frame_right.grid(row=2, column=2, sticky='ew', pady=1)
 
 # Widgets
 bottom_left_widget = Label(bottom_frame_left, bg='#1E052A')
 bottom_left_widget.grid(row=0, column=0, sticky='nsew')
-bottom_left_widget.pack(padx=1, pady=1)
+bottom_left_widget.pack(pady=1)
 # Bottom center widget
 bottom_center_widget = Label(bottom_frame_mid, bg='#1E052A')
 bottom_center_widget.grid(row=1, column=1, sticky='nsew', padx=50)
-bottom_center_widget.place(relx=0.5, rely=0.3, anchor=CENTER)
+bottom_center_widget.place(relx=0.5, rely=0.4, anchor=CENTER)
 bottom_center_bar = Label(bottom_frame_mid, bg='#1E052A')
 bottom_center_bar.grid(row=2, column=1, sticky='nsew')
 #bottom_center_widget.place(relx=0.5, rely=0.3, anchor=CENTER)
@@ -96,63 +104,55 @@ Label(top_frame, bg='#1E052A').grid(row=0, column=0, sticky='w')
 top_frame.grid_columnconfigure(0, weight=1)
 
 # Playlist page grid
+left_frame.grid_rowconfigure(0,  weight=1)
+left_frame.grid_rowconfigure(1,  weight=10)
+left_frame.grid_columnconfigure(0, weight=1)
+
+search_frame.grid_rowconfigure(0, weight=1)
+#search_frame.grid_rowconfigure(1, weight=1)
+search_frame.grid_columnconfigure(0, weight=1)
+
+# Playlist page grid
 middle_frame.grid_rowconfigure(0,  weight=1)
-middle_frame.grid_rowconfigure(1,  weight=1)
-middle_frame.grid_columnconfigure(0, weight=3)
-middle_frame.grid_columnconfigure(1, weight=3)
-middle_frame.grid_columnconfigure(2, weight=3)
-# middle_frame.grid_rowconfigure(2,  weight=1)
+middle_frame.grid_rowconfigure(1,  weight=2)
+middle_frame.grid_columnconfigure(0, weight=1)
 
 #middle_frame.grid_rowconfigure(3,  weight=1)
 
 # Bottom frame grid
-bottom_frame_mid.grid_rowconfigure(0, weight=2)
-bottom_frame_mid.grid_rowconfigure(1, weight=2)
+bottom_frame_mid.grid_rowconfigure(0, weight=1)
+bottom_frame_mid.grid_rowconfigure(1, weight=1)
 bottom_frame_mid.grid_columnconfigure(0, weight=1)
 bottom_frame_mid.grid_columnconfigure(1, weight=1)
 bottom_frame_mid.grid_columnconfigure(2, weight=1)
 
 # Window and label width
 
-
 # Labels
 
 # Left frame labels
-Label(left_frame, text="Playlists", font=("Arial", 14), fg='white', bg='#240745').pack(pady=5)
-playlist1 = Button(left_frame, text="Liked songs", width=20, height=2, fg='black', bg='red')
+
+# Search 
+
+Label(search_type_frame, text="Search", font=("Arial", 14), fg='white', bg='#3A0C60')
+search_entry = Entry(search_type_frame, font=("Arial", 12), width=30)
+search_entry.pack(side=LEFT, padx=5, pady=5, fill="x", expand=True)
+Label(search_buttons_frame, text="Buttons_to_search", font=("Arial", 14), fg='white', bg='#3A0C60').pack(pady=5)
+# Pinned playlists
+Label(pinned_playlist_frame, text="Playlists", font=("Arial", 14), fg='white', bg='#3A0C60').pack(pady=5)
+playlist1 = Button(pinned_playlist_frame, text="Liked songs", width=20, height=2, fg='black', bg='red')
 playlist1.pack(pady=5)
-playlist2 = Button(left_frame, text="UK Dubstep", width=20, height=2, fg='black', bg='black')
-playlist2.pack( pady=5)
+playlist2 = Button(pinned_playlist_frame, text="UK Dubstep", width=20, height=2, fg='black', bg='black')
+playlist2.pack(pady=5)
 
 # Middle frame labels
-
-Label(header_frame, text='Playlist: UK Bassline', font=("Arial", 14), fg='white', bg='#3C0F64').pack(pady=5)
-# song_listbox = Listbox(songlist_frame, bg='#1E052A', fg='white', height=15, width=40)
-# song_listbox.pack(padx=10, pady=5)
-#Label(songlist_frame, text='HUJ', font=("Arial", 14), fg='white', bg='red').pack(pady=5)
+Label(header_frame, text='Playlist: UK Bassline', font=("Arial", 14), fg='white', bg='#3A0C60').pack(pady=1)
 canvas = Canvas(songlist_frame, highlightthickness=0)
-canvas.pack(fill="both", expand=True)
+canvas.pack(fill="both", expand=True, pady=5)
 
 
 start_color = (133, 14, 185)  # Color start (purple)
 end_color = (60, 6, 83)      # Color end (darker purple)
-
-# Right frame labels
-
-#right_frame = Label(right_frame, font=("Arial", 12), fg='white', bg='#3A0C60')
-#right_frame.bind("<Button-1>", now_playing)
-
-
-
-
-
-    
-
-
-        
-
-# Create a Canvas for gradient background in songlist_frame
-
 
 
 def create_vertical_gradient(canvas, color1, color2):
@@ -176,20 +176,8 @@ songlist_frame.bind("<Configure>", update_canvas_gradient)
 # Initial gradient setup on start
 update_canvas_gradient()
 
-song_listbox = Listbox(songlist_frame, bg='#1E052A', fg='white', relief="flat")
+song_listbox = Listbox(songlist_frame, bg='#3C0F64', fg='white', relief="flat")
 song_listbox.place(relwidth=1, relheight=1)
-
-#canvas_width, canvas_height = 400, 600  # Adjust width and height as needed
-#create_vertical_gradient(canvas, canvas_width, canvas_height, start_color, end_color)
-
-# Listbox for displaying song list, overlayed on the gradient canvas
-
-
-# try:
-#     os.chdir('../WaveForm/Music')
-#     songs = os.listdir()
-# except FileNotFoundError:
-#     songs = []
 
 # Now songs are static, in future they will be dynamic
 os.chdir('../WaveForm/Music')
@@ -317,16 +305,14 @@ def create_bottom_widgets(self):
 # Bottom left frame labels
 
 title_label = Label(bottom_left_widget, fg="white",  bg='#1E052A', font=("Arial", 18, "bold"))
-title_label.pack(side=TOP, padx=0, pady=5)
+title_label.pack(side=TOP, padx=0, pady=10)
 title_label.bind("<Button-1>", now_playing)
 
 artist_label = Label(bottom_left_widget, fg="white",  bg='#1E052A', font=("Arial", 14, "bold"))
 artist_label.pack(side=TOP, padx=7, pady=5)
 title_label.bind("<Button-1>", now_playing)
 
-
 # Bottom center frame labels
-
 previous_label = Label(bottom_center_widget, image=previous_button, bg='#1E052A')
 previous_label.pack(side="left", pady=40, padx=5)
 previous_label.bind("<Button-1>", previous_song)
@@ -344,13 +330,10 @@ time_elapsed_label.pack(side="left", pady=5, padx=5)
 
 progress_slider = customtkinter.CTkSlider(bottom_center_bar, from_=0, to=100, command=slide_music)
 progress_slider.set(0)
-progress_slider.pack(side="left", pady=1, padx=5, expand=True, fill="x")
+progress_slider.pack(side="left", pady=5, padx=5, expand=True, fill="x")
 
 time_remaining_label = customtkinter.CTkLabel(bottom_center_bar, text="-00:00")
 time_remaining_label.pack(side="left", pady=5, padx=5)
-
-
-# Bottom right frame labels
 
 #Volume bar
 volume_label = customtkinter.CTkLabel(bottom_frame_right, text="Volume: 100%")
@@ -359,7 +342,7 @@ volume_label.pack(pady=20)
 volume_bar = customtkinter.CTkSlider(bottom_frame_right, from_=0, to=100, command=control_volume)
 
 volume_bar.set(100)
-volume_bar.pack(pady=10, padx=10, fill="x")
+volume_bar.pack(pady=10, fill="x")
 
 
 
