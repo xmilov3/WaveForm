@@ -262,8 +262,7 @@ def play_pause_song(event=None):
             progress_bar()
         else:
             pygame.mixer.music.unpause()
-            display_album_art(currentsong)
-            now_playing()
+        now_playing()
         play_pause_label.config(image=pause_button)
     is_playing = not is_playing
     
@@ -297,7 +296,6 @@ def previous_song(event=None):
 def now_playing():
     global is_playing, currentsong
     currentsong = song_listbox.get(ACTIVE)
-    display_album_art(song_listbox.get(ACTIVE))
     currentsong = currentsong.replace('.mp3', '').replace('.wav', '') # Hide extension
     # Cut too long title
     if " - " in currentsong:
