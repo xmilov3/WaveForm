@@ -1,8 +1,12 @@
 from tkinter import *
 import customtkinter
+from mutagen.mp3 import MP3
+from mutagen.id3 import ID3, APIC
+from PIL import Image, ImageTk
 import pygame
 import os
-import time 
+import time
+import io
 
 # Main window            
 root = Tk()
@@ -51,6 +55,10 @@ songlist_frame.grid(row=1, columnspan=3, sticky='nsew', padx=1, pady=1)
 # Right pannel
 right_frame = Frame(main_frame, bg='#3A0C60')
 right_frame.grid(row=1, column=2, sticky='nsew', padx=1, pady=1)
+now_playing_frame = Frame(right_frame, bg='#3A0C60')
+now_playing_frame.grid(row=0, column=0, sticky='nsew', padx=1, pady=1)
+next_in_queue_frame = Frame(right_frame, bg='#3C0F64')
+next_in_queue_frame.grid(row=1, column=0, sticky='nsew', padx=1, pady=1)
 #  Bottom left pannel
 bottom_frame_left = Frame(main_frame, bg='#1E052A')
 bottom_frame_left.grid(row=2, column=0, sticky='nsew', pady=1)
@@ -119,6 +127,12 @@ middle_frame.grid_columnconfigure(0, weight=1)
 
 #middle_frame.grid_rowconfigure(3,  weight=1)
 
+# Right Frame Grid
+
+right_frame.grid_rowconfigure(0, weight=3)
+right_frame.grid_rowconfigure(1, weight=4)
+right_frame.grid_columnconfigure(0, weight=1)
+
 # Bottom frame grid
 bottom_frame_mid.grid_rowconfigure(0, weight=1)
 bottom_frame_mid.grid_rowconfigure(1, weight=1)
@@ -146,14 +160,43 @@ playlist2 = Button(pinned_playlist_frame, text="UK Dubstep", width=20, height=2,
 playlist2.pack(pady=5)
 
 # Middle frame labels
-Label(header_frame, text='Playlist: UK Bassline', font=("Arial", 14), fg='white', bg='#3A0C60').pack(pady=1)
+Label(header_frame, text='Playlist: UK Bassline', font=("Arial", 24, "bold"), fg='white', bg='#3A0C60').pack(pady=1)
 canvas = Canvas(songlist_frame, highlightthickness=0)
 canvas.pack(fill="both", expand=True, pady=5)
 
+#Label(now_playing_frame, text='UK Bassline', font=("Arial", 18, "bold"), fg='white', bg='#3A0C60')
 
 start_color = (133, 14, 185)  # Color start (purple)
 end_color = (60, 6, 83)      # Color end (darker purple)
 
+album_art_label = Label(now_playing_frame, bg='yellow')
+album_art_label.pack(pady=10)
+
+def display_album_art(song_name):
+    filepath = os.path.join('../WaveForm/Music', song_name)
+    if filepath.endswith('.mp3'):
+        try:
+            audio = MP3(filepath, ID3=ID3)
+            album_art_found = False 
+            for tag in audio.tags.values():
+                if isinstance(tag, APIC):  
+                    album_art = Image.open(io.BytesIO(tag.data))
+                    album_art = album_art.resize((150, 150))  
+                    album_art = ImageTk.PhotoImage(album_art)
+                    album_art_label.config(image=album_art)
+                    album_art_label.image = album_art  
+                    album_art_found = True
+                    break
+            if not album_art_found:
+                album_art_label.config(image='')
+                album_art_label.image = None
+        except Exception as e:
+            print("Nie udało się załadować okładki z pliku MP3:", e)
+            album_art_label.config(image='')  
+            album_art_label.image = None
+    else:
+        album_art_label.config(image='')  
+        album_art_label.image = None
 
 def create_vertical_gradient(canvas, color1, color2):
     canvas_width = canvas.winfo_width()  # Get canvas width dynamically
@@ -185,7 +228,7 @@ songs = os.listdir()
 for s in songs:
     song_listbox.insert(END, s)
 
-Label(right_frame, text="Now Playing", font=("Arial", 14), fg='white', bg='#3A0C60').pack(pady=5)
+#title_label2 = Label(now_playing_frame, text="Now Playing", font=("Arial", 18, "bold"), fg='white', bg='#3A0C60').pack(pady=5)
 
 # Manipulate song functions
 def play_pause_song(event=None):
@@ -240,6 +283,7 @@ def now_playing():
     global is_playing, currentsong
     currentsong = song_listbox.get(ACTIVE)
     currentsong = currentsong.replace('.mp3', '').replace('.wav', '') # Hide extension
+    display_album_art(song_listbox.get(ACTIVE))
     # Cut too long title
     if " - " in currentsong:
         artist, title = currentsong.split(" - ")
@@ -247,12 +291,13 @@ def now_playing():
         artist = artist[:20] + '...' if len(artist) > 20 else artist
         title_label.config(text=f"{title}")
         artist_label.config(text=f"{artist}")
-       # right_frame.config(text=f"{title} - {artist}")
+        #now_playing_frame.config(text=f"{title} - {artist}")
+        
     else:
         currentsong_display = currentsong[:20] + "..." if len(currentsong) > 20 else currentsong
         title_label.config(text=f"{currentsong_display}")
         artist_label.config(text=f"{currentsong_display}")
-       # right_frame.config(text=f"{currentsong_display}")
+        #now_playing_frame.config(text=f"{currentsong_display}")
         
     
 def control_volume(value):
@@ -302,6 +347,14 @@ def create_widgets(self):
     
 def create_bottom_widgets(self):
     self.create_
+    
+# Left panel buttons
+def create_playlist_button(parent, text, bg_color, icon=None):
+    return Button(parent, text=text, font=("Arial", 14, "bold"), width=20, height=2, borderwidth=0, highlightthickness=0,
+                  activebackground='#501908', cursor='hand2')
+    
+    
+    
 # Bottom left frame labels
 
 title_label = Label(bottom_left_widget, fg="white",  bg='#1E052A', font=("Arial", 18, "bold"))
