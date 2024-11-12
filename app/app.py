@@ -57,6 +57,7 @@ right_frame = Frame(main_frame, bg='#3A0C60')
 right_frame.grid(row=1, column=2, sticky='nsew', padx=1, pady=1)
 now_playing_frame = Frame(right_frame, bg='#3A0C60')
 now_playing_frame.grid(row=0, column=0, sticky='nsew', padx=1, pady=1)
+now_playing_frame.place(relx=0.5, rely=0.06, anchor=CENTER)
 next_in_queue_frame = Frame(right_frame, bg='#3C0F64')
 next_in_queue_frame.grid(row=1, column=0, sticky='nsew', padx=1, pady=1)
 #  Bottom left pannel
@@ -129,8 +130,8 @@ middle_frame.grid_columnconfigure(0, weight=1)
 
 # Right Frame Grid
 
-right_frame.grid_rowconfigure(0, weight=3)
-right_frame.grid_rowconfigure(1, weight=4)
+right_frame.grid_rowconfigure(0, weight=2)
+right_frame.grid_rowconfigure(1, weight=3)
 right_frame.grid_columnconfigure(0, weight=1)
 
 # Bottom frame grid
@@ -164,16 +165,26 @@ Label(header_frame, text='Playlist: UK Bassline', font=("Arial", 24, "bold"), fg
 canvas = Canvas(songlist_frame, highlightthickness=0)
 canvas.pack(fill="both", expand=True, pady=5)
 
-#Label(now_playing_frame, text='UK Bassline', font=("Arial", 18, "bold"), fg='white', bg='#3A0C60')
 
 start_color = (133, 14, 185)  # Color start (purple)
 end_color = (60, 6, 83)      # Color end (darker purple)
 
+playlist_right_frame_label = Label(now_playing_frame, text='UK Bassline', font=("Arial", 18, "bold"), fg='white', bg='#3A0C60')
+playlist_right_frame_label.pack(side=TOP, padx=0, pady=0)
 album_art_label = Label(now_playing_frame, bg='yellow')
-album_art_label.pack(pady=10)
+
+album_art_label.pack(side=TOP, padx=0, pady=0)
+#title_label2 = Label(now_playing_frame, text="Now Playing", font=("Arial", 18, "bold"), fg='white', bg='#3A0C60').pack(pady=5)
+title2_label = Label(now_playing_frame, fg="white",  bg='#3A0C60', font=("Arial", 18, "bold"))
+title2_label.pack(side=TOP, padx=0, pady=0)
+#title2_label.bind("<Button-1>", now_playing)
+
+artist2_label = Label(now_playing_frame, fg="white",  bg='#3A0C60', font=("Arial", 14, "bold"))
+artist2_label.pack(side=TOP, padx=0, pady=2)
+#artist2_label.bind("<Button-1>", now_playing)
 
 def display_album_art(song_name):
-    filepath = os.path.join('../WaveForm/Music', song_name)
+    filepath = os.path.join('Music', song_name)
     if filepath.endswith('.mp3'):
         try:
             audio = MP3(filepath, ID3=ID3)
@@ -181,54 +192,56 @@ def display_album_art(song_name):
             for tag in audio.tags.values():
                 if isinstance(tag, APIC):  
                     album_art = Image.open(io.BytesIO(tag.data))
-                    album_art = album_art.resize((150, 150))  
+                    album_art = album_art.resize((100, 100))  
                     album_art = ImageTk.PhotoImage(album_art)
-                    album_art_label.config(image=album_art)
                     album_art_label.image = album_art  
+                    album_art_label.config(image=album_art)
                     album_art_found = True
                     break
             if not album_art_found:
                 album_art_label.config(image='')
                 album_art_label.image = None
         except Exception as e:
-            print("Nie udało się załadować okładki z pliku MP3:", e)
+            print("Couldn't find song cover", e)
             album_art_label.config(image='')  
             album_art_label.image = None
     else:
         album_art_label.config(image='')  
         album_art_label.image = None
 
-def create_vertical_gradient(canvas, color1, color2):
-    canvas_width = canvas.winfo_width()  # Get canvas width dynamically
-    canvas_height = canvas.winfo_height()  # Get canvas height dynamically
-    for i in range(canvas_height):
-        ratio = i / canvas_height  # Calculate the color ratio based on the current position
-        r = int(color1[0] + (color2[0] - color1[0]) * ratio)
-        g = int(color1[1] + (color2[1] - color1[1]) * ratio)
-        b = int(color1[2] + (color2[2] - color1[2]) * ratio)
-        color = f'#{r:02x}{g:02x}{b:02x}'  # Convert RGB to hex color
-        canvas.create_rectangle(0, i, canvas_width, i + 1, fill=color, outline='')
+# def create_vertical_gradient(canvas, color1, color2):
+#     canvas_width = canvas.winfo_width()  # Get canvas width dynamically
+#     canvas_height = canvas.winfo_height()  # Get canvas height dynamically
+#     for i in range(canvas_height):
+#         ratio = i / canvas_height  # Calculate the color ratio based on the current position
+#         r = int(color1[0] + (color2[0] - color1[0]) * ratio)
+#         g = int(color1[1] + (color2[1] - color1[1]) * ratio)
+#         b = int(color1[2] + (color2[2] - color1[2]) * ratio)
+#         color = f'#{r:02x}{g:02x}{b:02x}'  # Convert RGB to hex color
+#         canvas.create_rectangle(0, i, canvas_width, i + 1, fill=color, outline='')
 
-def update_canvas_gradient(event=None):
-    canvas.delete("all")  # Clear the canvas before redrawing
-    create_vertical_gradient(canvas, start_color, end_color)  # Redraw the gradient
+# def update_canvas_gradient(event=None):
+#     canvas.delete("all")  # Clear the canvas before redrawing
+#     create_vertical_gradient(canvas, start_color, end_color)  # Redraw the gradient
 
-# Ensure the gradient updates when the window is resized
-songlist_frame.bind("<Configure>", update_canvas_gradient)
+# # Ensure the gradient updates when the window is resized
+# songlist_frame.bind("<Configure>", update_canvas_gradient)
 
-# Initial gradient setup on start
-update_canvas_gradient()
+# # Initial gradient setup on start
+# update_canvas_gradient()
 
 song_listbox = Listbox(songlist_frame, bg='#3C0F64', fg='white', relief="flat")
 song_listbox.place(relwidth=1, relheight=1)
 
 # Now songs are static, in future they will be dynamic
-os.chdir('../WaveForm/Music')
+os.chdir('Music')
 songs = os.listdir()
 for s in songs:
     song_listbox.insert(END, s)
 
-#title_label2 = Label(now_playing_frame, text="Now Playing", font=("Arial", 18, "bold"), fg='white', bg='#3A0C60').pack(pady=5)
+
+
+
 
 # Manipulate song functions
 def play_pause_song(event=None):
@@ -245,9 +258,11 @@ def play_pause_song(event=None):
             pygame.mixer.music.play()
             song_length = int(pygame.mixer.Sound(currentsong).get_length())
             now_playing()
+            display_album_art(currentsong)
             progress_bar()
         else:
             pygame.mixer.music.unpause()
+            display_album_art(currentsong)
             now_playing()
         play_pause_label.config(image=pause_button)
     is_playing = not is_playing
@@ -282,8 +297,8 @@ def previous_song(event=None):
 def now_playing():
     global is_playing, currentsong
     currentsong = song_listbox.get(ACTIVE)
-    currentsong = currentsong.replace('.mp3', '').replace('.wav', '') # Hide extension
     display_album_art(song_listbox.get(ACTIVE))
+    currentsong = currentsong.replace('.mp3', '').replace('.wav', '') # Hide extension
     # Cut too long title
     if " - " in currentsong:
         artist, title = currentsong.split(" - ")
@@ -291,13 +306,15 @@ def now_playing():
         artist = artist[:20] + '...' if len(artist) > 20 else artist
         title_label.config(text=f"{title}")
         artist_label.config(text=f"{artist}")
-        #now_playing_frame.config(text=f"{title} - {artist}")
+        title2_label.config(text=f"{title}")
+        artist2_label.config(text=f"{artist}")
         
     else:
         currentsong_display = currentsong[:20] + "..." if len(currentsong) > 20 else currentsong
         title_label.config(text=f"{currentsong_display}")
         artist_label.config(text=f"{currentsong_display}")
-        #now_playing_frame.config(text=f"{currentsong_display}")
+        title2_label.config(text=f"{currentsong_display}")
+        artist2_label.config(text=f"{currentsong_display}")
         
     
 def control_volume(value):
@@ -342,11 +359,11 @@ def set_user_sliding(value):
     global user_sliding
     user_sliding = value
 
-def create_widgets(self):
-    self.create_bottom_widgets()
+# def create_widgets(self):
+#     self.create_bottom_widgets()
     
-def create_bottom_widgets(self):
-    self.create_
+# def create_bottom_widgets(self):
+#     self.create_
     
 # Left panel buttons
 def create_playlist_button(parent, text, bg_color, icon=None):
