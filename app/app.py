@@ -62,10 +62,10 @@ songlist_frame.grid(row=1, columnspan=3, sticky='nsew', padx=1, pady=1)
 right_frame = Frame(main_frame, bg='#3A0C60')
 right_frame.grid(row=1, column=2, sticky='nsew', padx=1, pady=1)
 now_playing_frame = Frame(right_frame, bg='#3A0C60')
-now_playing_frame.grid(row=0, column=0, sticky='nsew', padx=1, pady=1)
-now_playing_frame.place(relx=0.5, rely=0.06, anchor=CENTER)
+now_playing_frame.grid(row=0, column=0, sticky='nsew', padx=0, pady=0)
+now_playing_frame.place(relx=0.07, rely=0.26, anchor="w") #rely=0.06
 next_in_queue_frame = Frame(right_frame, bg='#3C0F64')
-next_in_queue_frame.grid(row=1, column=0, sticky='nsew', padx=1, pady=1)
+next_in_queue_frame.grid(row=1, column=0, sticky='nsew', padx=0, pady=1)
 #  Bottom left pannel
 bottom_frame_left = Frame(main_frame, bg='#1E052A')
 bottom_frame_left.grid(row=2, column=0, sticky='nsew', pady=1)
@@ -94,11 +94,15 @@ bottom_center_bar.grid(row=2, column=1, sticky='nsew')
 # Background and icon images
 img = PhotoImage(file='../WaveForm/gui/pics/Logo.png')
 logo_top = PhotoImage(file='../WaveForm/gui/pics/TopLogo.png')
+#default_cover_img = PhotoImage(file='../WaveForm/gui/pics/song_cover.png')
 play_button = PhotoImage(file='../WaveForm/gui/buttons/play_button.png')
 pause_button = PhotoImage(file='../WaveForm/gui/buttons/pause_button.png')
 next_button = PhotoImage(file='../WaveForm/gui/buttons/next_button.png')
 previous_button = PhotoImage(file='../WaveForm/gui/buttons/previous_button.png')
 root.iconphoto(False, img)
+
+# Load default cover image
+default_cover_path = "/Users/bartek/Desktop/Politechnika/Praca inżynierska/WaveForm/gui/pics/song_cover.png"
 
 
 # Grid settings
@@ -136,8 +140,8 @@ middle_frame.grid_columnconfigure(0, weight=1)
 
 # Right Frame Grid
 
-right_frame.grid_rowconfigure(0, weight=2)
-right_frame.grid_rowconfigure(1, weight=3)
+right_frame.grid_rowconfigure(0, weight=5)
+right_frame.grid_rowconfigure(1, weight=4)
 right_frame.grid_columnconfigure(0, weight=1)
 
 # Bottom frame grid
@@ -175,44 +179,66 @@ canvas.pack(fill="both", expand=True, pady=5)
 start_color = (133, 14, 185)  # Color start (purple)
 end_color = (60, 6, 83)      # Color end (darker purple)
 
-playlist_right_frame_label = Label(now_playing_frame, text='UK Bassline', font=("Arial", 18, "bold"), fg='white', bg='#3A0C60')
-playlist_right_frame_label.pack(side=TOP, padx=0, pady=0)
-album_art_label = Label(now_playing_frame, bg='yellow')
 
-album_art_label.pack(side=TOP, padx=0, pady=0)
+
+
+playlist_right_frame_label = Label(now_playing_frame, text='UK Bassline', font=("Arial", 28, "bold"), anchor="w", fg='white', bg='#3A0C60')
+playlist_right_frame_label.pack(fill="x", pady=25)
+
+album_art_label = Label(now_playing_frame)
+album_art_label.pack(fill="both", expand=True, pady=2)
+
 #title_label2 = Label(now_playing_frame, text="Now Playing", font=("Arial", 18, "bold"), fg='white', bg='#3A0C60').pack(pady=5)
-title2_label = Label(now_playing_frame, fg="white",  bg='#3A0C60', font=("Arial", 18, "bold"))
-title2_label.pack(side=TOP, padx=0, pady=0)
-#title2_label.bind("<Button-1>", now_playing)
+title2_label = Label(now_playing_frame, fg="white",  bg='#3A0C60', font=("Arial", 20, "bold"), anchor="w")
+title2_label.pack(fill="x", pady=5)
 
-artist2_label = Label(now_playing_frame, fg="white",  bg='#3A0C60', font=("Arial", 14, "bold"))
-artist2_label.pack(side=TOP, padx=0, pady=2)
+artist2_label = Label(now_playing_frame, fg="gray",  bg='#3A0C60', font=("Arial", 16), anchor="w")
+artist2_label.pack(fill="x")
 #artist2_label.bind("<Button-1>", now_playing)
 
-def display_album_art(song_name):
-    filepath = os.path.join('app/data/Music', song_name)
+#title2_label.bind("<Button-1>", now_playing)
+def display_album_art(current_song):
+    global currentsong
+    filepath = os.path.join('Music', currentsong)
+    
+    # Sprawdź, czy plik jest w formacie MP3
     if filepath.endswith('.mp3'):
         try:
             audio = MP3(filepath, ID3=ID3)
             album_art_found = False 
             for tag in audio.tags.values():
-                if isinstance(tag, APIC):  
+                if isinstance(tag, APIC):  # Jeśli znaleziono obraz w tagu APIC
                     album_art = Image.open(io.BytesIO(tag.data))
-                    album_art = album_art.resize((100, 100))  
+                    album_art = album_art.resize((300, 300))  
                     album_art = ImageTk.PhotoImage(album_art)
                     album_art_label.image = album_art  
                     album_art_label.config(image=album_art)
                     album_art_found = True
                     break
+            # Jeśli okładka nie została znaleziona w tagach ID3, wyświetl domyślną
             if not album_art_found:
-                album_art_label.config(image='')
-                album_art_label.image = None
+                load_default_album_art()
         except Exception as e:
-            print("Couldn't find song cover", e)
-            album_art_label.config(image='')  
-            album_art_label.image = None
+            print("Couldn't find song cover in MP3:", e)
+            load_default_album_art()
+
+    # Jeśli plik jest w formacie WAV lub innym, wyświetl domyślną okładkę
+    elif filepath.endswith('.wav'):
+        load_default_album_art()
     else:
-        album_art_label.config(image='')  
+        print("Unsupported file format:", filepath)
+        load_default_album_art()
+
+def load_default_album_art():
+    try:
+        default_image = Image.open(default_cover_path)
+        default_image = default_image.resize((300, 300))
+        default_image = ImageTk.PhotoImage(default_image)
+        album_art_label.image = default_image
+        album_art_label.config(image=default_image)
+    except Exception as e:
+        print("Error loading default album art:", e)
+        album_art_label.config(image='')
         album_art_label.image = None
 
 # def create_vertical_gradient(canvas, color1, color2):
@@ -240,7 +266,7 @@ song_listbox = Listbox(songlist_frame, bg='#3C0F64', fg='white', relief="flat")
 song_listbox.place(relwidth=1, relheight=1)
 
 # Now songs are static, in future they will be dynamic
-os.chdir('app/data/Music')
+os.chdir('Music')
 songs = os.listdir()
 for s in songs:
     song_listbox.insert(END, s)
@@ -264,7 +290,7 @@ def play_pause_song(event=None):
             pygame.mixer.music.play()
             song_length = int(pygame.mixer.Sound(currentsong).get_length())
             now_playing()
-            #display_album_art(currentsong)
+            display_album_art(currentsong)
             progress_bar()
         else:
             pygame.mixer.music.unpause()
