@@ -1,8 +1,9 @@
 from tkinter import *
-import customtkinter
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, APIC
 from PIL import Image, ImageTk
+# from get_cover_art import CoverFinder
+import customtkinter
 import pygame
 import os
 import time
@@ -27,6 +28,11 @@ song_start_time = 0
 # Initiate pygame mixer
 pygame.mixer.init()
 pygame.mixer.init(channels=2)
+
+
+# Trying new idea
+# finder = CoverFinder(OPTIONS=songs)
+# finder.scan_folder()
 
 # Main pannel
 main_frame = Frame(root, bg='black')
@@ -86,8 +92,8 @@ bottom_center_bar.grid(row=2, column=1, sticky='nsew')
 
 
 # Background and icon images
-img = PhotoImage(file='../WaveForm/Pictures/Logo.png')
-logo_top = PhotoImage(file='../WaveForm/Pictures/TopLogo.png')
+img = PhotoImage(file='../WaveForm/gui/pics/Logo.png')
+logo_top = PhotoImage(file='../WaveForm/gui/pics/TopLogo.png')
 play_button = PhotoImage(file='../WaveForm/gui/buttons/play_button.png')
 pause_button = PhotoImage(file='../WaveForm/gui/buttons/pause_button.png')
 next_button = PhotoImage(file='../WaveForm/gui/buttons/next_button.png')
@@ -184,7 +190,7 @@ artist2_label.pack(side=TOP, padx=0, pady=2)
 #artist2_label.bind("<Button-1>", now_playing)
 
 def display_album_art(song_name):
-    filepath = os.path.join('Music', song_name)
+    filepath = os.path.join('app/data/Music', song_name)
     if filepath.endswith('.mp3'):
         try:
             audio = MP3(filepath, ID3=ID3)
@@ -234,7 +240,7 @@ song_listbox = Listbox(songlist_frame, bg='#3C0F64', fg='white', relief="flat")
 song_listbox.place(relwidth=1, relheight=1)
 
 # Now songs are static, in future they will be dynamic
-os.chdir('Music')
+os.chdir('app/data/Music')
 songs = os.listdir()
 for s in songs:
     song_listbox.insert(END, s)
@@ -258,7 +264,7 @@ def play_pause_song(event=None):
             pygame.mixer.music.play()
             song_length = int(pygame.mixer.Sound(currentsong).get_length())
             now_playing()
-            display_album_art(currentsong)
+            #display_album_art(currentsong)
             progress_bar()
         else:
             pygame.mixer.music.unpause()
