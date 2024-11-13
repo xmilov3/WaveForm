@@ -190,7 +190,7 @@ artist2_label.pack(side=TOP, padx=0, pady=2)
 #artist2_label.bind("<Button-1>", now_playing)
 
 def display_album_art(song_name):
-    filepath = os.path.join('app/data/Music', song_name)
+    filepath = os.path.join('Music', song_name)
     if filepath.endswith('.mp3'):
         try:
             audio = MP3(filepath, ID3=ID3)
@@ -240,7 +240,7 @@ song_listbox = Listbox(songlist_frame, bg='#3C0F64', fg='white', relief="flat")
 song_listbox.place(relwidth=1, relheight=1)
 
 # Now songs are static, in future they will be dynamic
-os.chdir('app/data/Music')
+os.chdir('Music')
 songs = os.listdir()
 for s in songs:
     song_listbox.insert(END, s)
