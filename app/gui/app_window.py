@@ -35,7 +35,7 @@ def create_app_window():
     #bottom_frame_left, bottom_frame_mid, bottom_frame_right = create_bottom_panel(main_frame)
     middle_frame = create_middle_panel(main_frame)
     right_frame = create_right_panel(main_frame)
-    bottom_frame_mid = create_bottom_panel(main_frame)
+    bottom_frame = create_bottom_panel(main_frame)
     
     # Main Frame
     main_frame.grid_columnconfigure(0, weight=1)
@@ -69,11 +69,11 @@ def create_app_window():
     right_frame.grid_columnconfigure(0, weight=1)
 
     # Bottom frame grid
-    bottom_frame_mid.grid_rowconfigure(0, weight=1)
-    bottom_frame_mid.grid_rowconfigure(1, weight=1)
-    bottom_frame_mid.grid_columnconfigure(0, weight=1)
-    bottom_frame_mid.grid_columnconfigure(1, weight=1)
-    bottom_frame_mid.grid_columnconfigure(2, weight=1)
+    bottom_frame.grid_rowconfigure(0, weight=1)
+    bottom_frame.grid_rowconfigure(1, weight=1)
+    bottom_frame.grid_columnconfigure(0, weight=1)
+    bottom_frame.grid_columnconfigure(1, weight=1)
+    bottom_frame.grid_columnconfigure(2, weight=1)
     
     
     return root
