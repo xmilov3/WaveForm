@@ -12,68 +12,93 @@ def create_song_listbox(songlist_frame):
     song_listbox = Listbox(songlist_frame, bg='#3C0F64', fg='white', relief="flat")
     song_listbox.place(relwidth=1, relheight=1)
 
-    os.chdir('Music')
-    
-    songs = os.listdir()
-    
-    for s in songs:
-        song_listbox.insert(END, s)
-
+    try:
+        os.chdir('Music')
+        songs = os.listdir()
+        for song in songs:
+            song_listbox.insert(END, song)
+    except FileNotFoundError:
+        print("Folder not found")
+    except Exception as e:
+        print(f"error: {e}")
+        
     return song_listbox  
 
 # Manipulate song functions
-def play_pause_song(currentsong, is_playing, song_listbox, play_pause_label, song_length, current_song_position, song_start_time):
+def play_pause_song(currentsong, is_playing, song_listbox, play_pause_button, song_length, current_song_position, song_start_time):
+    play_button_img = load_button_image("play")
+    pause_button_img = load_button_image("pause")
+
     if is_playing:
         pygame.mixer.music.pause()
-        play_pause_label.config(play_pause_label)
+        play_pause_button.config(image=play_button_img)
+        is_playing = False
     else:
         if not pygame.mixer.music.get_busy():
             pygame.mixer.music.load(currentsong)
-            current_song_position = 0
-            song_start_time = 0
             pygame.mixer.music.play()
             song_length = int(pygame.mixer.Sound(currentsong).get_length())
-            now_playing()
-            #display_album_art(currentsong)
-            progress_bar()
+            current_song_position = 0
+            song_start_time = 0
         else:
             pygame.mixer.music.unpause()
-        now_playing()
-        play_pause_label.config(play_pause_label)
-    is_playing = not is_playing
-    return is_playing, song_length, current_song_position, song_start_time, song_listbox
+        play_pause_button.config(image=pause_button_img)
+        is_playing = True
+
+    return is_playing, song_length, current_song_position, song_start_time
+
+
     
-def stop_song():
-    global is_playing
+def stop_song(play_pause_label):
+    play_button_img = load_button_image("play")
     pygame.mixer.music.stop()
-    #play_pause_label.config(image=play_button)
-    is_playing = False
-    
-def next_song(song_listbox):
+    play_pause_label.config(image=play_button_img)
     global is_playing
-    stop_song()
-    current_index = song_listbox.curselection()[0]
+    is_playing = False
+    return is_playing
+    
+def next_song(song_listbox, play_pause_button):
+    global currentsong, is_playing
+    stop_song(play_pause_button)
+
+    current_index = song_listbox.curselection()
+    if not current_index:
+        print("No song selected!")
+        return is_playing
+    current_index = current_index[0]
     next_index = (current_index + 1) % song_listbox.size()
+
     song_listbox.select_clear(0, END)
     song_listbox.select_set(next_index)
     song_listbox.activate(next_index)
-    play_pause_song()
-    
-def previous_song(song_listbox):
-    global is_playing
-    stop_song()
-    current_index = song_listbox.curselection()[0]
+
+    currentsong = song_listbox.get(next_index)
+    is_playing = play_pause_song(currentsong, is_playing, play_pause_button)
+    return is_playing
+
+
+def previous_song(song_listbox, play_pause_button):
+    global currentsong, is_playing
+    stop_song(play_pause_button)
+
+    current_index = song_listbox.curselection()
+    if not current_index:
+        print("No song selected!")
+        return is_playing
+    current_index = current_index[0]
     previous_index = (current_index - 1) % song_listbox.size()
+
     song_listbox.select_clear(0, END)
     song_listbox.select_set(previous_index)
     song_listbox.activate(previous_index)
-    play_pause_song()
+
+    currentsong = song_listbox.get(previous_index)
+    is_playing = play_pause_song(currentsong, is_playing, play_pause_button)
+    return is_playing
     
-def now_playing(song_listbox, title_label, artist_label, title2_label, artist2_label):
-    global is_playing, currentsong
+def now_playing(song_listbox, currentsong, title_label, artist_label, title2_label, artist2_label):
     currentsong = song_listbox.get(ACTIVE)
-    currentsong = currentsong.replace('.mp3', '').replace('.wav', '') # Hide extension
-    # Cut too long title
+    currentsong = currentsong.replace('.mp3', '').replace('.wav', '') 
     if " - " in currentsong:
         artist, title = currentsong.split(" - ")
         title = title[:20] + '...' if len(title) > 20 else title
@@ -90,10 +115,12 @@ def now_playing(song_listbox, title_label, artist_label, title2_label, artist2_l
         title2_label.config(text=f"{currentsong_display}")
         artist2_label.config(text=f"{currentsong_display}")
         
+    return currentsong, title_label, artist_label, title2_label, artist2_label
     
 def control_volume(value, volume_label):
     pygame.mixer.music.set_volume(float(value)/100)
     volume_label.configure(text=f"Volume: {int(value)}%")
+    
     
 
 def progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_center_bar):
@@ -101,7 +128,7 @@ def progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bott
     
     if not user_sliding:
         current_time_ms = pygame.mixer.music.get_pos()
-        if current_time_ms != -1:  # Check if music is playing
+        if current_time_ms != -1:  
             current_song_position = int(current_time_ms / 1000) + song_start_time
         
         remaining_time = song_length - current_song_position
@@ -121,7 +148,7 @@ def slide_music(value, time_elapsed_label, time_remaining_label, bottom_center_b
     
     pygame.mixer.music.stop()
     pygame.mixer.music.play(start=new_time)
-    song_start_time = new_time  # Store the start time for get_pos() calculations
+    song_start_time = new_time  
     current_song_position = new_time
     
     time_elapsed_label.configure(text=time.strftime("%M:%S", time.gmtime(new_time)))
@@ -132,6 +159,7 @@ def slide_music(value, time_elapsed_label, time_remaining_label, bottom_center_b
 def set_user_sliding(value):
     global user_sliding
     user_sliding = value
+    return user_sliding
 
 # def create_widgets(self):
 #     self.create_bottom_widgets()

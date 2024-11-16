@@ -33,9 +33,9 @@ def create_app_window():
     left_frame = create_left_panel(main_frame)
     #search_frame = create_left_panel(left_frame)
     #bottom_frame_left, bottom_frame_mid, bottom_frame_right = create_bottom_panel(main_frame)
-    middle_frame = create_middle_panel(main_frame)
+    middle_frame, song_listbox = create_middle_panel(main_frame)
     right_frame = create_right_panel(main_frame)
-    bottom_frame = create_bottom_panel(main_frame)
+    bottom_frame = create_bottom_panel(main_frame, song_listbox)
     
     # Main Frame
     main_frame.grid_columnconfigure(0, weight=1)
