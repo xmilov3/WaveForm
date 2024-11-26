@@ -1,26 +1,29 @@
-from tkinter import Label
+from tkinter import Label, Button, PhotoImage, FLAT
 from app.func.load_pic_gui import load_play_button, load_pause_button, load_previous_button, load_next_button
+from app.func.config import *
 
-
-def create_play_pause_button(parent, command):
+def create_play_pause_button(parent, play_command, pause_command):
     play_button_img = load_play_button()
     pause_button_img = load_pause_button()
 
-    button = Label(parent, image=play_button_img, bg='#1E052A')
-    button.image = play_button_img 
-    button.is_playing = False 
+    button = Label(parent, image=play_button_img, bg='#1E052A', borderwidth=0, highlightthickness=0)
+    button.image_play = play_button_img 
+    button.image_pause = pause_button_img  
+    button.is_playing = False  
 
     def toggle_image(event=None):
+        print(f"Before toggle: is_playing={button.is_playing}")  
         if button.is_playing:
-            button.config(image=play_button_img)
-            button.image = play_button_img
+            button.config(image=button.image_play)  
+            pause_command()  
         else:
-            button.config(image=pause_button_img)
-            button.image = pause_button_img
-        button.is_playing = not button.is_playing
-        command(event)  
+            button.config(image=button.image_pause)  
+            play_command() 
+        button.is_playing = not button.is_playing  
+        print(f"After toggle: is_playing={button.is_playing}")  
 
-    button.bind("<Button-1>", toggle_image)
+    button.bind("<Button-1>", toggle_image)  
+
     return button
 
 
