@@ -27,28 +27,35 @@ def create_song_listbox(songlist_frame):
 
 # Manipulate song functions
 def play_pause_song(currentsong, is_playing, play_button, play_button_img, pause_button_img):
+    global current_song_position, song_start_time
+
     if not currentsong:
         print("Nie wybrano żadnej piosenki!")
         return is_playing
 
     if is_playing:
-        print("Pauzowanie muzyki")
-        play_button.config(image=play_button_img)  
         pygame.mixer.music.pause()
-        return False
+        current_song_position = pygame.mixer.music.get_pos() / 1000  
+        play_button.config(image=play_button_img)  
+        is_playing = False
+        print(f"Piosenka zapauzowana na pozycji: {current_song_position}s")
     else:
-        print("Wznawianie muzyki")
-        play_button.config(image=pause_button_img) 
-        if not pygame.mixer.music.get_busy():
+        if current_song_position > 0:
+            pygame.mixer.music.unpause()
+            print(f"Wznawianie od pozycji: {current_song_position}s")
+        else:
             try:
                 pygame.mixer.music.load(currentsong)
-                pygame.mixer.music.play()
+                pygame.mixer.music.play(start=song_start_time)  
+                print(f"Odtwarzanie piosenki: {currentsong}")
             except Exception as e:
-                print(f"Błąd: {e}")
+                print(f"Błąd odtwarzania piosenki: {e}")
                 return is_playing
-        else:
-            pygame.mixer.music.unpause()
-        return True
+
+        play_button.config(image=pause_button_img)  
+        is_playing = True
+
+    return is_playing
 
 
 
@@ -57,10 +64,13 @@ def play_pause_song(currentsong, is_playing, play_button, play_button_img, pause
 
     
 def stop_song(play_button, play_button_img):
-    global is_playing
+    global is_playing, current_song_position, song_start_time
     pygame.mixer.music.stop()
-    play_button.config(image=play_button.image_play)  
+    play_button.config(image=play_button_img)
     is_playing = False
+    current_song_position = 0  
+    song_start_time = 0  
+    print("Piosenka zatrzymana")
     return is_playing
 
 
