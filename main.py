@@ -1,7 +1,7 @@
 from tkinter import *
+from PIL import Image, ImageTk
 from app.gui.app_window import create_app_window
 from app.func.config import *
-
 
 
 if __name__ == "__main__":

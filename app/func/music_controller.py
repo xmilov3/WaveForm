@@ -2,8 +2,7 @@ from tkinter import *
 from customtkinter import *
 import pygame
 import time
-# from app.gui.widgets import create_play_pause_button
-from app.func.load_pic_gui import load_button_image
+from app.func.load_pic_gui import load_play_button, load_pause_button, load_next_button, load_previous_button
 from app.func.config import *
 pygame.mixer.init(channels=2)
 
@@ -25,46 +24,54 @@ def create_song_listbox(songlist_frame):
     return song_listbox  
 
 # Manipulate song functions
-def play_pause_song(currentsong, is_playing, song_listbox, play_pause_button, song_length, current_song_position, song_start_time):
-    play_button_img = load_button_image("play")
-    pause_button_img = load_button_image("pause")
+def play_pause_song(currentsong, is_playing, play_button, play_button_img, pause_button_img):
+    play_button_img = load_play_button()
+    pause_button_img = load_pause_button()
+    if not currentsong:
+        print("No song selected!")
+        return is_playing
 
     if is_playing:
         pygame.mixer.music.pause()
-        play_pause_button.config(image=play_button_img)
+        play_button.config(image=play_button_img)
         is_playing = False
     else:
         if not pygame.mixer.music.get_busy():
-            pygame.mixer.music.load(currentsong)
-            pygame.mixer.music.play()
-            song_length = int(pygame.mixer.Sound(currentsong).get_length())
-            current_song_position = 0
-            song_start_time = 0
+            try:
+                pygame.mixer.music.load(currentsong)
+                pygame.mixer.music.play()
+            except Exception as e:
+                print(f"Error: {e}")
+                return is_playing
         else:
             pygame.mixer.music.unpause()
-        play_pause_button.config(image=pause_button_img)
+        play_button.config(image=pause_button_img)
         is_playing = True
 
-    return is_playing, song_length, current_song_position, song_start_time
+    return is_playing
+
 
 
     
-def stop_song(play_pause_label):
-    play_button_img = load_button_image("play")
-    pygame.mixer.music.stop()
-    play_pause_label.config(image=play_button_img)
+def stop_song(play_button, play_button_img):
+    play_button_img = load_play_button()
     global is_playing
+    pygame.mixer.music.stop()
+    play_button.config(image=play_button_img)
     is_playing = False
     return is_playing
+
     
-def next_song(song_listbox, play_pause_button):
+def next_song(song_listbox, play_button, play_button_img, pause_button_img):
+    pause_button_img = load_pause_button()
+    play_button_img = load_play_button()
     global currentsong, is_playing
-    stop_song(play_pause_button)
+    stop_song(play_button, play_button_img)
 
     current_index = song_listbox.curselection()
     if not current_index:
         print("No song selected!")
-        return is_playing
+        return
     current_index = current_index[0]
     next_index = (current_index + 1) % song_listbox.size()
 
@@ -73,18 +80,20 @@ def next_song(song_listbox, play_pause_button):
     song_listbox.activate(next_index)
 
     currentsong = song_listbox.get(next_index)
-    is_playing = play_pause_song(currentsong, is_playing, play_pause_button)
-    return is_playing
+    is_playing = play_pause_song(currentsong, is_playing, play_button, play_button_img, pause_button_img)
 
 
-def previous_song(song_listbox, play_pause_button):
+
+def previous_song(song_listbox, play_button, play_button_img, pause_button_img):
+    pause_button_img = load_pause_button()
+    play_button_img = load_play_button()
     global currentsong, is_playing
-    stop_song(play_pause_button)
+    stop_song(play_button, play_button_img)
 
     current_index = song_listbox.curselection()
     if not current_index:
         print("No song selected!")
-        return is_playing
+        return
     current_index = current_index[0]
     previous_index = (current_index - 1) % song_listbox.size()
 
@@ -93,8 +102,8 @@ def previous_song(song_listbox, play_pause_button):
     song_listbox.activate(previous_index)
 
     currentsong = song_listbox.get(previous_index)
-    is_playing = play_pause_song(currentsong, is_playing, play_pause_button)
-    return is_playing
+    is_playing = play_pause_song(currentsong, is_playing, play_button, play_button_img, pause_button_img)
+
     
 def now_playing(song_listbox, currentsong, title_label, artist_label, title2_label, artist2_label):
     currentsong = song_listbox.get(ACTIVE)
@@ -161,13 +170,7 @@ def set_user_sliding(value):
     user_sliding = value
     return user_sliding
 
-# def create_widgets(self):
-#     self.create_bottom_widgets()
-    
-# def create_bottom_widgets(self):
-#     self.create_
-    
-# Left panel buttons
+
 def create_playlist_button(parent, text, bg_color, icon=None):
     return Button(parent, text=text, font=("Arial", 14, "bold"), width=20, height=2, borderwidth=0, highlightthickness=0,
                   activebackground='#501908', cursor='hand2')
