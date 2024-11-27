@@ -79,14 +79,20 @@ def create_bottom_panel(parent, song_listbox):
         command=lambda value: slide_music(value, time_elapsed_label, time_remaining_label)
     )
 
-    progress_slider.bind("<ButtonPress-1>", lambda e: set_user_sliding(True))
+    progress_slider.bind(
+    "<ButtonPress-1>",
+    lambda e: set_user_sliding(True)  
+    )
     progress_slider.bind(
         "<ButtonRelease-1>",
-        lambda e: set_user_sliding(
-            False,
-            progress_value=progress_slider.get()  
-        )
+        lambda e: slide_music(
+            progress_slider.get(),
+            time_elapsed_label,
+            time_remaining_label,
+            bottom_frame
+        ) 
     )
+
 
 
     progress_slider.grid(row=0, column=1, padx=10)
