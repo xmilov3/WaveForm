@@ -42,7 +42,6 @@ def create_app_window():
     bottom_frame, title_label, artist_label, time_remaining_label, time_elapsed_label, progress_slider = create_bottom_panel(
         main_frame, song_listbox
     )
-    # bottom_frame = create_bottom_panel(main_frame, song_listbox)
     initialize_first_song(
         song_listbox, 
         time_remaining_label, 
@@ -85,7 +84,7 @@ def create_app_window():
     bottom_frame.grid_rowconfigure(1, weight=0)
     bottom_frame.grid_rowconfigure(2, weight=1)
     bottom_frame.grid_columnconfigure(0, weight=1)
-    bottom_frame.grid_columnconfigure(1, weight=0)
+    bottom_frame.grid_columnconfigure(1, weight=6)
     bottom_frame.grid_columnconfigure(2, weight=1)
     
     

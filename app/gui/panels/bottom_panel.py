@@ -15,19 +15,29 @@ def create_bottom_panel(main_frame, song_listbox):
 
     bottom_frame_left = Frame(bottom_frame, bg='#1E052A')
     bottom_frame_left.grid(row=0, column=0, sticky='w', padx=10)
-    title_label = Label(bottom_frame_left, fg="white", bg='#1E052A', font=("Arial", 18, "bold"), anchor="w")
+
+    title_label = Label(
+        bottom_frame_left, 
+        fg="white", 
+        bg='#1E052A', 
+        font=("Arial", 18, "bold"), 
+        anchor="w", 
+        width=30  
+    )
     title_label.pack(side=TOP, anchor="w", padx=5, pady=2)
-    artist_label = Label(bottom_frame_left, fg="gray", bg='#1E052A', font=("Arial", 14), anchor="w")
+
+    artist_label = Label(
+        bottom_frame_left, 
+        fg="gray", 
+        bg='#1E052A', 
+        font=("Arial", 14), 
+        anchor="w", 
+        width=30  
+    )
     artist_label.pack(side=TOP, anchor="w", padx=5, pady=2)
 
-
-
     bottom_frame_mid = Frame(bottom_frame, bg='#1E052A')
-    bottom_frame_mid.grid(row=0, column=1, sticky='nsew', padx=5)
-
-    bottom_frame_right = Frame(bottom_frame, bg='#1E052A')
-    bottom_frame_right.grid(row=0, column=2, sticky='nsew', padx=5)
-
+    bottom_frame_mid.grid(row=0, column=1, sticky='nsew')
     try:
         play_button_img = create_play_pause_button.__globals__['load_play_button']()
         pause_button_img = create_play_pause_button.__globals__['load_pause_button']()
@@ -36,7 +46,17 @@ def create_bottom_panel(main_frame, song_listbox):
         return bottom_frame
 
     def previous_command():
-        previous_song(song_listbox, play_pause_button, play_button_img, pause_button_img, title_label, artist_label)
+        previous_song(
+            song_listbox, 
+            play_pause_button, 
+            play_button_img, 
+            pause_button_img, 
+            title_label, 
+            artist_label, 
+            time_elapsed_label, 
+            time_remaining_label, 
+            progress_slider
+        )
 
     def play_pause_command():
         global is_playing
@@ -54,26 +74,50 @@ def create_bottom_panel(main_frame, song_listbox):
             title_label,
             artist_label
         )
-
-
+        
     def next_command():
-        next_song(song_listbox, play_pause_button, play_button_img, pause_button_img, title_label, artist_label)
-    previous_button = create_previous_button(bottom_frame_mid, lambda e=None: previous_command())
+        next_song(
+            song_listbox, 
+            play_pause_button, 
+            play_button_img, 
+            pause_button_img, 
+            title_label, 
+            artist_label, 
+            time_elapsed_label, 
+            time_remaining_label, 
+            progress_slider
+        )
+
+    previous_button = create_previous_button(
+        bottom_frame_mid, 
+        lambda e=None: previous_command()
+    )
     play_pause_button = create_play_pause_button(
         bottom_frame_mid,
-        play_command=play_pause_command,  
-        pause_command=play_pause_command  
+        play_command=lambda: play_pause_command(),
+        pause_command=lambda: play_pause_command()
     )
-    next_button = create_next_button(bottom_frame_mid, lambda e=None: next_command())
+    next_button = create_next_button(
+        bottom_frame_mid,
+        lambda e=None: next_command()
+    )
 
-    previous_button.grid(row=0, column=0, ipadx=1, padx=0, pady=5)
-    play_pause_button.grid(row=0, column=1, ipadx=1, padx=0, pady=5)
-    next_button.grid(row=0, column=2, ipadx=1, padx=0, pady=5)
+    previous_button.grid(row=0, column=0, padx=10, pady=5, sticky="e")
+    play_pause_button.grid(row=0, column=1, padx=10, pady=5)
+    next_button.grid(row=0, column=2, padx=10, pady=5, sticky="w")
 
     bottom_center_bar = Frame(bottom_frame_mid, bg='#1E052A')
     bottom_center_bar.grid(row=1, column=0, columnspan=3, sticky='nsew', pady=10)
 
-    time_elapsed_label = Label(bottom_center_bar, text="00:00", font=("Arial", 12), fg='white', bg='#1E052A')
+    time_elapsed_label = Label(
+        bottom_center_bar, 
+        text="00:00", 
+        font=("Arial", 12), 
+        fg='white', 
+        bg='#1E052A', 
+        anchor="e", 
+        width=5  
+    )
     time_elapsed_label.grid(row=0, column=0, padx=5)
 
     progress_slider = Scale(
@@ -81,39 +125,50 @@ def create_bottom_panel(main_frame, song_listbox):
         from_=0,
         to=100,
         orient=HORIZONTAL,
-        length=600,
+        length=500,
         bg='black',
         troughcolor='#3A0C60',
         sliderrelief="flat",
         sliderlength=15,
         highlightthickness=0,
-        showvalue=False,
-        command=lambda value: None
+        showvalue=False
     )
     progress_slider.configure(borderwidth=0, relief="flat") 
     
     progress_slider.bind(
-    "<ButtonPress-1>",
-    lambda e: set_user_sliding(True)  
+        "<ButtonPress-1>",
+        lambda e: set_user_sliding(True) 
     )
     progress_slider.bind(
         "<ButtonRelease-1>",
-        lambda e: slide_music(
-            progress_slider.get(),
-            time_elapsed_label,
-            time_remaining_label,
-            bottom_frame
-        ) 
+        lambda e: (
+            slide_music(
+                progress_slider.get(),
+                time_elapsed_label,
+                time_remaining_label,
+                bottom_frame
+            ),
+            set_user_sliding(False)  
+        )
     )
+
     progress_slider.grid(row=0, column=1, padx=10)
 
-
-
-
-
-    time_remaining_label = Label(bottom_center_bar, text="-00:00", font=("Arial", 12), fg='white', bg='#1E052A')
+    time_remaining_label = Label(
+        bottom_center_bar, 
+        text="-00:00", 
+        font=("Arial", 12), 
+        fg='white', 
+        bg='#1E052A', 
+        anchor="w", 
+        width=5  
+    )
     time_remaining_label.grid(row=0, column=2, padx=5)
 
+
+    bottom_frame_right = Frame(bottom_frame, bg='#1E052A')
+    bottom_frame_right.grid(row=0, column=2, sticky='e', padx=5)
+    
     progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_center_bar)
 
     return bottom_frame, time_remaining_label, time_elapsed_label, progress_slider, title_label, artist_label
