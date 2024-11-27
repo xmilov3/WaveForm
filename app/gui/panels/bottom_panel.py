@@ -1,10 +1,5 @@
 from tkinter import Frame, Label, Scale, HORIZONTAL, ACTIVE
 from app.gui.widgets import create_play_pause_button, create_previous_button, create_next_button
-from app.func.music_controller import play_pause_song, next_song, previous_song, progress_bar, slide_music, stop_song
-from app.func.config import *
-
-from tkinter import Frame, Label, Scale, HORIZONTAL, ACTIVE
-from app.gui.widgets import create_play_pause_button, create_previous_button, create_next_button
 from app.func.music_controller import play_pause_song, next_song, previous_song, progress_bar, slide_music, stop_song, set_user_sliding
 from app.func.config import *
 
@@ -28,7 +23,7 @@ def create_bottom_panel(parent, song_listbox):
         play_button_img = create_play_pause_button.__globals__['load_play_button']()
         pause_button_img = create_play_pause_button.__globals__['load_pause_button']()
     except Exception as e:
-        print(f"Błąd ładowania obrazków przycisków: {e}")
+        print(f"Error while loading buttons: {e}")
         return bottom_frame
 
     def previous_command():
@@ -38,7 +33,7 @@ def create_bottom_panel(parent, song_listbox):
         global is_playing
         currentsong = song_listbox.get(ACTIVE)
         if not currentsong:
-            print("Nie wybrano żadnej piosenki!")
+            print("No song selected!")
             return
 
         is_playing = play_pause_song(
@@ -76,7 +71,7 @@ def create_bottom_panel(parent, song_listbox):
         troughcolor='#501908',
         sliderrelief="flat",
         highlightthickness=0,
-        command=lambda value: slide_music(value, time_elapsed_label, time_remaining_label)
+        command=lambda value: None
     )
 
     progress_slider.bind(
@@ -112,7 +107,7 @@ def update_play_pause(currentsong, song_listbox, play_button, play_button_img, p
     if not currentsong:
         currentsong = song_listbox.get(ACTIVE)
         if not currentsong:
-            print("Nie wybrano żadnej piosenki!")
+            print("No song selected!")
             return
 
     is_playing = play_pause_song(
