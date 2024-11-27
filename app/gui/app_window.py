@@ -67,10 +67,10 @@ def create_app_window():
 
     # Bottom frame grid
     bottom_frame.grid_rowconfigure(0, weight=1)
-    bottom_frame.grid_rowconfigure(1, weight=1)
+    bottom_frame.grid_rowconfigure(1, weight=0)
     bottom_frame.grid_rowconfigure(2, weight=1)
     bottom_frame.grid_columnconfigure(0, weight=1)
-    bottom_frame.grid_columnconfigure(1, weight=1)
+    bottom_frame.grid_columnconfigure(1, weight=0)
     bottom_frame.grid_columnconfigure(2, weight=1)
     
     

@@ -1,4 +1,4 @@
-from tkinter import Frame, Label, Scale, HORIZONTAL, ACTIVE
+from tkinter import Frame, Label, Scale, HORIZONTAL, ACTIVE, LEFT
 from app.gui.widgets import create_play_pause_button, create_previous_button, create_next_button
 from app.func.music_controller import play_pause_song, next_song, previous_song, progress_bar, slide_music, stop_song, set_user_sliding
 from app.func.config import *
@@ -51,9 +51,9 @@ def create_bottom_panel(parent, song_listbox):
     )
     next_button = create_next_button(bottom_frame_mid, lambda e=None: next_command())
 
-    previous_button.grid(row=0, column=0, padx=5)
-    play_pause_button.grid(row=0, column=1, padx=5)
-    next_button.grid(row=0, column=2, padx=5)
+    previous_button.grid(row=0, column=0, padx=0, pady=10)
+    play_pause_button.grid(row=0, column=1, padx=0, pady=10)
+    next_button.grid(row=0, column=2, padx=0, pady=10)
 
     bottom_center_bar = Frame(bottom_frame_mid, bg='#1E052A')
     bottom_center_bar.grid(row=1, column=0, columnspan=3, sticky='nsew', pady=10)
@@ -66,14 +66,17 @@ def create_bottom_panel(parent, song_listbox):
         from_=0,
         to=100,
         orient=HORIZONTAL,
-        length=400,
-        bg='#3A0C60',
-        troughcolor='#501908',
+        length=600,
+        bg='black',
+        troughcolor='#3A0C60',
         sliderrelief="flat",
+        sliderlength=15,
         highlightthickness=0,
+        showvalue=False,
         command=lambda value: None
     )
-
+    progress_slider.configure(borderwidth=0, relief="flat") 
+    
     progress_slider.bind(
     "<ButtonPress-1>",
     lambda e: set_user_sliding(True)  
@@ -87,10 +90,10 @@ def create_bottom_panel(parent, song_listbox):
             bottom_frame
         ) 
     )
-
-
-
     progress_slider.grid(row=0, column=1, padx=10)
+
+
+
 
 
     time_remaining_label = Label(bottom_center_bar, text="-00:00", font=("Arial", 12), fg='white', bg='#1E052A')
