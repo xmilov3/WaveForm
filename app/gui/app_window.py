@@ -1,4 +1,5 @@
 from tkinter import *
+import pygame
 import os
 import sys
 from PIL import Image, ImageTk
@@ -8,11 +9,13 @@ from app.gui.panels.left_panel import create_left_panel
 from app.gui.panels.middle_panel import create_middle_panel
 from app.gui.panels.right_panel import create_right_panel
 from app.gui.panels.bottom_panel import create_bottom_panel
-from app.func.music_controller import play_pause_song, stop_song, next_song, previous_song
+from app.func.music_controller import play_pause_song, stop_song, next_song, previous_song, initialize_first_song
 from app.func.config import *
 from app.gui.assets.pics import *
 from app.gui.assets.buttons import *
 
+pygame.mixer.init(channels=2)
+pygame.mixer.music.stop() 
 
 
     
@@ -36,7 +39,19 @@ def create_app_window():
     left_frame = create_left_panel(main_frame)
     middle_frame, song_listbox = create_middle_panel(main_frame)
     right_frame = create_right_panel(main_frame)
-    bottom_frame = create_bottom_panel(main_frame, song_listbox)
+    bottom_frame, title_label, artist_label, time_remaining_label, time_elapsed_label, progress_slider = create_bottom_panel(
+        main_frame, song_listbox
+    )
+    # bottom_frame = create_bottom_panel(main_frame, song_listbox)
+    initialize_first_song(
+        song_listbox, 
+        time_remaining_label, 
+        time_elapsed_label, 
+        progress_slider, 
+        bottom_frame,
+        title_label,
+        artist_label
+    )
     
     # Main Frame
     main_frame.grid_columnconfigure(0, weight=1)

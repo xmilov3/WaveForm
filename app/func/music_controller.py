@@ -2,9 +2,16 @@ from tkinter import *
 from customtkinter import *
 import pygame
 import time
+from mutagen.mp3 import MP3
+from mutagen.id3 import ID3, APIC
+from PIL import Image, ImageTk
+import os
+import customtkinter
 from app.func.load_pic_gui import load_play_button, load_pause_button, load_next_button, load_previous_button
 from app.func.config import *
+from app.func.config import artist_label, title_label
 pygame.mixer.init(channels=2)
+
 
 
 def create_song_listbox(songlist_frame):
@@ -24,22 +31,51 @@ def create_song_listbox(songlist_frame):
         
     return song_listbox
 
+def initialize_first_song(song_listbox, time_remaining_label, time_elapsed_label, progress_slider, bottom_frame, title_label, artist_label):
+    global currentsong, song_length, current_song_position, song_start_time, is_playing
+
+    is_playing = False
+    song_listbox.select_set(0)
+    song_listbox.activate(0)
+    currentsong = song_listbox.get(0)
+
+    try:
+        pygame.mixer.music.load(currentsong)
+        song_length = pygame.mixer.Sound(currentsong).get_length()
+        current_song_position = 0
+        song_start_time = 0
+
+        now_playing(currentsong, title_label, artist_label)  
+
+        time_elapsed_label.config(text="00:00")
+        time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(song_length)))
+        progress_slider.set(0)
+
+        pygame.mixer.music.play()  
+    except Exception as e:
+        print(f"Error initializing first track: {e}")
+
+
+
+
+
+
+
+
+
 
 
 # Manipulate song functions
-def play_pause_song(currentsong, is_playing, play_button, play_button_img, pause_button_img):
+def play_pause_song(currentsong, is_playing, play_button, play_button_img, pause_button_img, title_label, artist_label):
     global current_song_position, song_start_time, song_length
 
     if not currentsong:
-        print("No songs selected!")
+        print("No song selected!")
         return is_playing
-
-    
-    
 
     if is_playing:
         pygame.mixer.music.pause()
-        current_song_position = pygame.mixer.music.get_pos() / 1000  
+        current_song_position = pygame.mixer.music.get_pos() / 1000
         play_button.config(image=play_button_img)
         is_playing = False
         print(f"Song paused at position: {current_song_position}s")
@@ -47,23 +83,29 @@ def play_pause_song(currentsong, is_playing, play_button, play_button_img, pause
         if current_song_position > 0:
             pygame.mixer.music.unpause()
         else:
-            pygame.mixer.music.stop()
             try:
-                
                 pygame.mixer.music.load(currentsong)
                 pygame.mixer.music.play()
-                current_song_position = 0
-                song_start_time = 0  
                 song_length = pygame.mixer.Sound(currentsong).get_length()
-                print(f"Started playing: {currentsong}, length: {song_length}s")
+                current_song_position = 0
+                song_start_time = 0
+                print(f"Start playing: {currentsong}, lenght: {song_length}s")
             except Exception as e:
-                print(f"Cam't play a song: {e}")
+                print(f"Song playback error: {e}")
                 return is_playing
 
         play_button.config(image=pause_button_img)
         is_playing = True
 
+        update_song_info(currentsong, title_label, artist_label)
+
     return is_playing
+
+
+
+
+
+
 
 
 
@@ -79,7 +121,7 @@ def stop_song(play_button, play_button_img):
     return is_playing
 
 
-def next_song(song_listbox, play_button, play_button_img, pause_button_img):
+def next_song(song_listbox, play_button, play_button_img, pause_button_img, title_label, artist_label):
     global currentsong, is_playing, current_song_position, song_start_time, song_length
 
     if song_listbox.size() == 0:
@@ -99,7 +141,7 @@ def next_song(song_listbox, play_button, play_button_img, pause_button_img):
     currentsong = song_listbox.get(next_index)
 
     current_song_position = 0
-    song_start_time = 0  
+    song_start_time = 0
     play_button.config(image=pause_button_img)
 
     pygame.mixer.music.stop()
@@ -108,8 +150,12 @@ def next_song(song_listbox, play_button, play_button_img, pause_button_img):
         pygame.mixer.music.play()
         song_length = pygame.mixer.Sound(currentsong).get_length()
         is_playing = True
+        print(f"Playing next song: {currentsong}")
+
+        update_song_info(currentsong, title_label, artist_label)
+
     except Exception as e:
-        print(f"Error while loading a song {e}")
+        print(f"Error while loading song: {e}")
         play_button.config(image=play_button_img)
         is_playing = False
 
@@ -119,7 +165,12 @@ def next_song(song_listbox, play_button, play_button_img, pause_button_img):
 
 
 
-def previous_song(song_listbox, play_button, play_button_img, pause_button_img):
+
+
+
+
+
+def previous_song(song_listbox, play_button, play_button_img, pause_button_img, title_label, artist_label):
     global currentsong, is_playing, current_song_position, song_start_time, song_length
 
     if song_listbox.size() == 0:
@@ -138,47 +189,66 @@ def previous_song(song_listbox, play_button, play_button_img, pause_button_img):
 
     currentsong = song_listbox.get(previous_index)
     current_song_position = 0
-    song_start_time = 0  
+    song_start_time = 0
     play_button.config(image=pause_button_img)
-    print(f"Playing previous song: {currentsong}")
 
     pygame.mixer.music.stop()
-
     try:
         pygame.mixer.music.load(currentsong)
         pygame.mixer.music.play()
-        song_length = pygame.mixer.Sound(currentsong).get_length()  
-        current_song_position = 0
+        song_length = pygame.mixer.Sound(currentsong).get_length()
         is_playing = True
-        play_button.config(image=pause_button_img) 
+
+        update_song_info(currentsong, title_label, artist_label)
+
     except Exception as e:
-        print(f"Error while loading a song: {e}")
+        print(f"Error while loading song: {e}")
         play_button.config(image=play_button_img)
         is_playing = False
 
 
 
+
+
+
     
-def now_playing(song_listbox, currentsong, title_label, artist_label, title2_label, artist2_label):
+def now_playing(song_listbox, title_label, artist_label, title2_label=None, artist2_label=None):
     currentsong = song_listbox.get(ACTIVE)
-    currentsong = currentsong.replace('.mp3', '').replace('.wav', '') 
+    currentsong = currentsong.replace('.mp3', '').replace('.wav', '')  # Usuń rozszerzenie pliku
+
     if " - " in currentsong:
-        artist, title = currentsong.split(" - ")
+        artist, title = currentsong.split(" - ", 1)  # Tylko pierwsze wystąpienie separatora
         title = title[:20] + '...' if len(title) > 20 else title
         artist = artist[:20] + '...' if len(artist) > 20 else artist
-        title_label.config(text=f"{title}")
-        artist_label.config(text=f"{artist}")
+    else:
+        title = currentsong[:20] + "..." if len(currentsong) > 20 else currentsong
+        artist = "Unknown Artist"  # Domyślny artysta, jeśli brak separatora
+
+    title_label.config(text=f"{title}")
+    artist_label.config(text=f"{artist}")
+
+    if title2_label:
         title2_label.config(text=f"{title}")
+    if artist2_label:
         artist2_label.config(text=f"{artist}")
         
+def update_song_info(currentsong, title_label, artist_label):
+    currentsong = currentsong.replace('.mp3', '').replace('.wav', '')
+
+    if " - " in currentsong:
+        artist, title = currentsong.split(" - ", 1)
     else:
-        currentsong_display = currentsong[:20] + "..." if len(currentsong) > 20 else currentsong
-        title_label.config(text=f"{currentsong_display}")
-        artist_label.config(text=f"{currentsong_display}")
-        title2_label.config(text=f"{currentsong_display}")
-        artist2_label.config(text=f"{currentsong_display}")
+        artist = "Unknown Artist"
+        title = currentsong
+
+    title_label.config(text=f"{title}")
+    artist_label.config(text=f"{artist}")
+
+
+
+
         
-    return currentsong, title_label, artist_label, title2_label, artist2_label
+    return currentsong, title_label, artist_label
     
 def control_volume(value, volume_label):
     pygame.mixer.music.set_volume(float(value)/100)
@@ -187,12 +257,12 @@ def control_volume(value, volume_label):
     
 
 def progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_frame):
-    global current_song_position, song_length, is_playing, user_sliding
+    global current_song_position, song_length, is_playing
 
-    if is_playing and not user_sliding:
+    if is_playing:
         current_time_ms = pygame.mixer.music.get_pos()  
         if current_time_ms != -1:  
-            current_song_position = current_time_ms / 1000 + song_start_time  
+            current_song_position = current_time_ms / 1000
 
         if song_length > 0:
             remaining_time = song_length - current_song_position
@@ -201,6 +271,7 @@ def progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bott
             progress_slider.set((current_song_position / song_length) * 100)
 
     bottom_frame.after(500, lambda: progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_frame))
+
 
 def slide_music(value, time_elapsed_label, time_remaining_label, bottom_frame):
     global user_sliding, current_song_position, song_start_time, is_playing, song_length
@@ -221,7 +292,8 @@ def slide_music(value, time_elapsed_label, time_remaining_label, bottom_frame):
     time_elapsed_label.config(text=time.strftime("%M:%S", time.gmtime(new_time)))
     time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(song_length - new_time)))
 
-    bottom_frame.after(500, lambda: set_user_sliding(False))
+    user_sliding = False  
+
 
 
 
@@ -240,3 +312,4 @@ def set_user_sliding(value):
 def create_playlist_button(parent, text, bg_color, icon=None):
     return Button(parent, text=text, font=("Arial", 14, "bold"), width=20, height=2, borderwidth=0, highlightthickness=0,
                   activebackground='#501908', cursor='hand2')
+    
