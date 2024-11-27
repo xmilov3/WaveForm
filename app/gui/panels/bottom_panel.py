@@ -36,7 +36,7 @@ def create_bottom_panel(main_frame, song_listbox):
         return bottom_frame
 
     def previous_command():
-        previous_song(song_listbox, play_pause_button, play_button_img, pause_button_img)
+        previous_song(song_listbox, play_pause_button, play_button_img, pause_button_img, title_label, artist_label)
 
     def play_pause_command():
         global is_playing
@@ -57,7 +57,7 @@ def create_bottom_panel(main_frame, song_listbox):
 
 
     def next_command():
-        next_song(song_listbox, play_pause_button, play_button_img, pause_button_img)
+        next_song(song_listbox, play_pause_button, play_button_img, pause_button_img, title_label, artist_label)
     previous_button = create_previous_button(bottom_frame_mid, lambda e=None: previous_command())
     play_pause_button = create_play_pause_button(
         bottom_frame_mid,
