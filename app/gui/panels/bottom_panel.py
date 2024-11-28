@@ -178,7 +178,6 @@ def create_bottom_panel(main_frame, song_listbox):
         bg='#1E052A',
         anchor="center"
     )
-    # volume_label.pack(side=TOP, anchor="e", pady=2)
     volume_label.grid(row=0, column=0, pady=10)
 
     volume_slider = Scale(
@@ -198,14 +197,21 @@ def create_bottom_panel(main_frame, song_listbox):
     )
     volume_slider.set(50)
     volume_slider.grid(row=1, column=0, padx=10)
-    # volume_slider.pack(side=TOP, anchor="e", padx=5)
 
     
     progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_center_bar)
 
-    return bottom_frame, time_remaining_label, time_elapsed_label, progress_slider, title_label, artist_label
-
-
+    return (
+        bottom_frame,
+        time_remaining_label,
+        time_elapsed_label,
+        progress_slider,
+        title_label,
+        artist_label,
+        play_pause_button,
+        play_button_img,
+        pause_button_img,
+    )
 
 def update_play_pause(currentsong, song_listbox, play_button, play_button_img, pause_button_img):
     global is_playing

@@ -39,17 +39,30 @@ def create_app_window():
     left_frame = create_left_panel(main_frame)
     middle_frame, song_listbox = create_middle_panel(main_frame)
     right_frame = create_right_panel(main_frame)
-    bottom_frame, title_label, artist_label, time_remaining_label, time_elapsed_label, progress_slider = create_bottom_panel(
-        main_frame, song_listbox
-    )
+    
+    (
+        bottom_frame,
+        time_remaining_label,
+        time_elapsed_label,
+        progress_slider,
+        title_label,
+        artist_label,
+        play_pause_button,
+        play_button_img,
+        pause_button_img,
+    ) = create_bottom_panel(main_frame, song_listbox)
+
     initialize_first_song(
         song_listbox, 
-        time_remaining_label, 
+        play_pause_button, 
+        play_button_img, 
+        pause_button_img, 
+        title_label, 
+        artist_label, 
         time_elapsed_label, 
+        time_remaining_label, 
         progress_slider, 
-        bottom_frame,
-        title_label,
-        artist_label
+        bottom_frame
     )
     
     # Main Frame
