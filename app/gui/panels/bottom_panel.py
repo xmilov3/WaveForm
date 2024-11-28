@@ -4,7 +4,6 @@ from app.func.music_controller import play_pause_song, next_song, previous_song,
 from app.func.config import *
 
 
-
 def create_bottom_panel(main_frame, song_listbox):
     global currentsong, is_playing
     global title_label, artist_label
@@ -59,12 +58,18 @@ def create_bottom_panel(main_frame, song_listbox):
         )
 
     def play_pause_command():
-        global is_playing
+        global is_playing, user_sliding
+
+        if user_sliding:  
+            print("Ignoring Play/Pause toggle during sliding")
+            return
+
         currentsong = song_listbox.get(ACTIVE)
         if not currentsong:
             print("No song selected!")
             return
 
+        before_state = is_playing
         is_playing = play_pause_song(
             currentsong,
             is_playing,
@@ -74,6 +79,8 @@ def create_bottom_panel(main_frame, song_listbox):
             title_label,
             artist_label
         )
+        print(f"Play/Pause toggled: before={before_state}, after={is_playing}")
+
         
     def next_command():
         next_song(
@@ -137,21 +144,20 @@ def create_bottom_panel(main_frame, song_listbox):
     progress_slider.configure(borderwidth=0, relief="flat") 
     
     progress_slider.bind(
-        "<ButtonPress-1>",
-        lambda e: set_user_sliding(True) 
+    "<ButtonPress-1>",
+    lambda e: set_user_sliding(True) 
     )
+
     progress_slider.bind(
         "<ButtonRelease-1>",
-        lambda e: (
-            slide_music(
-                progress_slider.get(),
-                time_elapsed_label,
-                time_remaining_label,
-                bottom_frame
-            ),
-            set_user_sliding(False)  
+        lambda e: slide_music(
+            progress_slider.get(),
+            time_elapsed_label,
+            time_remaining_label,
+            bottom_frame
         )
     )
+
 
     progress_slider.grid(row=0, column=1, padx=10)
 
@@ -214,13 +220,19 @@ def create_bottom_panel(main_frame, song_listbox):
     )
 
 def update_play_pause(currentsong, song_listbox, play_button, play_button_img, pause_button_img):
-    global is_playing
+    global is_playing, user_sliding
+
+    if user_sliding:
+        print("Ignoring update_play_pause during sliding")
+        return
+
     if not currentsong:
         currentsong = song_listbox.get(ACTIVE)
         if not currentsong:
             print("No song selected!")
             return
 
+    before_state = is_playing
     is_playing = play_pause_song(
         currentsong,
         is_playing,
@@ -228,3 +240,4 @@ def update_play_pause(currentsong, song_listbox, play_button, play_button_img, p
         play_button_img,
         pause_button_img
     )
+    print(f"update_play_pause toggled: before={before_state}, after={is_playing}")
