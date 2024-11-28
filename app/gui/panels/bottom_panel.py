@@ -1,6 +1,6 @@
 from tkinter import Frame, Label, Scale, HORIZONTAL, ACTIVE, TOP
 from app.gui.widgets import create_play_pause_button, create_previous_button, create_next_button
-from app.func.music_controller import play_pause_song, next_song, previous_song, progress_bar, slide_music, stop_song, set_user_sliding
+from app.func.music_controller import play_pause_song, next_song, previous_song, progress_bar, slide_music, stop_song, set_user_sliding, initialize_first_song,control_volume
 from app.func.config import *
 
 
@@ -126,7 +126,8 @@ def create_bottom_panel(main_frame, song_listbox):
         to=100,
         orient=HORIZONTAL,
         length=500,
-        bg='black',
+        bg='#1E052A',
+        fg='white',
         troughcolor='#3A0C60',
         sliderrelief="flat",
         sliderlength=15,
@@ -167,7 +168,38 @@ def create_bottom_panel(main_frame, song_listbox):
 
 
     bottom_frame_right = Frame(bottom_frame, bg='#1E052A')
-    bottom_frame_right.grid(row=0, column=2, sticky='e', padx=5)
+    bottom_frame_right.grid(row=0, column=2, sticky='nsew', padx=10)
+    
+    volume_label = Label(
+        bottom_frame_right, 
+        text="Volume: 100%", 
+        font=("Arial", 12), 
+        fg='white', 
+        bg='#1E052A',
+        anchor="center"
+    )
+    # volume_label.pack(side=TOP, anchor="e", pady=2)
+    volume_label.grid(row=0, column=0, pady=10)
+
+    volume_slider = Scale(
+        bottom_frame_right,
+        from_=0,
+        to=100,
+        orient=HORIZONTAL,
+        length=200,
+        bg='#1E052A',
+        fg='white',
+        troughcolor='#3A0C60',
+        sliderrelief="flat",
+        sliderlength=15,
+        highlightthickness=0,
+        showvalue=False,
+        command=lambda value: control_volume(value, volume_label)
+    )
+    volume_slider.set(50)
+    volume_slider.grid(row=1, column=0, padx=10)
+    # volume_slider.pack(side=TOP, anchor="e", padx=5)
+
     
     progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_center_bar)
 

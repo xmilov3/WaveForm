@@ -44,12 +44,18 @@ def initialize_first_song(song_listbox, time_remaining_label, time_elapsed_label
         current_song_position = 0
         song_start_time = 0
 
-        time_elapsed_label.config(text="") 
-        time_remaining_label.config(text="")  
+        
+
+        time_elapsed_label.config(text="")
+        time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(song_length))) 
+        # time_remaining_label.config(text="")  
         progress_slider.set(0)
 
         title_label.config(text="")
         artist_label.config(text="")
+        print("Initializing first song...")
+        print(f"Song: {currentsong}")
+
 
     except Exception as e:
         print(f"Error initializing first track: {e}")
