@@ -135,7 +135,7 @@ def create_middle_panel(parent):
     song_count_label = Label(header_frame, text='', font=("Arial", 12), fg='white', bg='#3A0C60')
     song_count_label.grid(row=2, column=1, sticky="w", padx=(10, 0))
 
-    songlist_frame = Frame(middle_frame, bg='black')
+    songlist_frame = Frame(middle_frame, bg='white')
     songlist_frame.grid(row=1, column=0, sticky='nsew', padx=0, pady=0)
 
     song_listbox = Listbox(songlist_frame, bg='#3A0C60', fg='black', font=("Arial", 18), selectbackground="#3A0C60")
