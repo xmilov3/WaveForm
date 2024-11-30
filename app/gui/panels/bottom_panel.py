@@ -1,13 +1,17 @@
 from tkinter import Frame, Label, Scale, HORIZONTAL, ACTIVE, TOP
 from app.gui.widgets import create_play_pause_button, create_previous_button, create_next_button
-from app.func.music_controller import play_pause_song, next_song, previous_song, progress_bar, slide_music, stop_song, set_user_sliding, initialize_first_song,control_volume
+from app.func.music_controller import play_pause_song, next_song, previous_song, progress_bar, slide_music, stop_song, set_user_sliding, initialize_first_song, control_volume
 from app.func.config import *
 
 
 def create_bottom_panel(main_frame, song_listbox):
-    global currentsong, is_playing
-    global title_label, artist_label
-    is_playing = False  
+    global is_playing, user_sliding, current_song_position, song_length, currentsong
+
+    is_playing = False
+    user_sliding = False
+    current_song_position = 0
+    song_length = 0
+    currentsong = None
 
     bottom_frame = Frame(main_frame, bg='#1E052A')
     bottom_frame.grid(row=2, column=0, columnspan=3, sticky='nsew', pady=1)
@@ -16,27 +20,28 @@ def create_bottom_panel(main_frame, song_listbox):
     bottom_frame_left.grid(row=0, column=0, sticky='w', padx=10)
 
     title_label = Label(
-        bottom_frame_left, 
-        fg="white", 
-        bg='#1E052A', 
-        font=("Arial", 18, "bold"), 
-        anchor="w", 
-        width=30  
+        bottom_frame_left,
+        fg="white",
+        bg='#1E052A',
+        font=("Arial", 18, "bold"),
+        anchor="w",
+        width=30
     )
     title_label.pack(side=TOP, anchor="w", padx=5, pady=2)
 
     artist_label = Label(
-        bottom_frame_left, 
-        fg="gray", 
-        bg='#1E052A', 
-        font=("Arial", 14), 
-        anchor="w", 
-        width=30  
+        bottom_frame_left,
+        fg="gray",
+        bg='#1E052A',
+        font=("Arial", 14),
+        anchor="w",
+        width=30
     )
     artist_label.pack(side=TOP, anchor="w", padx=5, pady=2)
 
     bottom_frame_mid = Frame(bottom_frame, bg='#1E052A')
     bottom_frame_mid.grid(row=0, column=1, sticky='nsew')
+
     try:
         play_button_img = create_play_pause_button.__globals__['load_play_button']()
         pause_button_img = create_play_pause_button.__globals__['load_pause_button']()
@@ -44,21 +49,8 @@ def create_bottom_panel(main_frame, song_listbox):
         print(f"Error while loading buttons: {e}")
         return bottom_frame
 
-    def previous_command():
-        previous_song(
-            song_listbox, 
-            play_pause_button, 
-            play_button_img, 
-            pause_button_img, 
-            title_label, 
-            artist_label, 
-            time_elapsed_label, 
-            time_remaining_label, 
-            progress_slider
-        )
-
     def play_pause_command():
-        global is_playing, user_sliding
+        global is_playing
 
         if user_sliding:  
             print("Ignoring Play/Pause toggle during sliding")
@@ -69,7 +61,6 @@ def create_bottom_panel(main_frame, song_listbox):
             print("No song selected!")
             return
 
-        before_state = is_playing
         is_playing = play_pause_song(
             currentsong,
             is_playing,
@@ -79,35 +70,45 @@ def create_bottom_panel(main_frame, song_listbox):
             title_label,
             artist_label
         )
-        print(f"Play/Pause toggled: before={before_state}, after={is_playing}")
 
-        
     def next_command():
+        global is_playing, current_song_position
+
         next_song(
-            song_listbox, 
-            play_pause_button, 
-            play_button_img, 
-            pause_button_img, 
-            title_label, 
-            artist_label, 
-            time_elapsed_label, 
-            time_remaining_label, 
+            song_listbox,
+            play_pause_button,
+            play_button_img,
+            pause_button_img,
+            title_label,
+            artist_label,
+            time_elapsed_label,
+            time_remaining_label,
             progress_slider
         )
+        is_playing = True
+        current_song_position = 0
 
-    previous_button = create_previous_button(
-        bottom_frame_mid, 
-        lambda e=None: previous_command()
-    )
-    play_pause_button = create_play_pause_button(
-        bottom_frame_mid,
-        play_command=lambda: play_pause_command(),
-        pause_command=lambda: play_pause_command()
-    )
-    next_button = create_next_button(
-        bottom_frame_mid,
-        lambda e=None: next_command()
-    )
+    def previous_command():
+        global is_playing, current_song_position
+
+        previous_song(
+            song_listbox,
+            play_pause_button,
+            play_button_img,
+            pause_button_img,
+            title_label,
+            artist_label,
+            time_elapsed_label,
+            time_remaining_label,
+            progress_slider
+        )
+        is_playing = True
+        current_song_position = 0
+
+    previous_button = create_previous_button(bottom_frame_mid, lambda e=None: previous_command())
+    play_pause_button = create_play_pause_button(bottom_frame_mid, play_command=lambda: play_pause_command(),
+                                                 pause_command=lambda: play_pause_command())
+    next_button = create_next_button(bottom_frame_mid, lambda e=None: next_command())
 
     previous_button.grid(row=0, column=0, padx=10, pady=5, sticky="e")
     play_pause_button.grid(row=0, column=1, padx=10, pady=5)
@@ -117,13 +118,13 @@ def create_bottom_panel(main_frame, song_listbox):
     bottom_center_bar.grid(row=1, column=0, columnspan=3, sticky='nsew', pady=10)
 
     time_elapsed_label = Label(
-        bottom_center_bar, 
-        text="00:00", 
-        font=("Arial", 12), 
-        fg='white', 
-        bg='#1E052A', 
-        anchor="e", 
-        width=5  
+        bottom_center_bar,
+        text="00:00",
+        font=("Arial", 12),
+        fg='white',
+        bg='#1E052A',
+        anchor="e",
+        width=5
     )
     time_elapsed_label.grid(row=0, column=0, padx=5)
 
@@ -141,46 +142,36 @@ def create_bottom_panel(main_frame, song_listbox):
         highlightthickness=0,
         showvalue=False
     )
-    progress_slider.configure(borderwidth=0, relief="flat") 
-    
-    progress_slider.bind(
-    "<ButtonPress-1>",
-    lambda e: set_user_sliding(True) 
-    )
+    progress_slider.configure(borderwidth=0, relief="flat")
 
-    progress_slider.bind(
-        "<ButtonRelease-1>",
-        lambda e: slide_music(
-            progress_slider.get(),
-            time_elapsed_label,
-            time_remaining_label,
-            bottom_frame
-        )
-    )
-
-
+    progress_slider.bind("<ButtonPress-1>", lambda e: set_user_sliding(True))
+    progress_slider.bind("<ButtonRelease-1>", lambda e: slide_music(
+        progress_slider.get(),
+        time_elapsed_label,
+        time_remaining_label,
+        bottom_frame
+    ))
     progress_slider.grid(row=0, column=1, padx=10)
 
     time_remaining_label = Label(
-        bottom_center_bar, 
-        text="-00:00", 
-        font=("Arial", 12), 
-        fg='white', 
-        bg='#1E052A', 
-        anchor="w", 
-        width=5  
+        bottom_center_bar,
+        text="-00:00",
+        font=("Arial", 12),
+        fg='white',
+        bg='#1E052A',
+        anchor="w",
+        width=5
     )
     time_remaining_label.grid(row=0, column=2, padx=5)
 
-
     bottom_frame_right = Frame(bottom_frame, bg='#1E052A')
     bottom_frame_right.grid(row=0, column=2, sticky='nsew', padx=10)
-    
+
     volume_label = Label(
-        bottom_frame_right, 
-        text="Volume: 100%", 
-        font=("Arial", 12), 
-        fg='white', 
+        bottom_frame_right,
+        text="Volume: 100%",
+        font=("Arial", 12),
+        fg='white',
         bg='#1E052A',
         anchor="center"
     )
@@ -204,7 +195,6 @@ def create_bottom_panel(main_frame, song_listbox):
     volume_slider.set(50)
     volume_slider.grid(row=1, column=0, padx=10)
 
-    
     progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_center_bar)
 
     return (
@@ -218,26 +208,3 @@ def create_bottom_panel(main_frame, song_listbox):
         play_button_img,
         pause_button_img,
     )
-
-def update_play_pause(currentsong, song_listbox, play_button, play_button_img, pause_button_img):
-    global is_playing, user_sliding
-
-    if user_sliding:
-        print("Ignoring update_play_pause during sliding")
-        return
-
-    if not currentsong:
-        currentsong = song_listbox.get(ACTIVE)
-        if not currentsong:
-            print("No song selected!")
-            return
-
-    before_state = is_playing
-    is_playing = play_pause_song(
-        currentsong,
-        is_playing,
-        play_button,
-        play_button_img,
-        pause_button_img
-    )
-    print(f"update_play_pause toggled: before={before_state}, after={is_playing}")

@@ -9,7 +9,6 @@ import os
 import customtkinter
 from app.func.load_pic_gui import load_play_button, load_pause_button, load_next_button, load_previous_button
 from app.func.config import *
-from app.func.config import artist_label, title_label
 pygame.mixer.init(channels=2)
 import mysql.connector
 
@@ -50,9 +49,6 @@ def create_song_listbox(songlist_frame):
             connection.close()
 
     return song_listbox
-
-
-
 
 def initialize_first_song(
     song_listbox, 
@@ -243,7 +239,7 @@ def previous_song(song_listbox, play_button, play_button_img, pause_button_img, 
 
 
     
-def now_playing(song_listbox, title_label, artist_label, title2_label=None, artist2_label=None):
+def now_playing(song_listbox, title_label, artist_label, title2_label, artist2_label):
     currentsong = song_listbox.get(ACTIVE)
     currentsong = currentsong.replace('.mp3', '').replace('.wav', '')  
 
@@ -264,7 +260,7 @@ def now_playing(song_listbox, title_label, artist_label, title2_label=None, arti
         artist2_label.config(text=f"{title}")
 
         
-def update_song_info(currentsong, title_label, artist_label):
+def update_song_info(currentsong, title_label, artist_label, artist2_label, title2_label):
     currentsong = currentsong.replace('.mp3', '').replace('.wav', '')
 
     if " - " in currentsong:
@@ -275,8 +271,10 @@ def update_song_info(currentsong, title_label, artist_label):
 
     title_label.config(text=f"{title}")
     artist_label.config(text=f"{artist}")
+    title2_label.config(text=f"{title}")
+    artist2_label.config(text=f"{artist}")
 
-    return currentsong, title_label, artist_label
+    return currentsong, title_label, artist_label, artist2_label, title2_label
     
 def control_volume(value, volume_label):
     pygame.mixer.music.set_volume(float(value)/100)
