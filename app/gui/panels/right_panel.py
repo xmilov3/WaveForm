@@ -45,30 +45,25 @@ def create_right_panel(main_frame, playlist_name="Liked Songs"):
     right_frame.grid(row=1, column=2, sticky='nsew', padx=1, pady=1)
 
     now_playing_frame = Frame(right_frame, bg='#3A0C60')
-    now_playing_frame.grid(row=0, column=0, sticky='nsew', padx=0, pady=0)
+    now_playing_frame.grid(row=0, column=0, sticky='nsew', padx=0)
     now_playing_frame.place(relx=0.07, rely=0.26, anchor="w")
 
-    # Label for playlist name
     playlist_right_frame_label = Label(now_playing_frame, text='', font=("Arial", 28, "bold"), anchor="w", fg='white', bg='#3A0C60')
-    playlist_right_frame_label.pack(fill="x", pady=25)
+    playlist_right_frame_label.pack(fill="x")
 
-    # Label for album art
     album_art_label = Label(now_playing_frame, bg='#3A0C60')
-    album_art_label.pack(fill="both", expand=True, pady=2)
+    album_art_label.pack(fill="both", expand=True)
 
-    # Label for song title
     title2_label = Label(now_playing_frame, fg="white", bg='#3A0C60', font=("Arial", 20, "bold"), anchor="w")
-    title2_label.pack(fill="x", pady=5)
+    title2_label.pack(fill="x")
 
-    # Label for song artist
     artist2_label = Label(now_playing_frame, fg="gray", bg='#3A0C60', font=("Arial", 16), anchor="w")
     artist2_label.pack(fill="x")
 
-    # Update content dynamically
     update_now_playing(now_playing_frame, playlist_right_frame_label, album_art_label, title2_label, artist2_label, playlist_name)
 
     next_in_queue_frame = Frame(right_frame, bg='#3C0F64')
-    next_in_queue_frame.grid(row=1, column=0, sticky='nsew', padx=0, pady=1)
+    next_in_queue_frame.grid(row=1, column=0, sticky='nsew', padx=0)
 
     return right_frame
 
@@ -80,16 +75,12 @@ def update_now_playing(frame, playlist_label, album_art_label, title_label, arti
         title, artist, playlist, cover_path = song_details
         print(f"Song fetched: Title - {title}, Artist - {artist}, Playlist - {playlist}, Cover - {cover_path}")
 
-        # Update playlist name
         playlist_label.config(text=playlist)
 
-        # Update song title
         title_label.config(text=title)
 
-        # Update song artist
         artist_label.config(text=artist)
 
-        # Update album art
         if cover_path and cover_path.strip():
             try:
                 img = Image.open(cover_path)

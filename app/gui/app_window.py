@@ -68,7 +68,7 @@ def create_app_window():
     # Main Frame
     main_frame.grid_columnconfigure(0, weight=1)
     main_frame.grid_columnconfigure(1, weight=5)
-    main_frame.grid_columnconfigure(2, weight=3)
+    main_frame.grid_columnconfigure(2, weight=4)
     main_frame.grid_rowconfigure(0, weight=0)
     main_frame.grid_rowconfigure(1, weight=4)
     main_frame.grid_rowconfigure(2, weight=0)
@@ -96,7 +96,7 @@ def create_app_window():
     bottom_frame.grid_rowconfigure(0, weight=1)
     bottom_frame.grid_rowconfigure(1, weight=0)
     bottom_frame.grid_rowconfigure(2, weight=1)
-    bottom_frame.grid_columnconfigure(0, weight=1)
+    bottom_frame.grid_columnconfigure(0, weight=3)
     bottom_frame.grid_columnconfigure(1, weight=6)
     bottom_frame.grid_columnconfigure(2, weight=1)
     

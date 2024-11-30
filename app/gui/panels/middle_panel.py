@@ -117,13 +117,13 @@ def update_song_listbox(song_listbox, playlist_name):
             song_listbox.insert(END, f"{title} - {artist}")
 
 def create_middle_panel(parent):
-    middle_frame = Frame(parent, bg='#3C0F64')
-    middle_frame.grid(row=1, column=1, sticky='nsew', padx=1, pady=1)
+    middle_frame = Frame(parent, bg='#3C0F64', borderwidth=0, highlightthickness=0)
+    middle_frame.grid(row=1, column=1, sticky='nsew', padx=0, pady=0)
 
-    header_frame = Frame(middle_frame, bg='#3A0C60')
+    header_frame = Frame(middle_frame, bg='#3A0C60', borderwidth=0, highlightthickness=0)
     header_frame.grid(row=0, column=0, sticky='nsew', padx=0, pady=0)
 
-    header_image_label = Label(header_frame, bg='#3A0C60')
+    header_image_label = Label(header_frame, bg='#3A0C60', borderwidth=0, highlightthickness=0)
     header_image_label.grid(row=0, column=0, rowspan=3, padx=0, pady=0, sticky='nw')
 
     header_label = Label(header_frame, text='', font=("Arial", 54, "bold"), fg='white', bg='#3A0C60')
@@ -135,13 +135,14 @@ def create_middle_panel(parent):
     song_count_label = Label(header_frame, text='', font=("Arial", 12), fg='white', bg='#3A0C60')
     song_count_label.grid(row=2, column=1, sticky="w", padx=(10, 0))
 
-    songlist_frame = Frame(middle_frame, bg='white')
+    songlist_frame = Frame(middle_frame, bg='#3A0C60', borderwidth=0, highlightthickness=0)
     songlist_frame.grid(row=1, column=0, sticky='nsew', padx=0, pady=0)
 
-    song_listbox = Listbox(songlist_frame, bg='#3A0C60', fg='black', font=("Arial", 18), selectbackground="#3A0C60")
+    song_listbox = Listbox(songlist_frame, bg='#3A0C60', font=("Arial", 18), selectbackground="#3A0C60", borderwidth=0, highlightthickness=0)
     song_listbox.pack(fill=BOTH, expand=True)
 
     update_header(header_label, header_image_label, user_label, song_count_label, "liked Songs")
     update_song_listbox(song_listbox, "Liked Songs")
 
     return middle_frame, song_listbox
+
