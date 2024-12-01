@@ -1,4 +1,5 @@
 import tkinter as tk
+from app.func.load_pic_gui import load_init_logo
 
 def create_init_page(on_signup, on_signin):
     home_root = tk.Tk()
@@ -7,28 +8,29 @@ def create_init_page(on_signup, on_signin):
     home_root.configure(bg="#1E052A")
 
     tk.Label(
-        home_root, 
-        text="WaveForm", 
-        font=("Arial", 48, "bold"), 
-        fg="#1E052A", 
+        home_root,
+        text="WaveForm",
+        font=("Arial", 48, "bold"),
+        fg="#1E052A",
         bg="#1E052A"
-    ).pack(pady=20)
+    ).pack()
+
+    init_logo = load_init_logo()  
+    logo_label = tk.Label(
+        home_root,
+        image=init_logo,
+        bg="#1E052A"
+    )
+    logo_label.image = init_logo  
+    logo_label.pack()
 
     tk.Label(
-        home_root, 
-        text="Feel the vibe.", 
-        font=("Arial", 24, "italic"), 
-        fg="#9C27B0", 
+        home_root,
+        text="Welcome to WaveForm",
+        font=("Arial", 40, "bold"),
+        fg="white",
         bg="#1E052A"
-    ).pack(pady=10)
-
-    tk.Label(
-        home_root, 
-        text="Welcome to WaveForm", 
-        font=("Arial", 32, "bold"), 
-        fg="#1E052A", 
-        bg="#1E052A"
-    ).pack(pady=30)
+    ).pack(pady=50)
 
     def handle_signup():
         home_root.destroy()
@@ -39,35 +41,35 @@ def create_init_page(on_signup, on_signin):
         on_signin()
 
     signup_button = tk.Button(
-        home_root, 
-        text="Sign up", 
-        font=("Arial", 18, "bold"), 
-        bg="#9C27B0", 
-        fg="#1E052A", 
-        width=20, 
-        height=2, 
+        home_root,
+        text="Sign up",
+        font=("Arial", 18, "bold"),
+        bg="#9C27B0",
+        fg="black",
+        width=20,
+        height=2,
         command=handle_signup
     )
-    signup_button.pack(pady=10)
+    signup_button.pack(pady=20)
 
     tk.Label(
-        home_root, 
-        text="Or", 
-        font=("Arial", 18), 
-        fg="#1E052A", 
-        bg="#501908"
-    ).pack(pady=5)
+        home_root,
+        text="Or",
+        font=("Arial", 18),
+        fg="white",
+        bg="#1E052A"
+    ).pack(pady=10)
 
     signin_button = tk.Button(
-        home_root, 
-        text="Sign in", 
-        font=("Arial", 18, "bold"), 
-        bg="#3C0F64", 
-        fg="#1E052A", 
-        width=20, 
-        height=2, 
+        home_root,
+        text="Sign in",
+        font=("Arial", 18, "bold"),
+        bg="#3C0F64",
+        fg="black",
+        width=20,
+        height=2,
         command=handle_signin
     )
-    signin_button.pack(pady=10)
+    signin_button.pack(pady=20)
 
     home_root.mainloop()

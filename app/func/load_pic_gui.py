@@ -34,3 +34,7 @@ def load_next_button():
 def load_previous_button():
     previous_button = PhotoImage(file=get_full_path('../gui/assets/buttons/previous_button.png'))
     return previous_button
+
+def load_init_logo():
+    init_logo = PhotoImage(file=get_full_path('../gui/assets/pics/text_logo.png'))
+    return init_logo

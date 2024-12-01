@@ -11,11 +11,14 @@ def authenticate_user(connection, username, password):
         print(f"Błąd podczas autoryzacji: {e}")
         return False
 
-def register_user(connection, username, password):
+def register_user(connection, username, email, password, birth_date, gender):
     try:
         cursor = connection.cursor()
-        query = "INSERT INTO users (username, password) VALUES (%s, %s)"
-        cursor.execute(query, (username, password))
+        query = """
+            INSERT INTO users (username, email, password_hash, birth_date, gender, created_at)
+            VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP())
+        """
+        cursor.execute(query, (username, email, password, birth_date, gender))
         connection.commit()
         return True
     except Exception as e:
@@ -23,3 +26,4 @@ def register_user(connection, username, password):
         return False
     finally:
         cursor.close()
+
