@@ -51,21 +51,29 @@ def create_song_listbox(songlist_frame):
     return song_listbox
 
 def initialize_first_song(
-    song_listbox, 
-    play_pause_button, 
-    play_button_img, 
-    pause_button_img, 
-    title_label, 
-    artist_label, 
-    time_elapsed_label, 
-    time_remaining_label, 
-    progress_slider, 
+    song_listbox,
+    play_pause_button,
+    play_button_img,
+    pause_button_img,
+    title_label,
+    artist_label,
+    time_elapsed_label,
+    time_remaining_label,
+    progress_slider,
     bottom_frame
 ):
     global currentsong, song_length, current_song_position, song_start_time, is_playing
 
+    # Domyślny stan aplikacji
+    is_playing = False
+    current_song_position = 0
+    song_length = 0
+
+    # Ustaw przycisk na "Play" na starcie
+    play_pause_button.config(image=play_button_img)
+
     if song_listbox.size() == 0:
-        print("The song list is empty!")
+        print("Lista utworów jest pusta!")
         return
 
     song_listbox.select_set(0)
@@ -73,6 +81,7 @@ def initialize_first_song(
     currentsong = song_listbox.get(0)
 
     try:
+        # Pobierz pierwszy utwór z bazy danych
         song_title, artist_name = currentsong.split(" - ")
         connection = mysql.connector.connect(
             host='localhost',
@@ -85,36 +94,29 @@ def initialize_first_song(
         query = "SELECT file_path FROM songs WHERE title = %s AND artist = %s"
         cursor.execute(query, (song_title.strip(), artist_name.strip()))
         result = cursor.fetchone()
+
         if not result:
-            print(f"File path not found for song: {song_title} by {artist_name}")
+            print(f"Plik dla utworu {song_title} - {artist_name} nie został znaleziony.")
             return
 
         file_path = result[0]
 
         if not os.path.exists(file_path):
-            print(f"No file found at: {file_path}")
+            print(f"Plik nie istnieje: {file_path}")
             return
 
+        # Załaduj plik, ale nie odtwarzaj
         pygame.mixer.music.load(file_path)
-        pygame.mixer.music.play()
-        pygame.mixer.music.pause()
-        song_length = MP3(file_path).info.length  
+        pygame.mixer.music.stop()  # Upewnij się, że muzyka jest zatrzymana
 
-        current_song_position = 0
-        song_start_time = 0
+        song_length = MP3(file_path).info.length
         time_elapsed_label.config(text="00:00")
         time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(song_length)))
         progress_slider.set(0)
 
         update_song_info(currentsong, title_label, artist_label)
-
-        play_pause_button.config(image=play_button_img)
-
-        is_playing = True
     except Exception as e:
-        print(f"Error while initializing the first track: {e}")
-        play_pause_button.config(image=pause_button_img)
-        is_playing = False
+        print(f"Błąd przy inicjalizacji pierwszego utworu: {e}")
     finally:
         if 'connection' in locals() and connection.is_connected():
             cursor.close()
