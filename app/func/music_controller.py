@@ -64,12 +64,10 @@ def initialize_first_song(
 ):
     global currentsong, song_length, current_song_position, song_start_time, is_playing
 
-    # Domyślny stan aplikacji
     is_playing = False
     current_song_position = 0
     song_length = 0
 
-    # Ustaw przycisk na "Play" na starcie
     play_pause_button.config(image=play_button_img)
 
     if song_listbox.size() == 0:
@@ -81,7 +79,6 @@ def initialize_first_song(
     currentsong = song_listbox.get(0)
 
     try:
-        # Pobierz pierwszy utwór z bazy danych
         song_title, artist_name = currentsong.split(" - ")
         connection = mysql.connector.connect(
             host='localhost',
@@ -105,16 +102,17 @@ def initialize_first_song(
             print(f"Plik nie istnieje: {file_path}")
             return
 
-        # Załaduj plik, ale nie odtwarzaj
         pygame.mixer.music.load(file_path)
-        pygame.mixer.music.stop()  # Upewnij się, że muzyka jest zatrzymana
+        pygame.mixer.music.stop()
 
         song_length = MP3(file_path).info.length
         time_elapsed_label.config(text="00:00")
         time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(song_length)))
         progress_slider.set(0)
 
-        update_song_info(currentsong, title_label, artist_label)
+        title_label.config(text=song_title)
+        artist_label.config(text=artist_name)
+
     except Exception as e:
         print(f"Błąd przy inicjalizacji pierwszego utworu: {e}")
     finally:
@@ -125,11 +123,13 @@ def initialize_first_song(
 
 
 
+
 def play_pause_song(song_info, is_playing, play_button, play_button_img, pause_button_img, title_label, artist_label):
+    global current_song_position, song_start_time
 
     try:
         song_title, artist_name = song_info.split(" - ")
-        
+
         connection = mysql.connector.connect(
             host='localhost',
             database='WaveForm_db',
@@ -154,31 +154,25 @@ def play_pause_song(song_info, is_playing, play_button, play_button_img, pause_b
 
         if is_playing:
             print(f"Pausing song: {song_title}")
-            pygame.mixer.music.pause()  
-            play_button.config(image=play_button_img)  
+            current_song_position = pygame.mixer.music.get_pos() / 1000.0
+            pygame.mixer.music.pause()
+            play_button.config(image=play_button_img)
             return False
         else:
-            print(f"Playing song: {song_title}")
-            pygame.mixer.music.load(file_path)
-            pygame.mixer.music.play()
-            play_button.config(image=pause_button_img) 
-            
-            title_label.config(text=song_title) 
-            artist_label.config(text=artist_name) 
-            
+            print(f"Resuming song: {song_title}")
+            pygame.mixer.music.stop()
+            pygame.mixer.music.play(start=current_song_position)
+            song_start_time = current_song_position
+            play_button.config(image=pause_button_img)
             return True
 
     except Exception as e:
-        print(f"Song playback error: {e}")
+        print(f"Error in play_pause_song: {e}")
         return is_playing
     finally:
         if 'connection' in locals() and connection.is_connected():
             cursor.close()
             connection.close()
-
-
-
-
 
 def stop_song(play_button, play_button_img):
     global is_playing, current_song_position, song_start_time
@@ -191,8 +185,8 @@ def stop_song(play_button, play_button_img):
     return is_playing
 
 
-def next_song(song_listbox, play_button, play_button_img, pause_button_img, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
-    global currentsong, is_playing, song_length
+def next_song(song_listbox, play_pause_button, play_button_img, pause_button_img, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
+    global currentsong, is_playing, current_song_position, song_length, song_start_time
 
     if song_listbox.size() == 0:
         print("The song list is empty!")
@@ -209,15 +203,56 @@ def next_song(song_listbox, play_button, play_button_img, pause_button_img, titl
     song_listbox.activate(next_index)
 
     currentsong = song_listbox.get(next_index)
+    song_title, artist_name = currentsong.split(" - ")
 
-    is_playing = play_pause_song(currentsong, False, play_button, play_button_img, pause_button_img, title_label, artist_label)
-    progress_slider.set(0)
+    try:
+        connection = mysql.connector.connect(
+            host='localhost',
+            database='WaveForm_db',
+            user='root',
+            password=''
+        )
+        cursor = connection.cursor()
+        query = "SELECT file_path FROM songs WHERE title = %s AND artist = %s"
+        cursor.execute(query, (song_title.strip(), artist_name.strip()))
+        result = cursor.fetchone()
+
+        if not result:
+            print(f"File for song {song_title} - {artist_name} not found.")
+            return
+
+        file_path = result[0]
+
+        if not os.path.exists(file_path):
+            print(f"File does not exist: {file_path}")
+            return
+
+        pygame.mixer.music.load(file_path)
+        pygame.mixer.music.play()
+
+        song_length = MP3(file_path).info.length
+        current_song_position = 0
+        song_start_time = 0
+        is_playing = True
+
+        play_pause_button.config(image=pause_button_img)
+        time_elapsed_label.config(text="00:00")
+        time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(song_length)))
+        progress_slider.set(0)
+        title_label.config(text=song_title)
+        artist_label.config(text=artist_name)
+
+    except Exception as e:
+        print(f"Error in next_song: {e}")
+    finally:
+        if 'connection' in locals() and connection.is_connected():
+            cursor.close()
+            connection.close()
 
 
 
-
-def previous_song(song_listbox, play_button, play_button_img, pause_button_img, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
-    global currentsong, is_playing, song_length
+def previous_song(song_listbox, play_pause_button, play_button_img, pause_button_img, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
+    global currentsong, is_playing, current_song_position, song_length, song_start_time
 
     if song_listbox.size() == 0:
         print("The song list is empty!")
@@ -234,9 +269,55 @@ def previous_song(song_listbox, play_button, play_button_img, pause_button_img, 
     song_listbox.activate(previous_index)
 
     currentsong = song_listbox.get(previous_index)
+    song_title, artist_name = currentsong.split(" - ")
 
-    is_playing = play_pause_song(currentsong, False, play_button, play_button_img, pause_button_img, title_label, artist_label)
-    progress_slider.set(0)
+    try:
+        connection = mysql.connector.connect(
+            host='localhost',
+            database='WaveForm_db',
+            user='root',
+            password=''
+        )
+        cursor = connection.cursor()
+        query = "SELECT file_path FROM songs WHERE title = %s AND artist = %s"
+        cursor.execute(query, (song_title.strip(), artist_name.strip()))
+        result = cursor.fetchone()
+
+        if not result:
+            print(f"File for song {song_title} - {artist_name} not found.")
+            return
+
+        file_path = result[0]
+
+        if not os.path.exists(file_path):
+            print(f"File does not exist: {file_path}")
+            return
+
+        pygame.mixer.music.load(file_path)
+        pygame.mixer.music.play()
+
+        song_length = MP3(file_path).info.length
+        current_song_position = 0
+        song_start_time = 0
+        is_playing = True
+
+        play_pause_button.config(image=pause_button_img)
+        time_elapsed_label.config(text="00:00")
+        time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(song_length)))
+        progress_slider.set(0)
+        title_label.config(text=song_title)
+        artist_label.config(text=artist_name)
+
+    except Exception as e:
+        print(f"Error in previous_song: {e}")
+    finally:
+        if 'connection' in locals() and connection.is_connected():
+            cursor.close()
+            connection.close()
+
+
+
+
 
 
 
@@ -284,12 +365,12 @@ def control_volume(value, volume_label):
     
 
 def progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_frame):
-    global current_song_position, song_length, is_playing, user_sliding
+    global current_song_position, song_length, is_playing, user_sliding, song_start_time
 
     if is_playing and not user_sliding:
-        current_time_ms = pygame.mixer.music.get_pos()  
-        if current_time_ms != -1:  
-            current_song_position = current_time_ms / 1000.0  
+        current_time_ms = pygame.mixer.music.get_pos() 
+        if current_time_ms != -1:
+            current_song_position = current_time_ms / 1000.0 + song_start_time
 
         if song_length > 0:
             remaining_time = song_length - current_song_position
@@ -297,26 +378,36 @@ def progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bott
             time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(remaining_time)))
             progress_slider.set((current_song_position / song_length) * 100)
 
-    bottom_frame.after(500, lambda: progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_frame))
+    bottom_frame.after(100, lambda: progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_frame))
 
 
-def slide_music(value, time_elapsed_label, time_remaining_label, bottom_frame):
-    global user_sliding, current_song_position, is_playing, song_length
+def slide_music(value, time_elapsed_label, time_remaining_label, bottom_frame, progress_slider, play_pause_button, play_button_img, pause_button_img):
+    global user_sliding, current_song_position, is_playing, song_length, song_start_time, was_sliding
 
-    new_time = (float(value) / 100) * song_length 
+    new_time = (float(value) / 100) * song_length
     current_song_position = new_time
+    was_sliding = True
 
     if is_playing:
-        pygame.mixer.music.play(start=new_time) 
+        pygame.mixer.music.stop()
+        pygame.mixer.music.play(start=new_time)
         print(f"Music jumped to position: {new_time:.2f} seconds")
+        play_pause_button.config(image=pause_button_img)
     else:
-        pygame.mixer.music.set_pos(new_time)  
         print(f"Paused music moved to position: {new_time:.2f} seconds")
+        play_pause_button.config(image=play_button_img)
 
     time_elapsed_label.config(text=time.strftime("%M:%S", time.gmtime(new_time)))
     time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(song_length - new_time)))
 
-    bottom_frame.after(500, lambda: set_user_sliding(False))
+    progress_slider.set((new_time / song_length) * 100)
+
+    bottom_frame.after(100, lambda: set_user_sliding(False))
+
+
+
+
+
 
 
 def set_user_sliding(value):

@@ -20,11 +20,29 @@ def main():
 
     def on_register():
         create_register_window(connection, on_login)
+        
+    def auto_login():
+        username = "xmilov3"
+        password_hash = "admin"
+        
+        cursor = connection.cursor()
+        query = "SELECT * FROM users WHERE username = %s AND password_hash = %s"
+        cursor.execute(query, (username, password_hash))
+        user = cursor.fetchone()
+        
+        if user:
+            print("Auto-login successful")
+            on_login_success()
+            return True
+        else:
+            print("Auto-login failed. Invalid credentials.")
+            return False
 
-    create_init_page(
-        on_signup=on_register,
-        on_signin=on_login
-    )
+    if not auto_login():
+        create_init_page(
+            on_signup=on_register,
+            on_signin=on_login
+        )
 
 if __name__ == "__main__":
     main()

@@ -85,8 +85,11 @@ def create_bottom_panel(main_frame, song_listbox):
             time_remaining_label,
             progress_slider
         )
+
         is_playing = True
         current_song_position = 0
+        #play_pause_button.config(image=pause_button_img)
+
 
     def previous_command():
         global is_playing, current_song_position
@@ -104,6 +107,7 @@ def create_bottom_panel(main_frame, song_listbox):
         )
         is_playing = True
         current_song_position = 0
+        #play_pause_button.config(image=pause_button_img)
 
     previous_button = create_previous_button(bottom_frame_mid, lambda e=None: previous_command())
     play_pause_button = create_play_pause_button(bottom_frame_mid, play_command=lambda: play_pause_command(),
@@ -149,8 +153,13 @@ def create_bottom_panel(main_frame, song_listbox):
         progress_slider.get(),
         time_elapsed_label,
         time_remaining_label,
-        bottom_frame
+        bottom_frame,
+        progress_slider,
+        play_pause_button,
+        play_button_img,
+        pause_button_img
     ))
+
     progress_slider.grid(row=0, column=1, padx=10)
 
     time_remaining_label = Label(
