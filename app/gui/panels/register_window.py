@@ -20,7 +20,7 @@ def create_register_window(connection, on_register_success):
     username_label = tk.Label(
         register_root,
         text="Username",
-        fg="white",
+        fg="gray",
         bg="#1E052A",
         font=("Arial", 18)
     )
@@ -35,7 +35,7 @@ def create_register_window(connection, on_register_success):
     email_label = tk.Label(
         register_root,
         text="Email",
-        fg="white",
+        fg="gray",
         bg="#1E052A",
         font=("Arial", 18)
     )
@@ -50,7 +50,7 @@ def create_register_window(connection, on_register_success):
     password_label = tk.Label(
         register_root,
         text="Password",
-        fg="white",
+        fg="gray",
         bg="#1E052A",
         font=("Arial", 18)
     )
@@ -66,7 +66,7 @@ def create_register_window(connection, on_register_success):
     confirm_password_label = tk.Label(
         register_root,
         text="Confirm Password",
-        fg="white",
+        fg="gray",
         bg="#1E052A",
         font=("Arial", 18)
     )
@@ -82,30 +82,30 @@ def create_register_window(connection, on_register_success):
     tk.Label(
         register_root,
         text="Date of Birth",
-        fg="white",
+        fg="gray",
         bg="#1E052A",
         font=("Arial", 18)
     ).pack(pady=10)
 
     year_var = tk.StringVar(value="Year")
     year_menu = tk.OptionMenu(register_root, year_var, *[str(y) for y in range(1900, date.today().year + 1)])
-    year_menu.config(bg="white", fg="black", font=("Arial", 12))
+    year_menu.config(bg="gray", fg="black", font=("Arial", 12))
     year_menu.pack()
 
     month_var = tk.StringVar(value="Month")
     month_menu = tk.OptionMenu(register_root, month_var, *[str(m).zfill(2) for m in range(1, 13)])
-    month_menu.config(bg="white", fg="black", font=("Arial", 12))
+    month_menu.config(bg="gray", fg="black", font=("Arial", 12))
     month_menu.pack()
 
     day_var = tk.StringVar(value="Day")
     day_menu = tk.OptionMenu(register_root, day_var, *[str(d).zfill(2) for d in range(1, 32)])
-    day_menu.config(bg="white", fg="black", font=("Arial", 12))
+    day_menu.config(bg="gray", fg="black", font=("Arial", 12))
     day_menu.pack()
 
     tk.Label(
         register_root,
         text="Gender",
-        fg="white",
+        fg="gray",
         bg="#1E052A",
         font=("Arial", 18)
     ).pack(pady=10)
@@ -173,7 +173,7 @@ def create_register_window(connection, on_register_success):
         register_root,
         text="Already have an account? ",
         font=("Arial", 16),
-        fg="white",
+        fg="gray",
         bg="#1E052A"
     )
     login_label.pack(side="left", padx=(580, 0))

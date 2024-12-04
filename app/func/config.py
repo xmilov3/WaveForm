@@ -7,3 +7,8 @@ user_sliding = False
 was_sliding = False
 title_label = None
 artist_label = None
+
+
+#nice colors:
+
+#36003c

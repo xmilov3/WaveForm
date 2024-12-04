@@ -30,7 +30,7 @@ def create_login_window(connection, on_login_success, on_register):
     username_label = tk.Label(
         login_root,
         text="Username",
-        fg="white",
+        fg="gray",
         bg="#1E052A",
         font=("Arial", 18)
     )
@@ -45,7 +45,7 @@ def create_login_window(connection, on_login_success, on_register):
     password_label = tk.Label(
         login_root,
         text="Password",
-        fg="white",
+        fg="gray",
         bg="#1E052A",
         font=("Arial", 18)
     )
@@ -94,7 +94,7 @@ def create_login_window(connection, on_login_success, on_register):
         login_root,
         text="Don't have an account? ",
         font=("Arial", 16),
-        fg="white",
+        fg="gray",
         bg="#1E052A"
     )
     register_label.pack(side="left", padx=(580, 0))
@@ -103,7 +103,7 @@ def create_login_window(connection, on_login_success, on_register):
         login_root,
         text="Register to WaveForm",
         font=("Arial", 16, "underline"),
-        fg="white",
+        fg="gray",
         bg="#1E052A",
         cursor="hand2"
     )

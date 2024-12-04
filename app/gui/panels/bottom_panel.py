@@ -24,7 +24,7 @@ def create_bottom_panel(main_frame, song_listbox):
 
     title_label = Label(
         bottom_frame_left,
-        fg="white",
+        fg="gray",
         bg='#1E052A',
         font=("Arial", 18, "bold"),
         anchor="w",
@@ -127,7 +127,7 @@ def create_bottom_panel(main_frame, song_listbox):
         bottom_center_bar,
         text="00:00",
         font=("Arial", 12),
-        fg='white',
+        fg='gray',
         bg='#1E052A',
         anchor="e",
         width=5
@@ -140,9 +140,9 @@ def create_bottom_panel(main_frame, song_listbox):
         to=100,
         orient=HORIZONTAL,
         length=500,
-        bg='#1E052A',
-        fg='white',
-        troughcolor='#3A0C60',
+        bg='#0f000f',
+        fg='gray',
+        troughcolor='#320532',
         sliderrelief="flat",
         sliderlength=15,
         highlightthickness=0,
@@ -170,7 +170,7 @@ def create_bottom_panel(main_frame, song_listbox):
         bottom_center_bar,
         text="-00:00",
         font=("Arial", 12),
-        fg='white',
+        fg='gray',
         bg='#1E052A',
         anchor="w",
         width=5
@@ -184,7 +184,7 @@ def create_bottom_panel(main_frame, song_listbox):
         bottom_frame_right,
         text="Volume: 100%",
         font=("Arial", 12),
-        fg='white',
+        fg='gray',
         bg='#1E052A',
         anchor="center"
     )
@@ -196,9 +196,9 @@ def create_bottom_panel(main_frame, song_listbox):
         to=100,
         orient=HORIZONTAL,
         length=200,
-        bg='#1E052A',
-        fg='white',
-        troughcolor='#3A0C60',
+        bg='#0f000f',
+        fg='gray',
+        troughcolor='#320532',
         sliderrelief="flat",
         sliderlength=15,
         highlightthickness=0,

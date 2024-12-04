@@ -18,9 +18,9 @@ def create_song_listbox(songlist_frame):
     song_listbox = Listbox(
         songlist_frame, 
         bg='#3C0F64', 
-        fg='white', 
+        fg='grey', 
         selectbackground='#9C27B0', 
-        selectforeground='white',
+        selectforeground='grey',
         font=("Arial", 14), 
         relief="flat"
     )

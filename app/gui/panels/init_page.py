@@ -28,7 +28,7 @@ def create_init_page(on_signup, on_signin):
         home_root,
         text="Welcome to WaveForm",
         font=("Arial", 40, "bold"),
-        fg="white",
+        fg="gray",
         bg="#1E052A"
     ).pack(pady=50)
 
@@ -56,7 +56,7 @@ def create_init_page(on_signup, on_signin):
         home_root,
         text="Or",
         font=("Arial", 18),
-        fg="white",
+        fg="gray",
         bg="#1E052A"
     ).pack(pady=10)
 

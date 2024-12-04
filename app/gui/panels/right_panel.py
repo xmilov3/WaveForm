@@ -41,28 +41,28 @@ def fetch_current_song_details(playlist_name):
 
 
 def create_right_panel(main_frame, playlist_name="Liked Songs"):
-    right_frame = Frame(main_frame, bg='#3A0C60')
+    right_frame = Frame(main_frame, bg='#2d0232')
     right_frame.grid(row=1, column=2, sticky='nsew', padx=1, pady=1)
 
-    now_playing_frame = Frame(right_frame, bg='#3A0C60')
+    now_playing_frame = Frame(right_frame, bg='#2d0232')
     now_playing_frame.grid(row=0, column=0, sticky='nsew', padx=0)
     now_playing_frame.place(relx=0.07, rely=0.26, anchor="w")
 
-    playlist_right_frame_label = Label(now_playing_frame, text='', font=("Arial", 28, "bold"), anchor="w", fg='white', bg='#3A0C60')
+    playlist_right_frame_label = Label(now_playing_frame, text='', font=("Arial", 28, "bold"), anchor="w", fg='gray', bg='#2d0232')
     playlist_right_frame_label.pack(fill="x")
 
-    album_art_label = Label(now_playing_frame, bg='#3A0C60')
+    album_art_label = Label(now_playing_frame, bg='#2d0232')
     album_art_label.pack(fill="both", expand=True)
 
-    title2_label = Label(now_playing_frame, fg="white", bg='#3A0C60', font=("Arial", 20, "bold"), anchor="w")
+    title2_label = Label(now_playing_frame, fg="gray", bg='#2d0232', font=("Arial", 20, "bold"), anchor="w")
     title2_label.pack(fill="x")
 
-    artist2_label = Label(now_playing_frame, fg="gray", bg='#3A0C60', font=("Arial", 16), anchor="w")
+    artist2_label = Label(now_playing_frame, fg="gray", bg='#2d0232', font=("Arial", 16), anchor="w")
     artist2_label.pack(fill="x")
 
     update_now_playing(now_playing_frame, playlist_right_frame_label, album_art_label, title2_label, artist2_label, playlist_name)
 
-    next_in_queue_frame = Frame(right_frame, bg='#3C0F64')
+    next_in_queue_frame = Frame(right_frame, bg='#2d0232')
     next_in_queue_frame.grid(row=1, column=0, sticky='nsew', padx=0)
 
     return right_frame
