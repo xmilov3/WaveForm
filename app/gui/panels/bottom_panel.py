@@ -2,16 +2,19 @@ from tkinter import Frame, Label, Scale, HORIZONTAL, ACTIVE, TOP
 from app.gui.widgets import create_play_pause_button, create_previous_button, create_next_button
 from app.func.music_controller import play_pause_song, next_song, previous_song, progress_bar, slide_music, stop_song, set_user_sliding, initialize_first_song, control_volume
 from app.func.config import *
+from app.func.music_controller import previous_song
+
 
 
 def create_bottom_panel(main_frame, song_listbox):
-    global is_playing, user_sliding, current_song_position, song_length, currentsong
+    global is_playing, user_sliding, current_song_position, song_length, currentsong, song_start_time
 
     is_playing = False
     user_sliding = False
     current_song_position = 0
     song_length = 0
     currentsong = None
+    song_start_time=0
 
     bottom_frame = Frame(main_frame, bg='#1E052A')
     bottom_frame.grid(row=2, column=0, columnspan=3, sticky='nsew', pady=1)
@@ -88,7 +91,6 @@ def create_bottom_panel(main_frame, song_listbox):
 
         is_playing = True
         current_song_position = 0
-        #play_pause_button.config(image=pause_button_img)
 
 
     def previous_command():
@@ -105,9 +107,9 @@ def create_bottom_panel(main_frame, song_listbox):
             time_remaining_label,
             progress_slider
         )
+
         is_playing = True
         current_song_position = 0
-        #play_pause_button.config(image=pause_button_img)
 
     previous_button = create_previous_button(bottom_frame_mid, lambda e=None: previous_command())
     play_pause_button = create_play_pause_button(bottom_frame_mid, play_command=lambda: play_pause_command(),
@@ -157,8 +159,10 @@ def create_bottom_panel(main_frame, song_listbox):
         progress_slider,
         play_pause_button,
         play_button_img,
-        pause_button_img
+        pause_button_img,
+        song_listbox.get(ACTIVE)
     ))
+
 
     progress_slider.grid(row=0, column=1, padx=10)
 

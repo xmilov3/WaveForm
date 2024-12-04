@@ -7,6 +7,3 @@ user_sliding = False
 was_sliding = False
 title_label = None
 artist_label = None
-
-
-default_cover_path = "/Users/bartek/Desktop/Politechnika/Praca inżynierska/WaveForm/gui/assets/pics/song_cover.png"

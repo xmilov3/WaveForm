@@ -38,3 +38,7 @@ def load_previous_button():
 def load_init_logo():
     init_logo = PhotoImage(file=get_full_path('../gui/assets/pics/text_logo.png'))
     return init_logo
+
+def load_default_song_cover():
+    default_song_cover = PhotoImage(file=get_full_path('../gui/assets/covers/song_covers/song_cover.png'))
+    return default_song_cover
