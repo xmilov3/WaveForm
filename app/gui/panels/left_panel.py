@@ -4,7 +4,7 @@ from app.func.config import *
 
 def create_left_panel(parent):
     left_frame = Frame(parent, bg='#2d0232')
-    left_frame.grid(row=1, column=0, sticky='nsew', padx=1, pady=1)
+    left_frame.grid(row=1, column=0, sticky='nsew', padx=1, pady=0)
 
     search_frame = Frame(left_frame, bg='#2d0232')
     search_frame.grid(row=0, column=0, sticky='nsew')

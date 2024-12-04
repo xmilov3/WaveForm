@@ -42,7 +42,7 @@ def fetch_current_song_details(playlist_name):
 
 def create_right_panel(main_frame, playlist_name="Liked Songs"):
     right_frame = Frame(main_frame, bg='#2d0232')
-    right_frame.grid(row=1, column=2, sticky='nsew', padx=1, pady=1)
+    right_frame.grid(row=1, column=2, sticky='nsew', padx=1, pady=0)
 
     now_playing_frame = Frame(right_frame, bg='#2d0232')
     now_playing_frame.grid(row=0, column=0, sticky='nsew', padx=0)

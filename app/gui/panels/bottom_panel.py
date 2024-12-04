@@ -202,6 +202,7 @@ def create_bottom_panel(main_frame, song_listbox):
         sliderrelief="flat",
         sliderlength=15,
         highlightthickness=0,
+        borderwidth=0,
         showvalue=False,
         command=lambda value: control_volume(value, volume_label)
     )

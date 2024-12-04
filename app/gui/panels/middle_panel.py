@@ -139,7 +139,7 @@ def create_middle_panel(parent):
     songlist_frame.grid(row=1, column=0, sticky='nsew', padx=0, pady=0)
 
     song_listbox = Listbox(songlist_frame, bg='#2d0232', font=("Arial", 18), selectbackground="#2d0232", borderwidth=0, highlightthickness=0)
-    song_listbox.pack(fill=BOTH, expand=True)
+    song_listbox.pack(fill=BOTH, expand=True, pady=5)
 
     update_header(header_label, header_image_label, user_label, song_count_label, "liked Songs")
     update_song_listbox(song_listbox, "Liked Songs")
