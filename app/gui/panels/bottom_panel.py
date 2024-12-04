@@ -16,16 +16,16 @@ def create_bottom_panel(main_frame, song_listbox):
     currentsong = None
     song_start_time=0
 
-    bottom_frame = Frame(main_frame, bg='#1E052A')
+    bottom_frame = Frame(main_frame, bg='#150016')
     bottom_frame.grid(row=2, column=0, columnspan=3, sticky='nsew', pady=1)
 
-    bottom_frame_left = Frame(bottom_frame, bg='#1E052A')
+    bottom_frame_left = Frame(bottom_frame, bg='#150016')
     bottom_frame_left.grid(row=0, column=0, sticky='w', padx=10)
 
     title_label = Label(
         bottom_frame_left,
         fg="gray",
-        bg='#1E052A',
+        bg='#150016',
         font=("Arial", 18, "bold"),
         anchor="w",
         width=30
@@ -35,14 +35,14 @@ def create_bottom_panel(main_frame, song_listbox):
     artist_label = Label(
         bottom_frame_left,
         fg="gray",
-        bg='#1E052A',
+        bg='#150016',
         font=("Arial", 14),
         anchor="w",
         width=30
     )
     artist_label.pack(side=TOP, anchor="w", padx=5, pady=2)
 
-    bottom_frame_mid = Frame(bottom_frame, bg='#1E052A')
+    bottom_frame_mid = Frame(bottom_frame, bg='#150016')
     bottom_frame_mid.grid(row=0, column=1, sticky='nsew')
 
     try:
@@ -120,7 +120,7 @@ def create_bottom_panel(main_frame, song_listbox):
     play_pause_button.grid(row=0, column=1, padx=10, pady=5)
     next_button.grid(row=0, column=2, padx=10, pady=5, sticky="w")
 
-    bottom_center_bar = Frame(bottom_frame_mid, bg='#1E052A')
+    bottom_center_bar = Frame(bottom_frame_mid, bg='#150016')
     bottom_center_bar.grid(row=1, column=0, columnspan=3, sticky='nsew', pady=10)
 
     time_elapsed_label = Label(
@@ -128,7 +128,7 @@ def create_bottom_panel(main_frame, song_listbox):
         text="00:00",
         font=("Arial", 12),
         fg='gray',
-        bg='#1E052A',
+        bg='#150016',
         anchor="e",
         width=5
     )
@@ -140,7 +140,7 @@ def create_bottom_panel(main_frame, song_listbox):
         to=100,
         orient=HORIZONTAL,
         length=500,
-        bg='#0f000f',
+        bg='#845162',
         fg='gray',
         troughcolor='#320532',
         sliderrelief="flat",
@@ -171,13 +171,13 @@ def create_bottom_panel(main_frame, song_listbox):
         text="-00:00",
         font=("Arial", 12),
         fg='gray',
-        bg='#1E052A',
+        bg='#150016',
         anchor="w",
         width=5
     )
     time_remaining_label.grid(row=0, column=2, padx=5)
 
-    bottom_frame_right = Frame(bottom_frame, bg='#1E052A')
+    bottom_frame_right = Frame(bottom_frame, bg='#150016')
     bottom_frame_right.grid(row=0, column=2, sticky='nsew', padx=10)
 
     volume_label = Label(
@@ -185,7 +185,7 @@ def create_bottom_panel(main_frame, song_listbox):
         text="Volume: 100%",
         font=("Arial", 12),
         fg='gray',
-        bg='#1E052A',
+        bg='#150016',
         anchor="center"
     )
     volume_label.grid(row=0, column=0, pady=10)
@@ -196,7 +196,7 @@ def create_bottom_panel(main_frame, song_listbox):
         to=100,
         orient=HORIZONTAL,
         length=200,
-        bg='#0f000f',
+        bg='#845162',
         fg='gray',
         troughcolor='#320532',
         sliderrelief="flat",

@@ -1,31 +1,110 @@
 from tkinter import *
 from app.func.config import *
+from PIL import Image, ImageTk
 
 
 def create_left_panel(parent):
-    left_frame = Frame(parent, bg='#2d0232')
-    left_frame.grid(row=1, column=0, sticky='nsew', padx=1, pady=0)
+    left_frame = Frame(parent, bg='#1E052A', borderwidth=0, highlightbackground='#845162', highlightthickness=0)
+    left_frame.grid(row=1, column=0, sticky='nsew', padx=0, pady=0)
 
-    search_frame = Frame(left_frame, bg='#2d0232')
-    search_frame.grid(row=0, column=0, sticky='nsew')
+    buttons_frame = Frame(left_frame, bg='#2d0232', borderwidth=0, highlightbackground='#845162', highlightthickness=2)
+    buttons_frame.grid(row=0, column=0, sticky='ew', padx=10, pady=10)
 
-    search_type_frame = Frame(search_frame, bg='#2d0232')
-    search_type_frame.grid(row=0, column=0, sticky='nsew')
-    Label(search_type_frame, text="Search", font=("Arial", 14), fg='gray', bg='#2d0232')
-    search_entry = Entry(search_type_frame, font=("Arial", 12), width=30)
-    search_entry.pack(side=LEFT, padx=5, pady=5, fill="x", expand=True)
+    add_song_button = Button(
+        buttons_frame,
+        text="Add Song",
+        font=("Arial", 12),
+        fg='#845162',  
+        bg='#50184A',  
+        activebackground='#845162',  
+        activeforeground='#845162',  
+        borderwidth=0,
+        highlightbackground='#845162',
+        highlightthickness=1,
+        padx=10,
+        pady=5
+    )
+    add_song_button.pack(fill="x", padx=10, pady=5)
+    create_playlist_button = Button(
+        buttons_frame,
+        text="Create Playlist",
+        font=("Arial", 12),
+        fg='#845162',
+        bg='#50184A',
+        activebackground='#845162',
+        activeforeground='#845162',
+        borderwidth=0,
+        highlightbackground='#845162',
+        highlightthickness=1,
+        padx=10,
+        pady=5
+    )
+    create_playlist_button.pack(fill="x", padx=10, pady=5)
 
-    search_buttons_frame = Frame(search_frame, bg='#2d0232')
-    search_buttons_frame.grid(row=1, column=0, sticky='nsew')
-    Label(search_buttons_frame, text="Buttons_to_search", font=("Arial", 14), fg='gray', bg='#2d0232').pack()
+    analyze_song_button = Button(
+        buttons_frame,
+        text="Analyze Song",
+        font=("Arial", 12),
+        fg='#845162',
+        bg='#50184A',
+        activebackground='#845162',
+        activeforeground='#845162',
+        borderwidth=0,
+        highlightbackground='#845162',
+        highlightthickness=1,
+        padx=10,
+        pady=5
+    )
+    analyze_song_button.pack(fill="x", padx=10, pady=5)
 
-    pinned_playlist_frame = Frame(left_frame, bg='#2d0232')
-    pinned_playlist_frame.grid(row=1, column=0, sticky='nsew')
+    playlist_frame = Frame(left_frame, bg='#2d0232', borderwidth=0, highlightbackground='#845162', highlightthickness=2)
+    playlist_frame.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
 
-    Label(pinned_playlist_frame, text="Playlists", font=("Arial", 14), fg='gray', bg='#2d0232').pack()
-    playlist1 = Button(pinned_playlist_frame, text="Liked songs", width=20, height=2, fg='black', bg='red')
-    playlist1.pack(pady=5)
-    playlist2 = Button(pinned_playlist_frame, text="UK Dubstep", width=20, height=2, fg='black', bg='black')
-    playlist2.pack(pady=5)
+    playlist_label = Label(
+        playlist_frame,
+        text="Playlists",
+        font=("Arial", 14, "bold"),
+        fg='#845162',
+        bg='#2d0232',
+        borderwidth=0,
+        anchor="w"
+    )
+    playlist_label.pack(fill="x", padx=10, pady=10)
+
+    playlist1 = Button(
+        playlist_frame,
+        text="Liked Songs",
+        font=("Arial", 12),
+        fg='#845162',
+        bg='#50184A',
+        activebackground='#845162',
+        activeforeground='#845162',
+        borderwidth=0,
+        highlightbackground='#845162',
+        highlightthickness=1,
+        padx=10,
+        pady=5
+    )
+    playlist1.pack(fill="x", padx=10, pady=5)
+
+    playlist2 = Button(
+        playlist_frame,
+        text="UK Dubstep",
+        font=("Arial", 12),
+        fg='#845162',
+        bg='#50184A',
+        activebackground='#845162',
+        activeforeground='#845162',
+        borderwidth=0,
+        highlightbackground='#845162',
+        highlightthickness=1,
+        padx=10,
+        pady=5
+    )
+    playlist2.pack(fill="x", padx=10, pady=5)
+
+    left_frame.grid_rowconfigure(0, weight=1)  
+    left_frame.grid_rowconfigure(1, weight=2) 
+    left_frame.grid_columnconfigure(0, weight=1)
 
     return left_frame

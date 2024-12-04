@@ -1,5 +1,6 @@
 import os
 from tkinter import PhotoImage
+from PIL import Image, ImageTk
 
 def get_full_path(relative_path):
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -9,9 +10,17 @@ def load_logo():
     img = PhotoImage(file=get_full_path('../gui/assets/pics/Logo.png'))
     return img
 
-def load_top_logo():
-    logo_top = PhotoImage(file=get_full_path('../gui/assets/pics/TopLogo.png'))
-    return logo_top
+def load_top_logo(size=(100,100)):
+    full_path = get_full_path('../gui/assets/pics/TopLogo.png')
+    l_top = Image.open(full_path)  
+    l_top = l_top.resize(size, Image.LANCZOS)  
+    return ImageTk.PhotoImage(l_top)  
+
+def load_text(size=(200, 200)):
+    full_path = get_full_path('../gui/assets/pics/waveform.png')  
+    img = Image.open(full_path)  
+    img = img.resize(size, Image.LANCZOS)  
+    return ImageTk.PhotoImage(img)  
 
 def load_default_cover():
     default_cover = PhotoImage(file=get_full_path('../gui/assets/pics/song_cover.png'))
