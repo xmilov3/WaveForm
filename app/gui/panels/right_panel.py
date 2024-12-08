@@ -1,4 +1,4 @@
-from tkinter import Frame, Label, Listbox
+from tkinter import Frame, Label
 from PIL import Image, ImageTk
 from app.func.config import *
 import mysql.connector
@@ -79,13 +79,13 @@ def fetch_next_in_queue(playlist_name):
 
 def create_right_panel(parent, playlist_name="Liked Songs"):
     right_frame = Frame(parent, bg='#1E052A', borderwidth=0, highlightbackground='#845162', highlightthickness=0)
-    right_frame.grid(row=1, column=2, sticky='nsew', padx=0, pady=0)  # Matching padding for consistency
+    right_frame.grid(row=1, column=2, sticky='nsew', padx=0, pady=0)
 
     parent.grid_rowconfigure(1, weight=1)
     parent.grid_columnconfigure(2, weight=4)
 
     now_playing_frame = Frame(right_frame, bg='#2d0232', borderwidth=0, highlightbackground='#845162', highlightthickness=2)
-    now_playing_frame.grid(row=0, column=0, sticky='ew', padx=10, pady=(30, 30))  # Consistent top padding with space below
+    now_playing_frame.grid(row=0, column=0, sticky='ew', padx=10, pady=(30, 30))
 
     playlist_label = Label(
         now_playing_frame,
@@ -124,7 +124,7 @@ def create_right_panel(parent, playlist_name="Liked Songs"):
     artist_label.pack(fill="x", padx=10, pady=(0, 10))
 
     next_in_queue_frame = Frame(right_frame, bg='#2d0232', borderwidth=0, highlightbackground='#845162', highlightthickness=2)
-    next_in_queue_frame.grid(row=1, column=0, sticky='nsew', padx=10, pady=(0, 60))  # Space above and consistent bottom padding
+    next_in_queue_frame.grid(row=1, column=0, sticky='nsew', padx=10, pady=(0, 60))
 
     queue_label = Label(
         next_in_queue_frame,
@@ -136,17 +136,16 @@ def create_right_panel(parent, playlist_name="Liked Songs"):
     )
     queue_label.pack(fill="both", expand=True, padx=10, pady=(0, 40))
 
-    queue_listbox = Listbox(
+    queue_text_label = Label(
         next_in_queue_frame,
+        text="",
         bg='#2d0232',
-        font=("Arial", 16),
-        selectbackground="#50184A",
-        selectforeground="white",
-        borderwidth=0,
-        highlightthickness=0,
-        fg="white"
+        fg="white",
+        font=("Arial", 12),
+        justify="left",
+        anchor="nw"
     )
-    queue_listbox.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+    queue_text_label.pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
     update_now_playing(
         playlist_label=playlist_label,
@@ -156,17 +155,13 @@ def create_right_panel(parent, playlist_name="Liked Songs"):
         playlist_name=playlist_name
     )
 
-    update_next_in_queue(queue_listbox, playlist_name)
+    update_next_in_queue(queue_text_label, playlist_name)
 
     right_frame.grid_rowconfigure(0, weight=4)
     right_frame.grid_rowconfigure(1, weight=8)
     right_frame.grid_columnconfigure(0, weight=1)
 
-    return right_frame
-
-
-
-
+    return right_frame, queue_text_label
 
 
 def update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name):
@@ -200,14 +195,13 @@ def update_now_playing(playlist_label, album_art_label, title_label, artist_labe
         album_art_label.config(image='', text="No Cover")
 
 
-def update_next_in_queue(queue_listbox, playlist_name):
+def update_next_in_queue(queue_text_label, playlist_name):
     print(f"Updating next in queue for playlist: {playlist_name}")
     next_songs = fetch_next_in_queue(playlist_name)
 
-    queue_listbox.delete(0, 'end')
     if next_songs:
-        for song in next_songs:
-            title, artist = song
-            queue_listbox.insert('end', f"{title} - {artist}")
+        queue_text = "\n".join([f"{title} - {artist}" for title, artist in next_songs])
     else:
-        queue_listbox.insert('end', "No songs in queue.")
+        queue_text = "No songs in queue."
+
+    queue_text_label.config(text=queue_text)

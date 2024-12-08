@@ -463,9 +463,6 @@ def slide_music(value, time_elapsed_label, time_remaining_label, bottom_frame, p
 
 
 
-
-
-
 def set_user_sliding(value):
     global user_sliding, current_song_position, song_start_time
     print(f"set_user_sliding: {user_sliding} -> {value}")
