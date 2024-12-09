@@ -37,19 +37,21 @@ def create_app_window():
     top_frame = create_top_panel(main_frame)
     left_frame = create_left_panel(main_frame)
     middle_frame, song_listbox = create_middle_panel(main_frame)
-    right_frame = create_right_panel(main_frame)
+    right_frame, queue_text_label, playlist_label, album_art_label, title_label, artist_label = create_right_panel(main_frame, playlist_name="Liked Songs")
+
     
-    (
-        bottom_frame,
-        time_remaining_label,
-        time_elapsed_label,
-        progress_slider,
+    playlist_name = "Liked Songs" 
+
+    bottom_frame, time_remaining_label, time_elapsed_label, progress_slider, title_label, artist_label, play_pause_button, play_button_img, pause_button_img = create_bottom_panel(
+        main_frame,
+        song_listbox,
+        queue_text_label,
+        playlist_name, 
+        playlist_label,
+        album_art_label,
         title_label,
-        artist_label,
-        play_pause_button,
-        play_button_img,
-        pause_button_img,
-    ) = create_bottom_panel(main_frame, song_listbox)
+        artist_label
+    )
 
     initialize_first_song(
         song_listbox, 

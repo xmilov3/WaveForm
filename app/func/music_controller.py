@@ -11,6 +11,7 @@ from app.func.config import *
 pygame.mixer.init(channels=2)
 import mysql.connector
 from pydub import AudioSegment
+from app.gui.panels.right_panel import update_next_in_queue, update_now_playing
 
 
 
@@ -203,7 +204,9 @@ def stop_song(play_button, play_button_img):
     sync_is_playing()
 
 
-def next_song(song_listbox, play_pause_button, play_button_img, pause_button_img, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
+def next_song(song_listbox, play_pause_button, play_button_img, pause_button_img, 
+              title_label, artist_label, time_elapsed_label, time_remaining_label, 
+              progress_slider, queue_text_label, playlist_name, playlist_label, album_art_label):
     global currentsong, is_playing, current_song_position, song_length, song_start_time
 
     if song_listbox.size() == 0:
@@ -222,6 +225,9 @@ def next_song(song_listbox, play_pause_button, play_button_img, pause_button_img
 
     currentsong = song_listbox.get(next_index)
     song_title, artist_name = currentsong.split(" - ")
+
+    update_next_in_queue(queue_text_label, playlist_name)
+    update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
     try:
         connection = mysql.connector.connect(
@@ -291,7 +297,9 @@ def next_song(song_listbox, play_pause_button, play_button_img, pause_button_img
 
 
 
-def previous_song(song_listbox, play_pause_button, play_button_img, pause_button_img, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
+def previous_song(song_listbox, play_pause_button, play_button_img, pause_button_img, 
+                  title_label, artist_label, time_elapsed_label, time_remaining_label, 
+                  progress_slider, queue_text_label, playlist_name, playlist_label, album_art_label):   
     global currentsong, is_playing, current_song_position, song_length, song_start_time
 
     if song_listbox.size() == 0:
@@ -310,6 +318,9 @@ def previous_song(song_listbox, play_pause_button, play_button_img, pause_button
 
     currentsong = song_listbox.get(previous_index)
     song_title, artist_name = currentsong.split(" - ")
+
+    update_next_in_queue(queue_text_label, playlist_name)
+    update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
     try:
         connection = mysql.connector.connect(

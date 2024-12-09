@@ -161,8 +161,7 @@ def create_right_panel(parent, playlist_name="Liked Songs"):
     right_frame.grid_rowconfigure(1, weight=8)
     right_frame.grid_columnconfigure(0, weight=1)
 
-    return right_frame, queue_text_label
-
+    return right_frame, queue_text_label, playlist_label, album_art_label, title_label, artist_label
 
 def update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name):
     print(f"Updating now playing for playlist: {playlist_name}")

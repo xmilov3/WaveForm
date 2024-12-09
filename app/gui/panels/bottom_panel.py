@@ -1,13 +1,15 @@
 from tkinter import Frame, Label, Scale, HORIZONTAL, ACTIVE, TOP
 from app.gui.widgets import create_play_pause_button, create_previous_button, create_next_button
-from app.func.music_controller import play_pause_song, next_song, previous_song, progress_bar, slide_music, stop_song, set_user_sliding, initialize_first_song, control_volume
 from app.func.config import *
-from app.func.music_controller import previous_song
+from app.func.music_controller import (
+    play_pause_song, next_song, previous_song, progress_bar, slide_music, 
+    stop_song, set_user_sliding, initialize_first_song, control_volume, 
+    update_next_in_queue, update_now_playing
+)
 
-
-
-def create_bottom_panel(main_frame, song_listbox):
+def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_name, playlist_label, album_art_label, title_label, artist_label):
     global is_playing, user_sliding, current_song_position, song_length, currentsong, song_start_time
+
 
     is_playing = False
     user_sliding = False
@@ -86,11 +88,18 @@ def create_bottom_panel(main_frame, song_listbox):
             artist_label,
             time_elapsed_label,
             time_remaining_label,
-            progress_slider
+            progress_slider,
+            queue_text_label,
+            playlist_name,
+            playlist_label,
+            album_art_label
         )
 
         is_playing = True
         current_song_position = 0
+
+    update_next_in_queue(queue_text_label, playlist_name)
+    update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
 
     def previous_command():
@@ -105,11 +114,18 @@ def create_bottom_panel(main_frame, song_listbox):
             artist_label,
             time_elapsed_label,
             time_remaining_label,
-            progress_slider
+            progress_slider,
+            queue_text_label,
+            playlist_name,
+            playlist_label,
+            album_art_label
         )
 
         is_playing = True
         current_song_position = 0
+
+    update_next_in_queue(queue_text_label, playlist_name)
+    update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
     previous_button = create_previous_button(bottom_frame_mid, lambda e=None: previous_command())
     play_pause_button = create_play_pause_button(bottom_frame_mid, play_command=lambda: play_pause_command(),

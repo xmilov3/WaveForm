@@ -119,8 +119,6 @@ def update_song_listbox(song_listbox, playlist_name):
 
 
 def create_gradient_frame(frame, start_color, end_color, steps=100):
-    """
-    """
     r1, g1, b1 = tuple(int(start_color[i:i+2], 16) for i in (1, 3, 5))
     r2, g2, b2 = tuple(int(end_color[i:i+2], 16) for i in (1, 3, 5))
 
