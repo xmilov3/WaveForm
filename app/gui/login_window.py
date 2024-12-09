@@ -103,7 +103,7 @@ def create_login_window(connection, on_login_success, on_register):
         login_root,
         text="Register to WaveForm",
         font=("Arial", 16, "underline"),
-        fg="gray",
+        fg="#9C27B0",
         bg="#1E052A",
         cursor="hand2"
     )
