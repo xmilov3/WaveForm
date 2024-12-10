@@ -440,7 +440,7 @@ def progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bott
     global current_song_position, song_length, is_playing, user_sliding, song_start_time
 
     if is_playing and not user_sliding:
-        current_time_ms = pygame.mixer.music.get_pos() 
+        current_time_ms = pygame.mixer.music.get_pos()
         if current_time_ms != -1:
             current_song_position = current_time_ms / 1000.0 + song_start_time
 
@@ -450,13 +450,15 @@ def progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bott
             time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(remaining_time)))
             progress_slider.set((current_song_position / song_length) * 100)
 
-    bottom_frame.after(100, lambda: progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_frame))
-
+    bottom_frame.after(500, lambda: progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_frame))
 
 def slide_music(value, time_elapsed_label, time_remaining_label, bottom_frame, progress_slider, play_pause_button, play_button_img, pause_button_img, currentsong):
     global user_sliding, current_song_position, is_playing, song_length, song_start_time
 
+    user_sliding = True
+
     new_time = (float(value) / 100) * song_length
+    song_start_time = new_time
     current_song_position = new_time
 
     if is_playing:
@@ -469,7 +471,7 @@ def slide_music(value, time_elapsed_label, time_remaining_label, bottom_frame, p
     time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(song_length - new_time)))
     progress_slider.set((new_time / song_length) * 100)
 
-    bottom_frame.after(100, lambda: set_user_sliding(False))
+    bottom_frame.after(500, lambda: set_user_sliding(False))
 
 
 
