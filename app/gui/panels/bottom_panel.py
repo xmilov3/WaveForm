@@ -7,7 +7,9 @@ from app.func.music_controller import (
     update_next_in_queue, update_now_playing
 )
 
-def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_name, playlist_label, album_art_label, title_label, artist_label):
+def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_name, 
+                        playlist_label, album_art_label, title_label, artist_label,
+                        update_next_queue, update_now_playing):
     global is_playing, user_sliding, current_song_position, song_length, currentsong, song_start_time
 
 
@@ -79,6 +81,8 @@ def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_nam
     def next_command():
         global is_playing, current_song_position
 
+        print(f"Next command triggered")
+
         next_song(
             song_listbox,
             play_pause_button,
@@ -94,9 +98,9 @@ def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_nam
             playlist_label,
             album_art_label
         )
-
         is_playing = True
         current_song_position = 0
+        
 
     update_next_in_queue(queue_text_label, playlist_name)
     update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)

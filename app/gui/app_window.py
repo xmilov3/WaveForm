@@ -7,7 +7,7 @@ from app.func.load_pic_gui import load_top_logo, load_default_cover
 from app.gui.panels.top_panel import create_top_panel
 from app.gui.panels.left_panel import create_left_panel
 from app.gui.panels.middle_panel import create_middle_panel
-from app.gui.panels.right_panel import create_right_panel
+from app.gui.panels.right_panel import create_right_panel, update_next_in_queue, update_now_playing
 from app.gui.panels.bottom_panel import create_bottom_panel
 from app.func.music_controller import play_pause_song, stop_song, next_song, previous_song, initialize_first_song
 from app.func.config import *
@@ -37,20 +37,22 @@ def create_app_window():
     top_frame = create_top_panel(main_frame)
     left_frame = create_left_panel(main_frame)
     middle_frame, song_listbox = create_middle_panel(main_frame)
-    right_frame, queue_text_label, playlist_label, album_art_label, title_label, artist_label = create_right_panel(main_frame, playlist_name="Liked Songs")
+    right_frame, queue_text_label, playlist_label, album_art_label, title_label, artist_label = create_right_panel(
+        main_frame, playlist_name="Liked Songs")
 
     
-    playlist_name = "Liked Songs" 
 
     bottom_frame, time_remaining_label, time_elapsed_label, progress_slider, title_label, artist_label, play_pause_button, play_button_img, pause_button_img = create_bottom_panel(
-        main_frame,
-        song_listbox,
-        queue_text_label,
-        playlist_name, 
-        playlist_label,
-        album_art_label,
-        title_label,
-        artist_label
+        main_frame, 
+        song_listbox, 
+        queue_text_label, 
+        "Liked Songs",
+        playlist_label, 
+        album_art_label, 
+        title_label, 
+        artist_label, 
+        update_next_in_queue, 
+        update_now_playing
     )
 
     initialize_first_song(
