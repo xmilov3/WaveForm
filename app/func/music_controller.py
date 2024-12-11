@@ -437,7 +437,7 @@ def control_volume(value, volume_label):
     
 
 def progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_frame):
-    global current_song_position, song_length, is_playing, user_sliding, song_start_time
+    global current_song_position, song_length, is_playing, user_sliding
 
     if is_playing and not user_sliding:
         current_time_ms = pygame.mixer.music.get_pos()
@@ -453,25 +453,30 @@ def progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bott
     bottom_frame.after(500, lambda: progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_frame))
 
 def slide_music(value, time_elapsed_label, time_remaining_label, bottom_frame, progress_slider, play_pause_button, play_button_img, pause_button_img, currentsong):
-    global user_sliding, current_song_position, is_playing, song_length, song_start_time
+    global user_sliding, current_song_position, is_playing, song_length
 
     user_sliding = True
 
     new_time = (float(value) / 100) * song_length
-    song_start_time = new_time
     current_song_position = new_time
 
     if is_playing:
-        pygame.mixer.music.set_pos(new_time)
+        pygame.mixer.music.stop()
+        # pygame.mixer.music.set_pos(new_time)
+        pygame.mixer.music.play(start=new_time)
         print(f"Music jumped to position: {new_time:.2f} seconds")
     else:
-        print(f"Paused music moved to position: {new_time:.2f} seconds")
+        pygame.mixer.music.stop()
+        # pygame.mixer.music.load(currentsong)
+        pygame.mixer.music.play(start=new_time)
+        pygame.mixer.music.pause()
+        print("Music position updated and paused")
 
     time_elapsed_label.config(text=time.strftime("%M:%S", time.gmtime(new_time)))
     time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(song_length - new_time)))
     progress_slider.set((new_time / song_length) * 100)
 
-    bottom_frame.after(500, lambda: set_user_sliding(False))
+    bottom_frame.after(100, lambda: set_user_sliding(False))
 
 
 
