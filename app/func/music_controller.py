@@ -472,7 +472,6 @@ def slide_music(value, time_elapsed_label, time_remaining_label, bottom_frame, p
         pygame.mixer.music.pause()
         print("Music position updated and paused")
 
-    time_elapsed_label.config(text=time.strftime("%M:%S", time.gmtime(new_time)))
     time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(song_length - new_time)))
     progress_slider.set((new_time / song_length) * 100)
 
