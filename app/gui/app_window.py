@@ -14,6 +14,8 @@ from app.func.config import *
 from app.gui.assets.pics import *
 from app.gui.assets.buttons import *
 
+
+
 pygame.mixer.init(channels=2)
 pygame.mixer.music.stop() 
 

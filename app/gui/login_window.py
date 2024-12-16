@@ -1,13 +1,16 @@
 import tkinter as tk
 from tkinter import messagebox
-from app.func.load_pic_gui import load_init_logo
+from app.func.load_pic_gui import *
 from app.func.authentication import authenticate_user
+from app.func.config import *
+
 
 def create_login_window(connection, on_login_success, on_register):
     login_root = tk.Tk()
     login_root.title("WaveForm")
     login_root.geometry("1500x1000")
     login_root.configure(bg="#1E052A")
+    login_root.iconphoto(False, load_top_logo())
 
     tk.Label(
         login_root,
@@ -25,6 +28,7 @@ def create_login_window(connection, on_login_success, on_register):
     )
     logo_label.image = init_logo
     logo_label.pack()
+
 
 
     username_label = tk.Label(
@@ -66,7 +70,7 @@ def create_login_window(connection, on_login_success, on_register):
             login_root.destroy()  
             on_login_success() 
         else:
-            messagebox.showerror("Login Failed", "Invalid credentials. Please try again.")
+            messagebox.showinfo("Login Failed", "Invalid credentials. Please try again.")
 
     login_button = tk.Button(
         login_root,

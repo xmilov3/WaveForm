@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from app.func.load_pic_gui import *
 from datetime import date
 from app.func.authentication import register_user
 
@@ -8,6 +9,7 @@ def create_register_window(connection, on_register_success):
     register_root.title("WaveForm")
     register_root.geometry("1500x1000")
     register_root.configure(bg="#1E052A")
+    register_root.iconphoto(False, load_top_logo())
 
     tk.Label(
         register_root,
