@@ -1,6 +1,7 @@
 from tkinter import *
 from app.func.config import *
 from PIL import Image, ImageTk
+from app.func.add_song import add_song
 
 
 def create_left_panel(parent):
@@ -14,6 +15,7 @@ def create_left_panel(parent):
         buttons_frame,
         text="Add Song",
         font=("Arial", 12),
+        command=lambda: add_song(),
         fg='#845162',  
         bg='#50184A',  
         activebackground='#845162',  
@@ -25,6 +27,7 @@ def create_left_panel(parent):
         pady=5
     )
     add_song_button.pack(fill="x", padx=10, pady=5)
+    
     create_playlist_button = Button(
         buttons_frame,
         text="Create Playlist",
@@ -71,6 +74,22 @@ def create_left_panel(parent):
     )
     playlist_label.pack(fill="x", padx=10, pady=10)
 
+    local_songs = Button(
+        playlist_frame,
+        text="Local Songs",
+        font=("Arial", 12),
+        fg='#845162',
+        bg='#50184A',
+        activebackground='#845162',
+        activeforeground='#845162',
+        borderwidth=0,
+        highlightbackground='#845162',
+        highlightthickness=1,
+        padx=10,
+        pady=5
+    )
+    local_songs.pack(fill="x", padx=10, pady=5)
+
     playlist1 = Button(
         playlist_frame,
         text="Liked Songs",
@@ -86,6 +105,7 @@ def create_left_panel(parent):
         pady=5
     )
     playlist1.pack(fill="x", padx=10, pady=5)
+    
 
     playlist2 = Button(
         playlist_frame,
