@@ -5,27 +5,17 @@ from app.db.database import create_connection
 from app.gui.panels.register_window import create_register_window
 from app.gui.panels.init_page import create_init_page
 from app.gui.login_window import create_login_window
-from app.func.config import *
-from app.gui.assets.pics import *
-from app.func.session import user_session
-from app.func.playlist_handler import create_playlist
-from app.db.db_operations import insert_song
 
 def main():
+    
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
+    
     connection = create_connection()
     if not connection:
         print("Error! Unable to connect to database")
         return
 
-    def on_login_success(user_data):
-        user_id, username = user_data
-        user_session.set_user(user_id, username)
-        print(f"Session started for user: {username} (ID: {user_id})")
-
-
-
+    def on_login_success():
         root = create_app_window()
         root.mainloop()
 
@@ -34,11 +24,29 @@ def main():
 
     def on_register():
         create_register_window(connection, on_login)
+        
+    def auto_login():
+        username = "xmilov3"
+        password_hash = "admin"
+        
+        cursor = connection.cursor()
+        query = "SELECT * FROM users WHERE username = %s AND password_hash = %s"
+        cursor.execute(query, (username, password_hash))
+        user = cursor.fetchone()
+        
+        if user:
+            print("Auto-login successful")
+            on_login_success()
+            return True
+        else:
+            print("Auto-login failed. Invalid credentials.")
+            return False
 
-    create_init_page(
-        on_signup=on_register,
-        on_signin=on_login
-    )
+    if not auto_login():
+        create_init_page(
+            on_signup=on_register,
+            on_signin=on_login
+        )
 
 if __name__ == "__main__":
     main()

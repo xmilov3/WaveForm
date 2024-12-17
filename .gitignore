@@ -17,3 +17,6 @@ app/func/__pycache__/session.cpython-312.pyc
 app/gui/__pycache__/app_window.cpython-312.pyc
 app/gui/panels/__pycache__/right_panel.cpython-312.pyc
 app/gui/panels/__pycache__/right_panel.cpython-312.pyc
+app/gui/panels/__pycache__/left_panel.cpython-312.pyc
+app/gui/__pycache__/login_window.cpython-312.pyc
+app/func/__pycache__/add_playlist.cpython-312.pyc

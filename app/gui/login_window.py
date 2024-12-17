@@ -29,8 +29,6 @@ def create_login_window(connection, on_login_success, on_register):
     logo_label.image = init_logo
     logo_label.pack()
 
-
-
     username_label = tk.Label(
         login_root,
         text="Username",
@@ -65,12 +63,26 @@ def create_login_window(connection, on_login_success, on_register):
     def handle_login():
         username = username_entry.get()
         password = password_entry.get()
-        
-        if authenticate_user(connection, username, password):  
-            login_root.destroy()  
-            on_login_success() 
-        else:
-            messagebox.showinfo("Login Failed", "Invalid credentials. Please try again.")
+
+        try:
+            cursor = connection.cursor()
+            query = "SELECT user_id, email FROM users WHERE username = %s AND password_hash = %s"
+            cursor.execute(query, (username, password))
+            user_data = cursor.fetchone()
+
+            if user_data:
+                print("Login successful!")
+                login_root.destroy()
+                on_login_success(user_data)
+            else:
+                print("Invalid login credentials.")
+                messagebox.showerror("Login Failed", "Invalid email or password.")
+        except Exception as e:
+            print(f"Error during login: {e}")
+            messagebox.showerror("Error", f"An error occurred: {e}")
+        finally:
+            if cursor:
+                cursor.close()
 
     login_button = tk.Button(
         login_root,

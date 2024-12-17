@@ -4,6 +4,7 @@ from app.func.add_song import add_song
 from app.func.utils import fetch_playlists
 from app.db.db_operations import insert_song
 from app.func.playlist_handler import create_playlist
+from app.func.add_playlist import create_playlist_prompt
 
 def create_left_panel(parent):
     left_frame = Frame(parent, bg='#1E052A', borderwidth=0, highlightbackground='#845162', highlightthickness=0)
@@ -44,7 +45,7 @@ def create_left_panel(parent):
         buttons_frame,
         text="Create Playlist",
         font=("Arial", 12),
-        # command=lambda: add_playlist_prompt(),
+        command=lambda: create_playlist_prompt(),
         fg='#845162',
         bg='#50184A',
         activebackground='#845162',
@@ -59,7 +60,7 @@ def create_left_panel(parent):
         buttons_frame,
         text="Analyze Song",
         font=("Arial", 12),
-        command=lambda: create_playlist_prompt(),
+        # command=lambda: create_playlist_prompt(),
         fg='#845162',
         bg='#50184A',
         activebackground='#845162',
@@ -129,30 +130,6 @@ def add_song_with_playlist():
             messagebox.showinfo("Success", f"Song added to playlist '{selected_playlist}'.")
         else:
             messagebox.showinfo("Info", "No file selected.")
-
-def create_playlist_prompt(playlist_frame):
-    from app.func.playlist_handler import create_playlist
-    from app.func.utils import insert_song
-
-    playlist_name = simpledialog.askstring("Create Playlist", "Enter new playlist name:")
-    if not playlist_name:
-        messagebox.showwarning("Warning", "Playlist name cannot be empty!")
-        return
-
-    folder_path = filedialog.askdirectory(title="Select Folder for Playlist")
-    if not folder_path:
-        messagebox.showwarning("Warning", "No folder selected!")
-        return
-
-    try:
-        create_playlist(playlist_name, folder_path, insert_song)
-        messagebox.showinfo("Success", f"Playlist '{playlist_name}' created successfully!")
-        
-        update_playlist_buttons(playlist_frame)
-    except Exception as e:
-        print(f"Error creating playlist: {e}")
-        messagebox.showerror("Error", f"Failed to create playlist: {e}")
-
 
 def load_playlist_songs(playlist_name):
     from app.db.database import create_connection

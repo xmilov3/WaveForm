@@ -1,8 +1,11 @@
 import os
 import mysql.connector
 from app.db.database import create_connection
+from app.func.utils import split_title_and_artist
 from tkinter import simpledialog, filedialog, messagebox
 from app.db.db_operations import insert_song
+from app.func.utils import process_playlist_from_folder
+
 
 
 def get_playlist_id_if_exists(connection, playlist_name):
@@ -12,44 +15,62 @@ def get_playlist_id_if_exists(connection, playlist_name):
         cursor.execute(query, (playlist_name,))
         result = cursor.fetchone()
         return result[0] if result else None
-    except mysql.connector.Error as e:
+    except Exception as e:
         print(f"Error while checking playlist existence: {e}")
         return None
     finally:
         cursor.close()
 
-
-def create_playlist(playlist_name, folder_path, insert_song_function):
+def create_playlist(user_id, playlist_name, folder_path, insert_song_function):
     connection = create_connection()
     if not connection:
-        raise Exception("Failed to connect to database.")
+        print("Failed to connect to database.")
+        return
+
+    playlist_cover_path = os.path.join(folder_path, "cover", "cover.png")
+    playlist_id = None
 
     try:
         cursor = connection.cursor()
-        query = """
-            INSERT INTO playlists (user_id, name, description, created_at, created_by)
-            VALUES (%s, %s, %s, NOW(), %s);
-        """
-        cursor.execute(query, (1, playlist_name, "User-created playlist", "system"))
-        connection.commit()
-        playlist_id = cursor.lastrowid
+        playlist_id = get_playlist_id_if_exists(connection, playlist_name)
+        if not playlist_id:
+            query = """
+                INSERT INTO playlists (user_id, name, description, created_by, playlist_cover_path)
+                VALUES (%s, %s, %s, %s, %s)
+            """
+            cursor.execute(query, (user_id, playlist_name, "User-created playlist", user_id, playlist_cover_path))
+            connection.commit()
+            playlist_id = cursor.lastrowid
+            print(f"Playlist '{playlist_name}' created with ID: {playlist_id}.")
+        else:
+            print(f"Playlist '{playlist_name}' already exists with ID: {playlist_id}.")
 
         for file in os.listdir(folder_path):
-            if file.endswith(('.mp3', '.wav')):
+            if file.lower().endswith(('.mp3', '.wav')):
                 file_path = os.path.join(folder_path, file)
-                title = os.path.splitext(file)[0]
-                insert_song_function(connection, user_id=1, title=title, artist="Unknown Artist",
-                                     album=playlist_name, genre="Unknown Genre",
-                                     file_path=file_path, cover_path="/path/to/default_cover.png")
-        
-        print(f"Playlist '{playlist_name}' created with ID: {playlist_id}")
+                song_title, artist_name = split_title_and_artist(file)
+
+                insert_song_function(
+                    connection,
+                    user_id=user_id,
+                    title=song_title,
+                    artist=artist_name,
+                    album=playlist_name,
+                    genre="Unknown Genre",
+                    file_path=file_path,
+                    cover_path=playlist_cover_path
+                )
+                print(f"Added song '{song_title}' by '{artist_name}' to playlist '{playlist_name}'.")
     except Exception as e:
-        print(f"Error while creating playlist: {e}")
-        raise
+        print(f"Error creating playlist: {e}")
     finally:
-        if connection.is_connected():
+        if connection and connection.is_connected():
             cursor.close()
             connection.close()
+
+    print(f"Playlist '{playlist_name}' processing completed.")
+
+
 
 
 

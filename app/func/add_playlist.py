@@ -2,25 +2,19 @@ import os
 from app.db.database import create_connection
 from app.func.add_song import insert_song
 from tkinter import filedialog, simpledialog, messagebox
-from app.func.playlist_handler import process_playlist_from_folder, process_playlist_from_files
-from app.func.utils import process_playlist_from_folder
-
+from app.func.session import user_session
 from app.func.playlist_handler import create_playlist
 
 
 
-from tkinter import simpledialog, filedialog, messagebox
-from app.func.playlist_handler import create_playlist
-from app.db.db_operations import insert_song
 
-from tkinter import simpledialog, filedialog, messagebox
-from app.func.playlist_handler import create_playlist
-from app.db.db_operations import insert_song
 
 def create_playlist_prompt():
+    user_id = user_session.user_id
+
     choice = messagebox.askyesno("Create Playlist", "Do you want to create a playlist from a folder?\n"
                                                    "Yes - Use a folder\nNo - Create an empty playlist.")
-    
+
     playlist_name = simpledialog.askstring("Create Playlist", "Enter new playlist name:")
     if not playlist_name:
         messagebox.showinfo("Info", "Playlist creation cancelled.")
@@ -44,27 +38,19 @@ def create_playlist_prompt():
         print(f"Creating playlist '{playlist_name}' with cover '{cover_path}' and folder '{folder_path}'")
 
         if folder_path:
-            create_playlist(user_id=1, folder_path=folder_path, insert_song_function=insert_song)
+            create_playlist(user_id=user_id, playlist_name=playlist_name, folder_path=folder_path, insert_song_function=insert_song)
         else:
-            from app.db.database import create_connection
-            connection = create_connection()
-            if connection:
-                cursor = connection.cursor()
-                cursor.execute("""
-                    INSERT INTO playlists (user_id, name, description, playlist_cover_path)
-                    VALUES (%s, %s, %s, %s)
-                """, (1, playlist_name, "User-created playlist", cover_path))
-                connection.commit()
-                messagebox.showinfo("Success", f"Empty playlist '{playlist_name}' created successfully!")
-                cursor.close()
-                connection.close()
-        print(f"Playlist '{playlist_name}' created successfully.")
+            print(f"Creating empty playlist '{playlist_name}' with cover '{cover_path}'")
+        messagebox.showinfo("Success", f"Playlist '{playlist_name}' created successfully!")
+
+        
 
     except Exception as e:
         print(f"Error creating playlist: {e}")
         messagebox.showerror("Error", f"Failed to create playlist: {e}")
 
-def process_playlist_from_files(files):
+        
+def process_playlist_from_files(folder_path, user_id):
     connection = create_connection()
     if not connection:
         messagebox.showerror("Error", "Failed to connect to the database.")
@@ -85,9 +71,20 @@ def process_playlist_from_files(files):
         connection.commit()
         playlist_id = cursor.lastrowid
 
+        files = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith(('.mp3', '.wav'))]
+
         for file_path in files:
             title, ext = os.path.splitext(os.path.basename(file_path))
-            insert_song(connection, 1, title, "Unknown Artist", "Unknown Album", "Unknown Genre", file_path, 'app/gui/assets/covers/song_covers/song_cover.png')
+            insert_song(
+                connection, 
+                1, 
+                title, 
+                "Unknown Artist", 
+                "Unknown Album", 
+                "Unknown Genre", 
+                file_path, 
+                'app/gui/assets/covers/song_covers/song_cover.png'
+            )
             song_id = cursor.lastrowid
 
             cursor.execute("INSERT INTO playlist_songs (playlist_id, song_id) VALUES (%s, %s)", (playlist_id, song_id))
