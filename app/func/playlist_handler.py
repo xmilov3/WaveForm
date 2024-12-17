@@ -58,19 +58,50 @@ def create_playlist(user_id, folder_path, insert_song_function):
     print(f"Playlist '{playlist_name}' successfully created/updated.")
 
 def fetch_playlists():
-    connection = create_connection()
-    if not connection:
-        print("Failed to connect to database.")
-        return []
+    from app.db.database import create_connection
 
     try:
+        connection = create_connection()
         cursor = connection.cursor()
         cursor.execute("SELECT name FROM playlists")
-        playlists = cursor.fetchall()
-        return [playlist[0] for playlist in playlists]
+        playlists = [row[0] for row in cursor.fetchall()]
+        return playlists
     except Exception as e:
-        print(f"Error while fetching playlists: {e}")
+        print(f"Error fetching playlists: {e}")
         return []
+    finally:
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
+
+            
+def load_playlist_songs(playlist_name):
+    from app.db.database import create_connection
+
+    print(f"Loading songs for playlist: {playlist_name}")
+    try:
+        connection = create_connection()
+        cursor = connection.cursor()
+        query = """
+            SELECT songs.title, songs.artist
+            FROM songs
+            JOIN playlist_songs ON songs.song_id = playlist_songs.song_id
+            JOIN playlists ON playlists.playlist_id = playlist_songs.playlist_id
+            WHERE playlists.name = %s
+        """
+        cursor.execute(query, (playlist_name,))
+        songs = cursor.fetchall()
+        print(f"Fetched songs: {songs}")
+
+        if songs:
+            print(f"Songs in '{playlist_name}':")
+            for song in songs:
+                print(f"Title: {song[0]}, Artist: {song[1]}")
+        else:
+            print(f"No songs found in playlist '{playlist_name}'.")
+
+    except Exception as e:
+        print(f"Error loading songs: {e}")
     finally:
         if connection and connection.is_connected():
             cursor.close()
