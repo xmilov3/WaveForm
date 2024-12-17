@@ -53,7 +53,7 @@ def add_song():
             playlist_id = playlist[0]
 
         user_id = 1  
-        cover_path = '/path/to/default_cover.png'  
+        cover_path = '/Users/bartek/Desktop/Politechnika/Praca inżynierska/WaveForm/app/gui/assets/covers/song_covers/song_cover.png'  
 
         insert_song(connection, user_id, title, artist, album, genre, file_path, cover_path)
 

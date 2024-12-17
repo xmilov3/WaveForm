@@ -1,11 +1,13 @@
 import tkinter as tk
-from app.func.load_pic_gui import load_init_logo
+from app.func.load_pic_gui import *
+
 
 def create_init_page(on_signup, on_signin):
     home_root = tk.Tk()
     home_root.title("WaveForm")
     home_root.geometry("1500x1000")
     home_root.configure(bg="#1E052A")
+    home_root.iconphoto(False, load_top_logo())
 
     tk.Label(
         home_root,
