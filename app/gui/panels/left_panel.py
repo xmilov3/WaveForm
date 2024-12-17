@@ -3,17 +3,23 @@ from tkinter import simpledialog, filedialog, messagebox
 from app.func.add_song import add_song
 from app.func.utils import fetch_playlists
 from app.db.db_operations import insert_song
-from app.func.playlist_handler import create_playlist
 from app.func.add_playlist import create_playlist_prompt
+from app.func.playlist_utils import update_playlist_buttons
+from app.func.playlist_handler import delete_playlist
+
+
 
 def create_left_panel(parent):
-    left_frame = Frame(parent, bg='#1E052A', borderwidth=0, highlightbackground='#845162', highlightthickness=0)
-    left_frame.grid(row=1, column=0, sticky='nsew', padx=0, pady=0)
+    left_frame = Frame(parent, bg='#1E052A', borderwidth=0)
+    left_frame.grid(row=1, column=0, sticky='nsew')
 
-    buttons_frame = Frame(left_frame, bg='#2d0232', borderwidth=0, highlightbackground='#845162', highlightthickness=2)
+    buttons_frame = Frame(left_frame, bg='#2d0232')
     buttons_frame.grid(row=0, column=0, sticky='ew', padx=10, pady=10)
 
-    add_song_button = Button(
+    playlist_frame = Frame(left_frame, bg='#2d0232')
+    playlist_frame.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
+
+    Button(
         buttons_frame,
         text="Add Song",
         font=("Arial", 12),
@@ -22,12 +28,10 @@ def create_left_panel(parent):
         bg='#50184A',
         activebackground='#845162',
         activeforeground='#845162',
-        borderwidth=0,
-        padx=10, pady=5
-    )
-    add_song_button.pack(fill="x", padx=10, pady=5)
+        borderwidth=0
+    ).pack(fill="x", padx=10, pady=5)
 
-    add_playlist_button = Button(
+    Button(
         buttons_frame,
         text="Add Playlist",
         font=("Arial", 12),
@@ -36,27 +40,11 @@ def create_left_panel(parent):
         bg='#50184A',
         activebackground='#845162',
         activeforeground='#845162',
-        borderwidth=0,
-        padx=10, pady=5
-    )
-    add_playlist_button.pack(fill="x", padx=10, pady=5)
-
-    create_playlist_button = Button(
-        buttons_frame,
-        text="Create Playlist",
-        font=("Arial", 12),
-        command=lambda: create_playlist_prompt(),
-        fg='#845162',
-        bg='#50184A',
-        activebackground='#845162',
-        activeforeground='#845162',
-        borderwidth=0,
-        padx=10, pady=5
-    )
-    create_playlist_button.pack(fill="x", padx=10, pady=5)
+        borderwidth=0
+    ).pack(fill="x", padx=10, pady=5)
 
 
-    analyze_song_button = Button(
+    Button(
         buttons_frame,
         text="Analyze Song",
         font=("Arial", 12),
@@ -67,51 +55,14 @@ def create_left_panel(parent):
         activeforeground='#845162',
         borderwidth=0,
         padx=10, pady=5
-    )
-    analyze_song_button.pack(fill="x", padx=10, pady=5)
+    ).pack(fill="x", padx=10, pady=5)
 
-    playlist_frame = Frame(left_frame, bg='#2d0232', borderwidth=0, highlightbackground='#845162', highlightthickness=2)
-    playlist_frame.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
-
-    update_playlist_buttons(playlist_frame)
+    update_playlist_buttons(playlist_frame, delete_playlist)
 
     return left_frame
 
-def update_playlist_buttons(playlist_frame):
-    from app.func.playlist_handler import fetch_playlists
 
-    def on_playlist_click(playlist_name):
-        print(f"Playlist clicked: {playlist_name}")
-        load_playlist_songs(playlist_name)
 
-    for widget in playlist_frame.winfo_children():
-        widget.destroy()
-
-    playlist_label = Label(
-        playlist_frame,
-        text="Playlists",
-        font=("Arial", 14, "bold"),
-        fg='#845162',
-        bg='#2d0232',
-        anchor="w"
-    )
-    playlist_label.pack(fill="x", padx=10, pady=10)
-
-    playlists = fetch_playlists()
-    for playlist_name in playlists:
-        playlist_button = Button(
-            playlist_frame,
-            text=playlist_name,
-            font=("Arial", 12),
-            fg='#845162',
-            bg='#50184A',
-            activebackground='#845162',
-            activeforeground='#845162',
-            borderwidth=0,
-            padx=10, pady=5,
-            command=lambda name=playlist_name: on_playlist_click(name)
-        )
-        playlist_button.pack(fill="x", padx=10, pady=5)
 
 def add_song_with_playlist():
     playlists = fetch_playlists()
@@ -123,7 +74,7 @@ def add_song_with_playlist():
     if selected_playlist:
         file_path = filedialog.askopenfilename(
             title="Select a music file",
-            filetypes=(("MP3 Files", "*.mp3"), ("WAV Files", "*.wav"))
+            filetypes=[("MP3 Files", "*.mp3"), ("WAV Files", "*.wav")]
         )
         if file_path:
             add_song(file_path, selected_playlist)
@@ -131,9 +82,9 @@ def add_song_with_playlist():
         else:
             messagebox.showinfo("Info", "No file selected.")
 
+
 def load_playlist_songs(playlist_name):
     from app.db.database import create_connection
-
     print(f"Loading songs for playlist: {playlist_name}")
     try:
         connection = create_connection()

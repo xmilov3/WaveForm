@@ -2,6 +2,8 @@ import os
 from app.db.db_operations import insert_song
 from app.func.utils import process_playlist_from_folder
 from app.db.database import create_connection
+from app.db.song_operations import insert_song
+
 
 def add_song(file_path, playlist_name):
     connection = create_connection()

@@ -4,8 +4,34 @@ from app.db.database import create_connection
 from app.func.utils import split_title_and_artist
 from tkinter import simpledialog, filedialog, messagebox
 from app.db.db_operations import insert_song
-from app.func.utils import process_playlist_from_folder
+from app.func.utils import process_playlist_from_folder, fetch_playlists
 
+
+def delete_playlist(playlist_name, playlist_frame, update_playlist_buttons):
+    try:
+        connection = create_connection()
+        if not connection:
+            messagebox.showerror("Error", "Failed to connect to the database.")
+            return
+        
+        cursor = connection.cursor()
+        
+        query = "DELETE FROM playlists WHERE name = %s"
+        cursor.execute(query, (playlist_name,))
+        connection.commit()
+        
+        messagebox.showinfo("Success", f"Playlist '{playlist_name}' deleted successfully!")
+        
+        update_playlist_buttons(playlist_frame)
+    
+    except Exception as e:
+        print(f"Error deleting playlist: {e}")
+        messagebox.showerror("Error", f"Failed to delete playlist: {e}")
+    
+    finally:
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
 
 
 def get_playlist_id_if_exists(connection, playlist_name):

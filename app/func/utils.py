@@ -1,7 +1,6 @@
 import os
-import mysql.connector
 from app.db.database import create_connection
-from app.db.db_operations import insert_song
+
 
 def split_title_and_artist(file_name):
     try:

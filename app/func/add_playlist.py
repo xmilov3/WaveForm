@@ -4,12 +4,16 @@ from app.func.add_song import insert_song
 from tkinter import filedialog, simpledialog, messagebox
 from app.func.session import user_session
 from app.func.playlist_handler import create_playlist
+from app.func.session import user_session
+from app.func.playlist_utils import update_playlist_buttons 
 
 
 
 
 
-def create_playlist_prompt():
+
+
+def create_playlist_prompt(playlist_frame):
     user_id = user_session.user_id
 
     choice = messagebox.askyesno("Create Playlist", "Do you want to create a playlist from a folder?\n"
@@ -38,16 +42,17 @@ def create_playlist_prompt():
         print(f"Creating playlist '{playlist_name}' with cover '{cover_path}' and folder '{folder_path}'")
 
         if folder_path:
-            create_playlist(user_id=user_id, playlist_name=playlist_name, folder_path=folder_path, insert_song_function=insert_song)
+            create_playlist(user_id=user_id, folder_path=folder_path, insert_song_function=insert_song)
         else:
             print(f"Creating empty playlist '{playlist_name}' with cover '{cover_path}'")
         messagebox.showinfo("Success", f"Playlist '{playlist_name}' created successfully!")
 
-        
+        update_playlist_buttons(playlist_frame)
 
     except Exception as e:
         print(f"Error creating playlist: {e}")
         messagebox.showerror("Error", f"Failed to create playlist: {e}")
+
 
         
 def process_playlist_from_files(folder_path, user_id):
