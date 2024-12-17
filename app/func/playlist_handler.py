@@ -1,6 +1,9 @@
 import os
 import mysql.connector
 from app.db.database import create_connection
+from tkinter import simpledialog, filedialog, messagebox
+from app.db.db_operations import insert_song
+
 
 def get_playlist_id_if_exists(connection, playlist_name):
     try:
@@ -15,47 +18,40 @@ def get_playlist_id_if_exists(connection, playlist_name):
     finally:
         cursor.close()
 
-def create_playlist(user_id, folder_path, insert_song_function):
+
+def create_playlist(playlist_name, folder_path, insert_song_function):
     connection = create_connection()
     if not connection:
-        print("Failed to connect to database.")
-        return
+        raise Exception("Failed to connect to database.")
 
-    playlist_name = os.path.basename(folder_path)
-    playlist_cover_path = os.path.join(folder_path, "cover", "cover.png")
+    try:
+        cursor = connection.cursor()
+        query = """
+            INSERT INTO playlists (user_id, name, description, created_at, created_by)
+            VALUES (%s, %s, %s, NOW(), %s);
+        """
+        cursor.execute(query, (1, playlist_name, "User-created playlist", "system"))
+        connection.commit()
+        playlist_id = cursor.lastrowid
 
-    playlist_id = get_playlist_id_if_exists(connection, playlist_name)
-    if not playlist_id:
-        try:
-            cursor = connection.cursor()
-            query = """
-                INSERT INTO playlists (user_id, name, description, created_by, playlist_cover_path)
-                VALUES (%s, %s, %s, %s, %s)
-            """
-            cursor.execute(query, (user_id, playlist_name, "User-created playlist", user_id, playlist_cover_path))
-            connection.commit()
-            playlist_id = cursor.lastrowid
-            print(f"Playlist '{playlist_name}' created with ID: {playlist_id}.")
-        except mysql.connector.Error as e:
-            print(f"Error while creating playlist: {e}")
-            return
-        finally:
+        for file in os.listdir(folder_path):
+            if file.endswith(('.mp3', '.wav')):
+                file_path = os.path.join(folder_path, file)
+                title = os.path.splitext(file)[0]
+                insert_song_function(connection, user_id=1, title=title, artist="Unknown Artist",
+                                     album=playlist_name, genre="Unknown Genre",
+                                     file_path=file_path, cover_path="/path/to/default_cover.png")
+        
+        print(f"Playlist '{playlist_name}' created with ID: {playlist_id}")
+    except Exception as e:
+        print(f"Error while creating playlist: {e}")
+        raise
+    finally:
+        if connection.is_connected():
             cursor.close()
+            connection.close()
 
-    for file in os.listdir(folder_path):
-        if file.lower().endswith(('.mp3', '.wav')):
-            file_path = os.path.join(folder_path, file)
-            title, _ = os.path.splitext(file)
 
-            try:
-                insert_song_function(connection, user_id, title, "Unknown Artist", playlist_name, "Unknown Genre", file_path, playlist_cover_path)
-                print(f"Added song '{title}' to database.")
-            except mysql.connector.Error as e:
-                print(f"Error while inserting song: {e}")
-                continue
-
-    connection.close()
-    print(f"Playlist '{playlist_name}' successfully created/updated.")
 
 def fetch_playlists():
     from app.db.database import create_connection
