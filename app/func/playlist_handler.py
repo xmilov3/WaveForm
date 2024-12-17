@@ -56,3 +56,22 @@ def create_playlist(user_id, folder_path, insert_song_function):
 
     connection.close()
     print(f"Playlist '{playlist_name}' successfully created/updated.")
+
+def fetch_playlists():
+    connection = create_connection()
+    if not connection:
+        print("Failed to connect to database.")
+        return []
+
+    try:
+        cursor = connection.cursor()
+        cursor.execute("SELECT name FROM playlists")
+        playlists = cursor.fetchall()
+        return [playlist[0] for playlist in playlists]
+    except Exception as e:
+        print(f"Error while fetching playlists: {e}")
+        return []
+    finally:
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
