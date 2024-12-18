@@ -3,7 +3,7 @@ from tkinter import simpledialog, filedialog, messagebox
 from app.func.add_song import add_song
 from app.func.utils import fetch_playlists
 from app.db.db_operations import insert_song
-from app.func.add_playlist import create_playlist_prompt
+from app.func.add_playlist import create_empty_playlist, import_playlist_from_folder
 from app.func.playlist_utils import update_playlist_buttons
 from app.func.playlist_handler import delete_playlist
 
@@ -33,9 +33,21 @@ def create_left_panel(parent):
 
     Button(
         buttons_frame,
-        text="Add Playlist",
+        text="Create Playlist",
         font=("Arial", 12),
-        command=lambda: create_playlist_prompt(playlist_frame),
+        command=lambda: create_empty_playlist(playlist_frame),
+        fg='#845162',
+        bg='#50184A',
+        activebackground='#845162',
+        activeforeground='#845162',
+        borderwidth=0
+    ).pack(fill="x", padx=10, pady=5)
+    
+    Button(
+        buttons_frame,
+        text="Import playlist",
+        font=("Arial", 12),
+        command=lambda: import_playlist_from_folder(playlist_frame),
         fg='#845162',
         bg='#50184A',
         activebackground='#845162',

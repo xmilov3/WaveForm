@@ -22,7 +22,7 @@ def delete_playlist(playlist_name, playlist_frame, update_playlist_buttons):
         
         messagebox.showinfo("Success", f"Playlist '{playlist_name}' deleted successfully!")
         
-        update_playlist_buttons(playlist_frame)
+        update_playlist_buttons(playlist_frame, delete_playlist)
     
     except Exception as e:
         print(f"Error deleting playlist: {e}")

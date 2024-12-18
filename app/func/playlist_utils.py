@@ -5,14 +5,12 @@ from tkinter import Label, Button, Frame
 from app.func.utils import fetch_playlists
 
 def update_playlist_buttons(playlist_frame, delete_playlist_callback):
+    from app.func.utils import fetch_playlists
+
     for widget in playlist_frame.winfo_children():
         widget.destroy()
 
     playlists = fetch_playlists()
-
-    if not playlists:
-        Label(playlist_frame, text="No Playlists Available", fg="#845162", bg="#2d0232").pack(pady=10)
-        return
 
     for playlist_name in playlists:
         frame = Frame(playlist_frame, bg="#2d0232")
@@ -29,5 +27,5 @@ def update_playlist_buttons(playlist_frame, delete_playlist_callback):
             text="X",
             fg="white",
             bg="red",
-            command=lambda name=playlist_name: delete_playlist_callback(name, playlist_frame)
+            command=lambda name=playlist_name: delete_playlist_callback(name, playlist_frame, update_playlist_buttons)
         ).pack(side="right")
