@@ -4,7 +4,7 @@ from app.func.add_song import add_song
 from app.func.utils import fetch_playlists
 from app.db.db_operations import insert_song
 from app.func.add_playlist import create_empty_playlist, import_playlist_from_folder
-from app.func.playlist_utils import update_playlist_buttons
+from app.func.playlist_utils import update_playlist_buttons, change_playlist_cover
 from app.func.playlist_handler import delete_playlist
 
 
@@ -69,7 +69,7 @@ def create_left_panel(parent):
         padx=10, pady=5
     ).pack(fill="x", padx=10, pady=5)
 
-    update_playlist_buttons(playlist_frame, delete_playlist)
+    update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover)
 
     return left_frame
 

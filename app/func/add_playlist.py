@@ -5,7 +5,7 @@ from tkinter import filedialog, simpledialog, messagebox
 from app.func.session import user_session
 from app.func.playlist_handler import create_playlist, delete_playlist
 from app.func.session import user_session
-from app.func.playlist_utils import update_playlist_buttons 
+from app.func.playlist_utils import update_playlist_buttons, change_playlist_cover
 
 
 
@@ -15,22 +15,14 @@ def create_empty_playlist(playlist_frame):
     user_id = user_session.user_id
     created_by = user_session.username
 
-    playlist_name = simpledialog.askstring("Create Empty Playlist", "Enter new playlist name:")
+    playlist_name = simpledialog.askstring("Create Playlist", "Enter new playlist name:")
     if not playlist_name:
         messagebox.showinfo("Info", "Playlist creation cancelled.")
         return
 
-    cover_path = filedialog.askopenfilename(
-        title="Select Playlist Cover Image",
-        filetypes=[("Image Files", "*.png *.jpg *.jpeg"), ("All Files", "*.*")]
-    )
-    if not cover_path:
-        messagebox.showinfo("Info", "No cover image selected. Playlist creation cancelled.")
-        return
+    cover_path = "app/gui/assets/covers/default_cover.png"
 
     try:
-        print(f"Creating empty playlist '{playlist_name}' with cover '{cover_path}'")
-
         connection = create_connection()
         cursor = connection.cursor()
         query = """
@@ -39,16 +31,17 @@ def create_empty_playlist(playlist_frame):
         """
         cursor.execute(query, (user_id, playlist_name, "Empty playlist", created_by, cover_path))
         connection.commit()
-        cursor.close()
-        connection.close()
 
-        messagebox.showinfo("Success", f"Empty playlist '{playlist_name}' created successfully!")
-
-        update_playlist_buttons(playlist_frame, delete_playlist)
+        messagebox.showinfo("Success", f"Playlist '{playlist_name}' created successfully!")
+        update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover)
 
     except Exception as e:
-        print(f"Error creating empty playlist: {e}")
-        messagebox.showerror("Error", f"Failed to create empty playlist: {e}")
+        messagebox.showerror("Error", f"Failed to create playlist: {e}")
+    finally:
+        if connection:
+            cursor.close()
+            connection.close()
+
 
 def import_playlist_from_folder(playlist_frame):
     user_id = user_session.user_id
