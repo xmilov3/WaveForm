@@ -1,10 +1,7 @@
-import os
+from tkinter import messagebox, Menu, Frame, Button, filedialog
 from app.db.database import create_connection
-from app.func.utils import process_playlist_from_folder, split_title_and_artist
-from tkinter import Label, Button, Frame, messagebox, filedialog
 from app.func.utils import fetch_playlists
 
-from tkinter import Menu
 
 def update_playlist_buttons(playlist_frame, delete_playlist_callback, change_cover_callback):
     from app.func.utils import fetch_playlists
@@ -18,40 +15,56 @@ def update_playlist_buttons(playlist_frame, delete_playlist_callback, change_cov
         frame = Frame(playlist_frame, bg="#2d0232")
         frame.pack(fill="x", padx=10, pady=5)
 
-        Button(
+        playlist_button = Button(
             frame,
             text=playlist_name,
+            font=("Arial", 12),
+            fg='#845162',
+            bg='#50184A',
+            activebackground='#845162',
+            activeforeground='#845162',
             command=lambda name=playlist_name: print(f"Selected playlist: {name}")
-        ).pack(side="left", fill="x", expand=True)
+        )
+        playlist_button.pack(side="left", fill="x", expand=True)
 
-        Button(
+        menu_button = Button(
             frame,
             text=":",
+            font=("Arial", 12),
             fg="white",
             bg="#50184A",
-            command=lambda name=playlist_name: show_playlist_menu(name, delete_playlist_callback, change_cover_callback)
-        ).pack(side="right")
+            activebackground="#845162",
+            activeforeground="#845162"
+        )
+        menu_button.pack(side="right")
+
+        menu_button.bind("<Button-1>", lambda event, name=playlist_name: show_playlist_menu(
+            event, name, playlist_frame, delete_playlist_callback, change_cover_callback
+        ))
 
 
 
+def delete_playlist(playlist_name, playlist_frame, update_playlist_buttons):
+    try:
+        connection = create_connection()
+        if not connection:
+            messagebox.showerror("Error", "Failed to connect to the database.")
+            return
+        
+        cursor = connection.cursor()
+        query = "DELETE FROM playlists WHERE name = %s"
+        cursor.execute(query, (playlist_name,))
+        connection.commit()
+        
+        messagebox.showinfo("Success", f"Playlist '{playlist_name}' deleted successfully!")
+        update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover)
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to delete playlist: {e}")
+    finally:
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
 
-def show_playlist_menu(playlist_name, delete_playlist_callback, change_cover_callback):
-    menu = Menu(None, tearoff=0)
-    menu.add_command(label="Delete Playlist", command=lambda: delete_playlist_callback(playlist_name))
-    menu.add_command(
-    label="Delete Playlist",
-    command=lambda: delete_playlist_callback(playlist_name, update_playlist_buttons)
-)
-
-    menu.add_command(label="Change Cover", command=lambda: change_cover_callback(playlist_name))
-    menu.post(500, 500)
-
-
-def open_playlist_menu(parent, playlist_name, delete_callback, change_cover_callback):
-    menu = Menu(parent, tearoff=0)
-    menu.add_command(label="Delete Playlist", command=lambda: delete_callback(playlist_name, parent))
-    menu.add_command(label="Change Cover", command=lambda: change_cover_callback(playlist_name))
-    menu.post(parent.winfo_rootx(), parent.winfo_rooty())
 
 def change_playlist_cover(playlist_name):
     cover_path = filedialog.askopenfilename(
@@ -76,3 +89,17 @@ def change_playlist_cover(playlist_name):
         if connection:
             cursor.close()
             connection.close()
+
+
+def show_playlist_menu(event, playlist_name, playlist_frame, delete_playlist_callback, change_cover_callback):
+    menu = Menu(None, tearoff=0)
+    menu.add_command(
+        label="Delete Playlist",
+        command=lambda: delete_playlist_callback(playlist_name, playlist_frame, update_playlist_buttons)
+    )
+    menu.add_command(
+        label="Change Cover",
+        command=lambda: change_cover_callback(playlist_name)
+    )
+    menu.post(event.widget.winfo_rootx() + event.x, event.widget.winfo_rooty() + event.y)
+

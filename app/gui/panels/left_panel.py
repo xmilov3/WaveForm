@@ -4,8 +4,8 @@ from app.func.add_song import add_song
 from app.func.utils import fetch_playlists
 from app.db.db_operations import insert_song
 from app.func.add_playlist import create_empty_playlist, import_playlist_from_folder
-from app.func.playlist_utils import update_playlist_buttons, change_playlist_cover
-from app.func.playlist_handler import delete_playlist
+from app.func.playlist_utils import update_playlist_buttons, change_playlist_cover, delete_playlist
+
 
 
 
