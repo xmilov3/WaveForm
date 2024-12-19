@@ -63,6 +63,9 @@ class UserSession:
         self.username = username
         # self.email = email
 
+    def get_user_id(self):
+        return self.user_id
+
     def clear_session(self):
         self.user_id = None
         self.username = None

@@ -1,10 +1,10 @@
 import os
 from tkinter import *
-from app.gui.app_window import create_app_window
+from app_window import create_app_window
 from app.db.database import create_connection
-from app.gui.panels.register_window import create_register_window
-from app.gui.panels.init_page import create_init_page
-from app.gui.login_window import create_login_window
+from register_window import create_register_window
+from init_page import create_init_page
+from login_window import create_login_window
 
 def main():
     

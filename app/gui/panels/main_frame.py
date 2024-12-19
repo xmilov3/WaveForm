@@ -1,9 +1,18 @@
-from tkinter import Frame, Label
+import tkinter as tk
 from app.func.config import *
 
 
+class MainFrame(tk.Frame):
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
+        self.configure(bg='black')
 
-def create_main_frame(root):
-    main_frame = Frame(root, bg='black')
-    main_frame.grid(row=0, column=0, sticky='nsew', padx=1, pady=1)
-    return main_frame
+        label = tk.Label(
+            self, 
+            text="Welcome to the Main Frame!", 
+            font=("Arial", 24, "bold"), 
+            fg="white", 
+            bg="black"
+        )
+        label.pack(expand=True, padx=10, pady=10)
+

@@ -1,44 +1,63 @@
-import os
-from tkinter import *
-from app.gui.app_window import create_app_window
+import tkinter as tk
+from page_manager import PageManager
+from init_page import InitPage
+from app_window import AppWindow
+from login_window import LoginPage
+from register_window import RegisterPage
 from app.db.database import create_connection
-from app.gui.panels.register_window import create_register_window
-from app.gui.panels.init_page import create_init_page
-from app.gui.login_window import create_login_window
-from app.func.config import *
-from app.gui.assets.pics import *
 from app.func.session import user_session
-from app.func.playlist_handler import create_playlist
-from app.db.db_operations import insert_song
+from app.func.load_pic_gui import load_top_logo
+
 
 def main():
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    root = tk.Tk()
+    root.withdraw()
+    root.title("WaveForm")
+    root.configure(bg="#1E052A")
+    root.geometry("1500x1000")
+    icon = load_top_logo()
+    root.iconphoto(True, icon)
+    
 
     connection = create_connection()
     if not connection:
         print("Error! Unable to connect to database")
         return
 
+    page_manager = PageManager(root)
+    root.grid_rowconfigure(0, weight=1)
+    root.grid_columnconfigure(0, weight=1)
+
     def on_login_success(user_data):
         user_id, username = user_data
         user_session.set_user(user_id, username)
         print(f"Session started for user: {username} (ID: {user_id})")
+        page_manager.show_page("AppWindow")
 
+    def open_login():
+        page_manager.show_page("LoginPage")
 
+    def open_register():
+        page_manager.show_page("RegisterPage")
 
-        root = create_app_window()
-        root.mainloop()
+    init_page = InitPage(root, page_manager)
+    login_page = LoginPage(root, page_manager, connection)
+    register_page = RegisterPage(root, page_manager, connection)
+    app_window = AppWindow(root, page_manager)
 
-    def on_login():
-        create_login_window(connection, on_login_success, on_register)
+    page_manager.add_page("InitPage", init_page)
+    page_manager.add_page("LoginPage", login_page)
+    page_manager.add_page("RegisterPage", register_page)
+    page_manager.add_page("AppWindow", app_window)
 
-    def on_register():
-        create_register_window(connection, on_login)
+    page_manager.show_page("InitPage")
 
-    create_init_page(
-        on_signup=on_register,
-        on_signin=on_login
-    )
+    page_manager.center_window(1500, 1000)
+    root.update_idletasks()
+    root.deiconify()
+
+    root.mainloop()
+
 
 if __name__ == "__main__":
     main()
