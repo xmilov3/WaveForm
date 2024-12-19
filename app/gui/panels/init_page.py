@@ -1,11 +1,12 @@
 import tkinter as tk
 from app.func.load_pic_gui import *
+from app.func.session import center_window
 
 
 def create_init_page(on_signup, on_signin):
     home_root = tk.Tk()
     home_root.title("WaveForm")
-    home_root.geometry("1500x1000")
+    center_window(home_root,1500, 1000)
     home_root.configure(bg="#1E052A")
     home_root.iconphoto(False, load_top_logo())
 

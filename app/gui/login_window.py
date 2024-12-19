@@ -3,12 +3,12 @@ from tkinter import messagebox
 from app.func.load_pic_gui import *
 from app.func.authentication import authenticate_user
 from app.func.config import *
-
+from app.func.session import center_window
 
 def create_login_window(connection, on_login_success, on_register):
     login_root = tk.Tk()
     login_root.title("WaveForm")
-    login_root.geometry("1500x1000")
+    center_window(login_root,1500,1000)
     login_root.configure(bg="#1E052A")
     login_root.iconphoto(False, load_top_logo())
 

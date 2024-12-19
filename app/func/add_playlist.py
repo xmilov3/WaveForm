@@ -1,6 +1,6 @@
 import os
 from app.db.database import create_connection
-from app.func.session import user_session
+from app.func.session import user_session, center_window
 from app.func.add_song import insert_song
 from tkinter import filedialog, simpledialog, messagebox
 from app.func.playlist_handler import create_playlist, delete_playlist
@@ -10,13 +10,14 @@ from tkinter import *
 
 
 
+
 def create_empty_playlist(playlist_frame):
     user_id = user_session.user_id
     created_by = user_session.username
 
     dialog = Toplevel()
     dialog.title("Create Playlist")
-    dialog.geometry("500x300")
+    center_window(dialog, 500, 300)
 
     Label(dialog, text="Playlist Name:", font=("Arial", 12, "bold")).grid(row=0, column=0, sticky="w", padx=10, pady=10)
     playlist_name_entry = Entry(dialog, font=("Arial", 12))
@@ -84,7 +85,7 @@ def import_playlist_from_folder(playlist_frame):
 
     dialog = Toplevel()
     dialog.title("Import Playlist")
-    dialog.geometry("500x350")
+    center_window(dialog, 500, 300)
     dialog.configure(bg="#1E052A")
 
     Label(dialog, text="Playlist Name:", font=("Arial", 12, "bold"), fg="white", bg="#1E052A").grid(row=0, column=0, sticky="w", padx=10, pady=10)

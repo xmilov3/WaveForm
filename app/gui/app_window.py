@@ -13,6 +13,7 @@ from app.func.music_controller import play_pause_song, stop_song, next_song, pre
 from app.func.config import *
 from app.gui.assets.pics import *
 from app.gui.assets.buttons import *
+from app.func.session import center_window
 
 
 
@@ -20,12 +21,10 @@ pygame.mixer.init(channels=2)
 pygame.mixer.music.stop() 
 
 
-    
-
 def create_app_window():
     root = Tk()
     root.title("WaveForm")
-    root.geometry("1500x1000")
+    center_window(root, 1500, 1000)
     root.configure(bg='#150016')
     root.iconphoto(False, load_top_logo())
     

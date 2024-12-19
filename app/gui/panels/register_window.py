@@ -3,11 +3,12 @@ from tkinter import messagebox
 from app.func.load_pic_gui import *
 from datetime import date
 from app.func.authentication import register_user
+from app.func.session import center_window
 
 def create_register_window(connection, on_register_success):
     register_root = tk.Tk()
     register_root.title("WaveForm")
-    register_root.geometry("1500x1000")
+    center_window(register_root,1500, 1000)
     register_root.configure(bg="#1E052A")
     register_root.iconphoto(False, load_top_logo())
 
