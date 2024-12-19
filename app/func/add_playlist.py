@@ -10,7 +10,6 @@ from app.func.utils import process_playlist_from_folder, split_title_and_artist
 
 
 
-
 def create_empty_playlist(playlist_frame):
     user_id = user_session.user_id
     created_by = user_session.username

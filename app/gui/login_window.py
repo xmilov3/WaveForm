@@ -66,7 +66,7 @@ def create_login_window(connection, on_login_success, on_register):
 
         try:
             cursor = connection.cursor()
-            query = "SELECT user_id, email FROM users WHERE username = %s AND password_hash = %s"
+            query = "SELECT user_id, username FROM users WHERE username = %s AND password_hash = %s"
             cursor.execute(query, (username, password))
             user_data = cursor.fetchone()
 

@@ -22,7 +22,7 @@ def create_left_panel(parent):
     Button(
         buttons_frame,
         text="Add Song",
-        font=("Arial", 12),
+        font=("Arial", 14, "bold"),
         command=lambda: add_song_with_playlist(),
         fg='#845162',
         bg='#50184A',
@@ -34,7 +34,7 @@ def create_left_panel(parent):
     Button(
         buttons_frame,
         text="Create Playlist",
-        font=("Arial", 12),
+        font=("Arial", 14, "bold"),
         command=lambda: create_empty_playlist(playlist_frame),
         fg='#845162',
         bg='#50184A',
@@ -46,7 +46,7 @@ def create_left_panel(parent):
     Button(
         buttons_frame,
         text="Import playlist",
-        font=("Arial", 12),
+        font=("Arial", 14, "bold"),
         command=lambda: import_playlist_from_folder(playlist_frame),
         fg='#845162',
         bg='#50184A',
@@ -59,8 +59,8 @@ def create_left_panel(parent):
     Button(
         buttons_frame,
         text="Analyze Song",
-        font=("Arial", 12),
-        # command=lambda: create_playlist_prompt(),
+        font=("Arial", 14, "bold"),
+        command=lambda: add_song_with_playlist(),
         fg='#845162',
         bg='#50184A',
         activebackground='#845162',

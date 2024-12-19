@@ -48,14 +48,18 @@ class UserSession:
     def __init__(self):
         self.user_id = None
         self.username = None
+        # self.email = None
 
     def set_user(self, user_id, username):
         self.user_id = user_id
         self.username = username
+        # self.email = email
 
     def clear_session(self):
         self.user_id = None
         self.username = None
+        # self.email = None
 
 
 user_session = UserSession()
+
