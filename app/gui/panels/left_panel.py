@@ -9,7 +9,7 @@ from app.func.playlist_utils import update_playlist_buttons, change_playlist_cov
 
 
 
-def create_left_panel(parent):
+def create_left_panel(parent, page_manager):
     left_frame = Frame(parent, bg='#1E052A', borderwidth=0)
     left_frame.grid(row=1, column=0, sticky='nsew')
 
@@ -69,11 +69,41 @@ def create_left_panel(parent):
         padx=10, pady=5
     ).pack(fill="x", padx=10, pady=5)
 
+    
+    
+    
     update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover)
+    populate_playlists(playlist_frame, page_manager)
 
     return left_frame
 
+def populate_playlists(playlist_frame, page_manager):
+    for widget in playlist_frame.winfo_children():
+        widget.destroy()
 
+    playlists = fetch_playlists()
+    if playlists:
+        for playlist_name in playlists:
+            Button(
+                playlist_frame,
+                text=playlist_name,
+                font=("Arial", 12),
+                fg='#FFFFFF',
+                bg='#50184A',
+                activebackground='#845162',
+                activeforeground='#FFFFFF',
+                borderwidth=0,
+                command=lambda name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
+
+            ).pack(fill="x", padx=10, pady=2)
+    else:
+        Label(
+            playlist_frame,
+            text="No playlists available.",
+            font=("Arial", 12),
+            fg="gray",
+            bg="#2d0232"
+        ).pack(fill="x", padx=10, pady=2)
 
 
 def add_song_with_playlist():

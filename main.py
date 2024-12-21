@@ -6,11 +6,13 @@ from login_window import LoginPage
 from register_window import RegisterPage
 from app.db.database import create_connection
 from app.func.session import user_session
+from app.gui.panels.middle_panel import create_middle_panel
 from app.func.load_pic_gui import load_top_logo
 
 
 def main():
     root = tk.Tk()
+    page_manager = PageManager(root)
     root.withdraw()
     root.title("WaveForm")
     root.configure(bg="#1E052A")
@@ -49,6 +51,7 @@ def main():
     page_manager.add_page("LoginPage", login_page)
     page_manager.add_page("RegisterPage", register_page)
     page_manager.add_page("AppWindow", app_window)
+    page_manager.add_dynamic_panel("MiddlePanel", lambda playlist_name: create_middle_panel(root, playlist_name))
 
     page_manager.show_page("InitPage")
 

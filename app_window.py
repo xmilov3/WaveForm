@@ -26,9 +26,11 @@ class AppWindow(tk.Frame):
         self.init_panels()
 
     def init_panels(self):
-        top_frame = create_top_panel(self.main_frame)
-        left_frame = create_left_panel(self.main_frame)
-        middle_frame, song_listbox = create_middle_panel(self.main_frame)
+        top_frame = create_top_panel(self.main_frame, self.page_manager)
+        left_frame = create_left_panel(self.main_frame, self.page_manager)
+        
+        middle_frame, song_listbox = create_middle_panel(self.main_frame, "Liked Songs")
+
         right_frame, queue_text_label, playlist_label, album_art_label, title_label, artist_label = create_right_panel(
             self.main_frame, playlist_name="Liked Songs"
         )
