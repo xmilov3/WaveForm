@@ -6,27 +6,41 @@ from app.db.database import create_connection
 from app.func.playlist_handler import process_playlist_from_folder
 
 
+
+from tkinter import Button, Menu
+
+playlist_buttons = {}
+
 def update_playlist_buttons(playlist_frame, delete_playlist_callback, change_cover_callback, page_manager):
-    for widget in playlist_frame.winfo_children():
-        widget.destroy()
+    global playlist_buttons
 
     playlists = fetch_playlists()
 
-    for i, playlist_name in enumerate(playlists):
-        button = Button(
-            playlist_frame,
-            text=playlist_name,
-            font=("Arial", 14, "bold"),
-            fg="#FFFFFF",
-            bg="#50184A",
-            activebackground="#845162",
-            activeforeground="#FFFFFF",
-            borderwidth=0,
-            command=lambda name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
-        )
-        button.grid(row=i, column=0, sticky="ew", padx=5, pady=5)
+    existing_widgets = {widget.cget("text"): widget for widget in playlist_frame.winfo_children() if isinstance(widget, Button)}
 
-        button.bind("<Button-3>", lambda event, name=playlist_name: show_context_menu(event, name, playlist_frame, page_manager))
+    for playlist_name in list(existing_widgets.keys()):
+        if playlist_name not in playlists:
+            existing_widgets[playlist_name].destroy()
+            if playlist_name in playlist_buttons:
+                del playlist_buttons[playlist_name]
+
+    for i, playlist_name in enumerate(playlists):
+        if playlist_name in existing_widgets:
+            button = existing_widgets[playlist_name]
+            button.configure(
+                text=playlist_name
+            )
+        else:
+            button = Button(
+                playlist_frame,
+                text=playlist_name,
+                font=("Arial", 14, "bold"),
+                borderwidth=0,
+                command=lambda name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
+            )
+            button.grid(row=i, column=0, sticky="ew", padx=5, pady=5)
+            button.bind("<Button-3>", lambda event, name=playlist_name: show_context_menu(event, name, playlist_frame, page_manager))
+            playlist_buttons[playlist_name] = button
 
     playlist_frame.grid_columnconfigure(0, weight=1)
 

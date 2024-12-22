@@ -10,6 +10,7 @@ from app.func.playlist_utils import *
 
 
 
+
 def create_left_panel(parent, page_manager):
     left_frame = Frame(parent, bg='#1E052A', borderwidth=0)
     left_frame.grid(row=1, column=0, sticky='nsew')
@@ -19,6 +20,8 @@ def create_left_panel(parent, page_manager):
 
     playlist_frame = Frame(left_frame, bg='#2d0232')
     playlist_frame.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
+
+    left_frame.playlist_frame = playlist_frame
 
     style = ttk.Style()
     style.configure(
@@ -69,10 +72,10 @@ def create_left_panel(parent, page_manager):
 
 
 def populate_playlists(playlist_frame, page_manager):
-    playlists = fetch_playlists()
-
     for widget in playlist_frame.winfo_children():
         widget.destroy()
+
+    playlists = fetch_playlists()
 
     if playlists:
         for i, playlist_name in enumerate(playlists):
@@ -80,35 +83,32 @@ def populate_playlists(playlist_frame, page_manager):
                 playlist_frame,
                 text=playlist_name,
                 font=("Arial", 14, "bold"),
-                fg='#FFFFFF',
+                fg='black',
                 bg='#50184A',
-                activebackground='#845162',
-                activeforeground='#FFFFFF',
-                borderwidth=0
+                # activebackground='#845162',
+                activeforegrouknd='black',
+                borderwidth=0,
+                command=lambda name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
             )
             playlist_button.grid(row=i, column=0, sticky="ew", padx=5, pady=5)
-            
+
             playlist_button.configure(
-                fg='#FFFFFF',
+                fg='black',
                 bg='#50184A',
-                activebackground='#845162',
-                activeforeground='#FFFFFF'
-            )
-            
-            playlist_button.bind(
-                "<Button-1>",
-                lambda event, name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
+                # activebackground='#845162',
+                # activeforeground='black'
             )
     else:
         Label(
             playlist_frame,
             text="No playlists available.",
-            font=("Arial", 12),
+            font=("Arial", 14, "bold"),
             fg="gray",
             bg="#2d0232"
         ).grid(row=0, column=0, padx=5, pady=5, sticky="ew")
 
     playlist_frame.grid_columnconfigure(0, weight=1)
+
 
 
 

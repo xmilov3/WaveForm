@@ -69,6 +69,7 @@ def create_empty_playlist(playlist_frame, page_manager):
 
             messagebox.showinfo("Success", f"Playlist '{playlist_name}' created successfully!")
             update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover, page_manager)
+
             dialog.destroy()
         except Exception as e:
             messagebox.showerror("Error", f"Failed to create playlist: {e}")

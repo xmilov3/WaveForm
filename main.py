@@ -9,7 +9,7 @@ from app.func.session import user_session
 from app.gui.panels.middle_panel import create_middle_panel
 from app.func.load_pic_gui import load_top_logo
 import tkinter as tk
-from app.gui.panels.left_panel import update_playlist_buttons, show_context_menu
+from app.gui.panels.left_panel import update_playlist_buttons, show_context_menu, populate_playlists
 
 
 def main():
@@ -22,15 +22,18 @@ def main():
     icon = load_top_logo()
     root.iconphoto(True, icon)
     
+    
+
 
     connection = create_connection()
     if not connection:
         print("Error! Unable to connect to database")
         return
-
+    
     page_manager = PageManager(root)
     root.grid_rowconfigure(0, weight=1)
     root.grid_columnconfigure(0, weight=1)
+    
 
     def on_login_success(user_data):
         user_id, username = user_data
@@ -48,6 +51,7 @@ def main():
     login_page = LoginPage(root, page_manager, connection)
     register_page = RegisterPage(root, page_manager, connection)
     app_window = AppWindow(root, page_manager)
+    
 
     page_manager.add_page("InitPage", init_page)
     page_manager.add_page("LoginPage", login_page)
