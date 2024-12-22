@@ -13,6 +13,11 @@ def create_top_panel(parent, page_manager):
     logo_label.image = top_logo_img
     logo_label.grid(row=0, column=2, sticky='e', padx=10, pady=5)
 
+    text_logo_img = load_text(size=(350, 80))
+    text_logo_label = Label(top_frame, image=text_logo_img, bg="#150016")
+    text_logo_label.image = text_logo_img
+    text_logo_label.grid(row=0, column=0, sticky='w', padx=10, pady=5)
+
     bind_logo_click(logo_label, page_manager)
 
     return top_frame

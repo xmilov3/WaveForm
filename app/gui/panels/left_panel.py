@@ -87,11 +87,11 @@ def populate_playlists(playlist_frame, page_manager):
             Button(
                 playlist_frame,
                 text=playlist_name,
-                font=("Arial", 12),
-                fg='#FFFFFF',
+                font=("Arial", 14, "bold"),
+                fg='#845162',
                 bg='#50184A',
                 activebackground='#845162',
-                activeforeground='#FFFFFF',
+                activeforeground='#845162',
                 borderwidth=0,
                 command=lambda name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
             ).pack(fill="x", padx=10, pady=2)
