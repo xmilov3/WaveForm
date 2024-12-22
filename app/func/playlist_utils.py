@@ -2,45 +2,28 @@ from tkinter import messagebox, Menu, Frame, Button, filedialog, RIGHT, ttk
 from app.db.database import create_connection
 from app.func.utils import fetch_playlists
 
-def update_playlist_buttons(playlist_frame, delete_playlist_callback, change_cover_callback):
-    from app.func.utils import fetch_playlists
-
+def update_playlist_buttons(playlist_frame, delete_playlist_callback, change_cover_callback, page_manager):
     for widget in playlist_frame.winfo_children():
         widget.destroy()
 
     playlists = fetch_playlists()
 
-    for i,playlist_name in enumerate(playlists):
-
+    for i, playlist_name in enumerate(playlists):
         playlist_button = Button(
             playlist_frame,
             text=playlist_name,
             font=("Arial", 14, "bold"),
-            fg='#845162',
-            # bg='#50184A',
-            activebackground='#845162',
-            activeforeground='#845162',
-            command=lambda name=playlist_name: print(f"Selected playlist: {name}")
+            fg="#FFFFFF",
+            bg="#50184A",
+            activebackground="#50184A",
+            activeforeground="#FFFFFF"
         )
         playlist_button.grid(row=i, column=0, sticky="ew", padx=0, pady=1)
-
-        menu_button = Button(
-            playlist_frame,
-            text=">",
-            font=("Arial", 14, "bold"),
-            fg="#845162",
-            bg="#845162",
-            activebackground="#845162",
-            activeforeground="#845162"
-        )
-        menu_button.grid(row=i, column=1, sticky="e", padx=(0, 5), pady=1)
-
-        menu_button.bind("<Button-1>", lambda event, name=playlist_name: show_playlist_menu(
+        playlist_button.bind("<Button-3>", lambda event, name=playlist_name: show_playlist_menu(
             event, name, playlist_frame, delete_playlist_callback, change_cover_callback
         ))
+        playlist_button.bind("<Button-1>", lambda event, name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name))
     playlist_frame.columnconfigure(0, weight=1)
-    playlist_frame.columnconfigure(1, weight=0) 
-
 
 
 
@@ -57,7 +40,7 @@ def delete_playlist(playlist_name, playlist_frame, update_playlist_buttons, page
         connection.commit()
         
         messagebox.showinfo("Success", f"Playlist '{playlist_name}' deleted successfully!")
-        update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover)
+        update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover, page_manager)
     except Exception as e:
         messagebox.showerror("Error", f"Failed to delete playlist: {e}")
     finally:
@@ -103,3 +86,9 @@ def show_playlist_menu(event, playlist_name, playlist_frame, delete_playlist_cal
     )
     menu.post(event.widget.winfo_rootx() + event.x, event.widget.winfo_rooty() + event.y)
 
+
+def initialize_middle_frame(page_manager):
+    playlists = fetch_playlists()
+    if playlists:
+        first_playlist = playlists[0]
+        page_manager.show_dynamic_panel("MiddlePanel", first_playlist)

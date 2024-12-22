@@ -62,7 +62,8 @@ def create_empty_playlist(playlist_frame, page_manager):
             connection.commit()
 
             messagebox.showinfo("Success", f"Playlist '{playlist_name}' created successfully!")
-            update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover)
+            # update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover)
+            update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover, page_manager)
             dialog.destroy()
         except Exception as e:
             messagebox.showerror("Error", f"Failed to create playlist: {e}")
@@ -142,7 +143,8 @@ def import_playlist_from_folder(playlist_frame, page_manager):
 
             if playlist_id:
                 messagebox.showinfo("Success", f"Playlist '{playlist_name}' imported successfully!")
-                update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover)
+                # update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover)
+                update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover, page_manager)
                 dialog.destroy()
             else:
                 messagebox.showerror("Error", "Failed to import playlist due to database error.")

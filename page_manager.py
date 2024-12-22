@@ -38,13 +38,11 @@ class PageManager:
     def show_dynamic_panel(self, dynamic_panel_name, playlist_name):
         if self.current_dynamic_panel:
             self.current_dynamic_panel.grid_remove()
-
         create_panel_func = self.dynamic_panels[dynamic_panel_name]
-
         middle_frame = create_panel_func(self.root, playlist_name)
         middle_frame.grid(row=1, column=1, sticky="nsew")
-
         self.current_dynamic_panel = middle_frame
+
 
 
     def center_window(self, width, height):

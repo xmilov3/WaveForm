@@ -71,8 +71,7 @@ def create_left_panel(parent, page_manager):
 
     
     
-    
-    update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover)
+    update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover, page_manager)
     populate_playlists(playlist_frame, page_manager)
 
     return left_frame

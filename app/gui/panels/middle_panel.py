@@ -144,4 +144,5 @@ def create_middle_panel(parent, playlist_name):
     middle_frame.grid_rowconfigure(1, weight=1)
     middle_frame.grid_columnconfigure(0, weight=1)
 
-    return middle_frame, song_listbox
+    return middle_frame, header_frame, songlist_frame, song_listbox
+
