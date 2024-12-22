@@ -94,7 +94,6 @@ def populate_playlists(playlist_frame, page_manager):
                 activeforeground='#FFFFFF',
                 borderwidth=0,
                 command=lambda name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
-
             ).pack(fill="x", padx=10, pady=2)
     else:
         Label(
