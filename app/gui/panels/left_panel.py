@@ -86,7 +86,7 @@ def populate_playlists(playlist_frame, page_manager):
                 fg='black',
                 bg='#50184A',
                 # activebackground='#845162',
-                activeforegrouknd='black',
+                # activeforegrouknd='black',
                 borderwidth=0,
                 command=lambda name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
             )

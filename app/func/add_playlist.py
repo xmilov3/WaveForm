@@ -149,7 +149,7 @@ def import_playlist_from_folder(playlist_frame, page_manager):
 
         try:
             print(f"Importing playlist '{playlist_name}' from folder '{folder_path}'")
-            playlist_id = process_playlist_from_folder(folder_path, playlist_name, user_id, created_by, insert_song)
+            playlist_id = process_playlist_from_folder(folder_path, playlist_name, user_id, created_by, insert_song, cover_path)
 
             if playlist_id:
                 messagebox.showinfo("Success", f"Playlist '{playlist_name}' imported successfully!")
@@ -161,11 +161,9 @@ def import_playlist_from_folder(playlist_frame, page_manager):
             print(f"Error importing playlist: {e}")
             messagebox.showerror("Error", f"Failed to import playlist: {e}")
 
-
     Button(dialog, text="OK", command=submit_import).grid(row=4, column=1, sticky="e", padx=10, pady=20)
     Button(dialog, text="Cancel", command=dialog.destroy).grid(row=4, column=2, sticky="w", padx=10, pady=20)
 
     dialog.columnconfigure(1, weight=1)
 
     dialog.mainloop()
-

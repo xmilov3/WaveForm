@@ -67,7 +67,7 @@ class AppWindow(tk.Frame):
         self.main_frame.grid_rowconfigure(2, weight=0)
 
         # Top Frame
-        top_frame.grid(row=0, column=0, columnspan=3, sticky="nsew")
+        top_frame.grid_columnconfigure(0, weight=1)
 
         # Left Frame
         left_frame.grid(row=1, column=0, sticky="nsew")

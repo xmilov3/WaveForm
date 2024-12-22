@@ -41,11 +41,12 @@ class PageManager:
         if self.current_dynamic_panel:
             self.current_dynamic_panel.grid_remove()
         create_panel_func = self.dynamic_panels[dynamic_panel_name]
-        middle_frame = create_panel_func(self.root, playlist_name)
         
-        if not isinstance(middle_frame, Frame):
-            raise TypeError(f"The dynamic panel '{dynamic_panel_name}' did not return a Frame object. Received: {type(middle_frame)}")
+        panels = create_panel_func(self.root, playlist_name)
+        if not isinstance(panels, tuple) or not isinstance(panels[0], Frame):
+            raise TypeError(f"The dynamic panel '{dynamic_panel_name}' did not return a valid tuple with Frame as the first element. Received: {type(panels)}")
 
+        middle_frame = panels[0]
         middle_frame.grid(row=1, column=1, sticky="nsew")
         self.current_dynamic_panel = middle_frame
 

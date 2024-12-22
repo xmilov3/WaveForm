@@ -5,7 +5,7 @@ from tkinter import Label, messagebox
 
 
 
-def process_playlist_from_folder(folder_path, playlist_name, user_id, created_by, insert_song_function):
+def process_playlist_from_folder(folder_path, playlist_name, user_id, created_by, insert_song_function, cover_path=None):
     connection = create_connection()
     if not connection:
         print("Cannot connect to database.")
@@ -14,11 +14,14 @@ def process_playlist_from_folder(folder_path, playlist_name, user_id, created_by
     playlist_id = None
     try:
         cursor = connection.cursor()
+
+        if not cover_path:
+            cover_path = "app/gui/assets/covers/playlist_covers/default_cover.png"
+
         query = """
             INSERT INTO playlists (user_id, name, description, created_by, playlist_cover_path)
             VALUES (%s, %s, %s, %s, %s)
         """
-        cover_path = "app/gui/assets/covers/playlist_covers/default_cover.png"
         cursor.execute(query, (user_id, playlist_name, "Importing playlist", created_by, cover_path))
         connection.commit()
         playlist_id = cursor.lastrowid
@@ -54,6 +57,7 @@ def process_playlist_from_folder(folder_path, playlist_name, user_id, created_by
             cursor.close()
             connection.close()
     return playlist_id
+
 
 def get_playlist_id_if_exists(connection, playlist_name):
     try:

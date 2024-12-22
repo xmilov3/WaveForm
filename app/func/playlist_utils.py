@@ -35,11 +35,13 @@ def update_playlist_buttons(playlist_frame, delete_playlist_callback, change_cov
                 playlist_frame,
                 text=playlist_name,
                 font=("Arial", 14, "bold"),
-                borderwidth=0,
+                # borderwidth=0,
                 command=lambda name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
             )
             button.grid(row=i, column=0, sticky="ew", padx=5, pady=5)
             button.bind("<Button-3>", lambda event, name=playlist_name: show_context_menu(event, name, playlist_frame, page_manager))
+            button.bind("<Control-Button-1>", lambda event, name=playlist_name: show_context_menu(event, name, playlist_frame, page_manager))
+
             playlist_buttons[playlist_name] = button
 
     playlist_frame.grid_columnconfigure(0, weight=1)
