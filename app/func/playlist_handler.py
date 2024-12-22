@@ -1,11 +1,9 @@
 import os
 import mysql.connector
 from app.db.database import create_connection
-from app.func.utils import split_title_and_artist
 from tkinter import simpledialog, filedialog, messagebox
 from app.db.db_operations import insert_song
-from app.func.utils import process_playlist_from_folder, fetch_playlists
-from app.func.playlist_utils import change_playlist_cover, update_playlist_buttons, delete_playlist
+from app.func.playlist_utils import change_playlist_cover, update_playlist_buttons, delete_playlist, split_title_and_artist, process_playlist_from_folder, fetch_playlists
 
 
 

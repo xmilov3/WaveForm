@@ -1,10 +1,9 @@
 from tkinter import *
 from tkinter import simpledialog, filedialog, messagebox
 from app.func.add_song import add_song
-from app.func.utils import fetch_playlists
 from app.db.db_operations import insert_song
 from app.func.add_playlist import create_empty_playlist, import_playlist_from_folder
-from app.func.playlist_utils import update_playlist_buttons, change_playlist_cover, delete_playlist
+from app.func.playlist_utils import update_playlist_buttons, change_playlist_cover, delete_playlist, fetch_playlists
 
 
 
@@ -156,3 +155,14 @@ def load_playlist_songs(playlist_name):
         if connection and connection.is_connected():
             cursor.close()
             connection.close()
+
+def initialize_middle_frame(playlist_frame, page_manager):
+    playlists = fetch_playlists()
+    if playlists:
+        first_playlist = playlists[0]
+        page_manager.show_dynamic_panel("MiddlePanel", first_playlist)
+    else:
+        print("No songs found to load.")
+
+    update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover, page_manager)
+    initialize_middle_frame(playlist_frame, page_manager)

@@ -1,4 +1,4 @@
-from app.func.utils import fetch_playlists
+from app.func.playlist_utils import fetch_playlists
 from tkinter import Label, Button, Toplevel
 
 def center_window(window, width=1500, height=1000):

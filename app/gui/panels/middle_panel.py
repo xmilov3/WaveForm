@@ -1,6 +1,7 @@
 from tkinter import *
 from PIL import Image, ImageTk
 import mysql.connector
+from app.func.playlist_utils import fetch_playlists
 
 
 def fetch_playlist_details(playlist_name):
@@ -131,6 +132,10 @@ def create_songlist_frame(parent, playlist_name):
 
 
 def create_middle_panel(parent, playlist_name):
+    if not playlist_name:
+        print("Playlist name is required.")
+        return None, None, None, None
+
     middle_frame = Frame(parent, bg="#1E052A")
     middle_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
 
@@ -145,4 +150,3 @@ def create_middle_panel(parent, playlist_name):
     middle_frame.grid_columnconfigure(0, weight=1)
 
     return middle_frame, header_frame, songlist_frame, song_listbox
-

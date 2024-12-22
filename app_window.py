@@ -7,6 +7,8 @@ from app.gui.panels.middle_panel import create_middle_panel
 from app.gui.panels.right_panel import create_right_panel, update_next_in_queue, update_now_playing
 from app.gui.panels.bottom_panel import create_bottom_panel
 from app.func.music_controller import play_pause_song, stop_song, next_song, previous_song, initialize_first_song
+from app.func.playlist_utils import fetch_playlists
+
 
 pygame.mixer.init(channels=2)
 pygame.mixer.music.stop()
@@ -28,7 +30,10 @@ class AppWindow(tk.Frame):
     def init_panels(self):
         top_frame = create_top_panel(self.main_frame, self.page_manager)
         left_frame = create_left_panel(self.main_frame, self.page_manager)
-        middle_frame, header_frame, songlist_frame, song_listbox = create_middle_panel(self.main_frame, "Liked Songs")
+        playlists = fetch_playlists()
+        first_playlist = playlists[0] if playlists else None
+        middle_frame, header_frame, songlist_frame, song_listbox = create_middle_panel(self.main_frame, first_playlist)
+
 
         right_frame, queue_text_label, playlist_label, album_art_label, title_label, artist_label = create_right_panel(
             self.main_frame, playlist_name="Liked Songs"

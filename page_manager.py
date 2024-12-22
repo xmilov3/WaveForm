@@ -15,6 +15,9 @@ class PageManager:
             self.pages[name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
+    def add_dynamic_panel(self, name, create_panel_func):
+        self.dynamic_panels[name] = create_panel_func
+
     def show_page(self, name, *args):
         for page in self.pages.values():
             page.grid_remove()
@@ -31,8 +34,15 @@ class PageManager:
 
         self.root.update_idletasks()
 
-    def add_dynamic_panel(self, name, frame_creator):
-        self.dynamic_panels[name] = frame_creator
+    def show_dynamic_panel(self, dynamic_panel_name, playlist_name):
+        if self.current_dynamic_panel:
+            self.current_dynamic_panel.grid_remove()
+
+        create_panel_func = self.dynamic_panels[dynamic_panel_name]
+        middle_frame, _, _, _ = create_panel_func(self.root, playlist_name)
+
+        middle_frame.grid(row=1, column=1, sticky="nsew")
+        self.current_dynamic_panel = middle_frame
 
 
     def show_dynamic_panel(self, dynamic_panel_name, playlist_name):

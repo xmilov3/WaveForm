@@ -5,7 +5,7 @@ from app.func.add_song import insert_song
 from tkinter import filedialog, simpledialog, messagebox
 from app.func.playlist_handler import create_playlist, delete_playlist
 from app.func.playlist_utils import update_playlist_buttons, change_playlist_cover
-from app.func.utils import process_playlist_from_folder, split_title_and_artist
+from app.func.playlist_utils import process_playlist_from_folder, split_title_and_artist
 from tkinter import *
 
 
@@ -62,7 +62,6 @@ def create_empty_playlist(playlist_frame, page_manager):
             connection.commit()
 
             messagebox.showinfo("Success", f"Playlist '{playlist_name}' created successfully!")
-            # update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover)
             update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover, page_manager)
             dialog.destroy()
         except Exception as e:
@@ -143,7 +142,6 @@ def import_playlist_from_folder(playlist_frame, page_manager):
 
             if playlist_id:
                 messagebox.showinfo("Success", f"Playlist '{playlist_name}' imported successfully!")
-                # update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover)
                 update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover, page_manager)
                 dialog.destroy()
             else:
