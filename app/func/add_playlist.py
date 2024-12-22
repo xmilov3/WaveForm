@@ -47,6 +47,9 @@ def create_empty_playlist(playlist_frame, page_manager):
         description = description_entry.get().strip()
         cover_path = cover_path_entry.get().strip()
 
+        if not cover_path:
+            cover_path = "app/gui/assets/covers/playlist_covers/default_cover.png"
+
         if not playlist_name:
             messagebox.showerror("Error", "Playlist name is required!")
             return
@@ -70,6 +73,7 @@ def create_empty_playlist(playlist_frame, page_manager):
             if connection:
                 cursor.close()
                 connection.close()
+
 
     Button(dialog, text="OK", command=submit_playlist).grid(row=3, column=1, sticky="e", padx=10, pady=20)
 
@@ -129,6 +133,9 @@ def import_playlist_from_folder(playlist_frame, page_manager):
         folder_path = folder_path_entry.get().strip()
         cover_path = cover_path_entry.get().strip()
 
+        if not cover_path:
+            cover_path = "app/gui/assets/covers/playlist_covers/default_cover.png"
+
         if not playlist_name:
             messagebox.showerror("Error", "Playlist name is required!")
             return
@@ -149,6 +156,7 @@ def import_playlist_from_folder(playlist_frame, page_manager):
         except Exception as e:
             print(f"Error importing playlist: {e}")
             messagebox.showerror("Error", f"Failed to import playlist: {e}")
+
 
     Button(dialog, text="OK", command=submit_import).grid(row=4, column=1, sticky="e", padx=10, pady=20)
     Button(dialog, text="Cancel", command=dialog.destroy).grid(row=4, column=2, sticky="w", padx=10, pady=20)

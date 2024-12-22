@@ -30,38 +30,30 @@ class AppWindow(tk.Frame):
     def init_panels(self):
         top_frame = create_top_panel(self.main_frame, self.page_manager)
         left_frame = create_left_panel(self.main_frame, self.page_manager)
+
         playlists = fetch_playlists()
         first_playlist = playlists[0] if playlists else None
-        middle_frame, header_frame, songlist_frame, song_listbox = create_middle_panel(self.main_frame, first_playlist)
 
+        middle_frame, header_frame, songlist_frame, song_listbox = create_middle_panel(
+            self.main_frame, first_playlist
+        )
+        self.main_frame.update_idletasks()
 
         right_frame, queue_text_label, playlist_label, album_art_label, title_label, artist_label = create_right_panel(
-            self.main_frame, playlist_name="Liked Songs"
+            self.main_frame, playlist_name=first_playlist
         )
+
         bottom_frame, time_remaining_label, time_elapsed_label, progress_slider, title_label, artist_label, play_pause_button, play_button_img, pause_button_img = create_bottom_panel(
             self.main_frame,
             song_listbox,
             queue_text_label,
-            "Liked Songs",
+            first_playlist,
             playlist_label,
             album_art_label,
             title_label,
             artist_label,
             update_next_in_queue,
-            update_now_playing
-        )
-
-        initialize_first_song(
-            song_listbox,
-            play_pause_button,
-            play_button_img,
-            pause_button_img,
-            title_label,
-            artist_label,
-            time_elapsed_label,
-            time_remaining_label,
-            progress_slider,
-            bottom_frame
+            update_now_playing,
         )
 
         self.configure_layout(top_frame, left_frame, middle_frame, right_frame, bottom_frame)

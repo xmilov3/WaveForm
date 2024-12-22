@@ -146,7 +146,7 @@ def process_playlist_from_folder(folder_path, playlist_name, user_id, created_by
             INSERT INTO playlists (user_id, name, description, created_by, playlist_cover_path)
             VALUES (%s, %s, %s, %s, %s)
         """
-        cover_path = "app/gui/assets/covers/default_cover.png"
+        cover_path = "app/gui/assets/covers/playlist_covers/default_cover.png"
         cursor.execute(query, (user_id, playlist_name, "Importing playlist", created_by, cover_path))
         connection.commit()
         playlist_id = cursor.lastrowid

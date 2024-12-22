@@ -107,7 +107,7 @@ def populate_playlists(playlist_frame, page_manager):
 
 
 def handle_playlist_selection(event, page_manager, listbox):
-    selected_index = listbox.curselection()  # Pobierz zaznaczenie
+    selected_index = listbox.curselection()
     if selected_index:
         playlist_name = listbox.get(selected_index)
         page_manager.show_dynamic_panel("MiddlePanel", playlist_name)
@@ -172,6 +172,7 @@ def initialize_middle_frame(playlist_frame, page_manager):
     if playlists:
         first_playlist = playlists[0]
         page_manager.show_dynamic_panel("MiddlePanel", first_playlist)
+        playlist_frame.update_idletasks()
     else:
         print("No songs found to load.")
 

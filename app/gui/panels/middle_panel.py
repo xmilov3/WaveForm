@@ -65,7 +65,7 @@ def fetch_songs_by_playlist(playlist_name):
             connection.close()
 
 
-def create_header_frame(parent, playlist_name):
+def create_header_frame(parent, playlist_name=None):
     header_frame = Frame(parent, bg="#2D0232")
 
     header_image_label = Label(header_frame, bg="#2D0232")
@@ -106,7 +106,7 @@ def create_header_frame(parent, playlist_name):
 
 
 def create_songlist_frame(parent, playlist_name):
-    songlist_frame = Frame(parent, bg="#1E052A")
+    songlist_frame = Frame(parent, bg="#1E052A", width=580)
     song_listbox = Listbox(
         songlist_frame,
         bg="#2D0232",
@@ -115,9 +115,10 @@ def create_songlist_frame(parent, playlist_name):
         selectforeground="white",
         borderwidth=0,
         highlightthickness=0,
-        fg="white"
+        fg="white",
+        height=20,
     )
-    song_listbox.pack(fill=BOTH, expand=True, padx=5, pady=5)
+    song_listbox.pack(fill=BOTH, expand=True, padx=10, pady=5)
 
     songs = fetch_songs_by_playlist(playlist_name)
     song_listbox.delete(0, END)
@@ -136,8 +137,9 @@ def create_middle_panel(parent, playlist_name):
         print("Playlist name is required.")
         return None, None, None, None
 
-    middle_frame = Frame(parent, bg="#1E052A")
+    middle_frame = Frame(parent, bg="#1E052A", width=600, height=400)
     middle_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
+    middle_frame.grid_propagate(False)
 
     header_frame = create_header_frame(middle_frame, playlist_name)
     header_frame.grid(row=0, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
