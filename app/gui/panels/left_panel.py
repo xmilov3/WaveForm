@@ -70,37 +70,48 @@ def create_left_panel(parent, page_manager):
 
     
     
-    update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover, page_manager)
     populate_playlists(playlist_frame, page_manager)
 
     return left_frame
 
 def populate_playlists(playlist_frame, page_manager):
-    for widget in playlist_frame.winfo_children():
-        widget.destroy()
-
     playlists = fetch_playlists()
+
+    listbox = getattr(playlist_frame, "listbox", None)
+    if not listbox:
+        listbox = Listbox(
+            playlist_frame,
+            bg="#2D0232",
+            fg="white",
+            font=("Arial", 14),
+            selectbackground="#50184A",
+            selectforeground="white",
+            borderwidth=0,
+            highlightthickness=0
+        )
+        listbox.pack(fill=BOTH, expand=True, padx=10, pady=10)
+        playlist_frame.listbox = listbox
+
+    listbox.delete(0, END)
+
     if playlists:
         for playlist_name in playlists:
-            Button(
-                playlist_frame,
-                text=playlist_name,
-                font=("Arial", 14, "bold"),
-                fg='#845162',
-                bg='#50184A',
-                activebackground='#845162',
-                activeforeground='#845162',
-                borderwidth=0,
-                command=lambda name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
-            ).pack(fill="x", padx=10, pady=2)
+            listbox.insert(END, playlist_name)
+        
+        listbox.bind(
+            "<<ListboxSelect>>",
+            lambda event: handle_playlist_selection(event, page_manager, listbox)
+        )
     else:
-        Label(
-            playlist_frame,
-            text="No playlists available.",
-            font=("Arial", 12),
-            fg="gray",
-            bg="#2d0232"
-        ).pack(fill="x", padx=10, pady=2)
+        listbox.insert(END, "No playlists available.")
+
+
+def handle_playlist_selection(event, page_manager, listbox):
+    selected_index = listbox.curselection()  # Pobierz zaznaczenie
+    if selected_index:
+        playlist_name = listbox.get(selected_index)
+        page_manager.show_dynamic_panel("MiddlePanel", playlist_name)
+
 
 
 def add_song_with_playlist():
