@@ -12,6 +12,8 @@ pygame.mixer.init(channels=2)
 import mysql.connector
 from pydub import AudioSegment
 from app.gui.panels.right_panel import update_next_in_queue, update_now_playing
+from app.func.shared_func import play_playlist
+
 
 
 
@@ -68,9 +70,46 @@ def initialize_first_song(
     time_elapsed_label,
     time_remaining_label,
     progress_slider,
-    bottom_frame
+    bottom_frame,
+    playlist_name=None
 ):
     global currentsong, song_length, current_song_position, song_start_time, is_playing
+
+    if playlist_name:
+        try:
+            connection = mysql.connector.connect(
+                host='localhost',
+                database='WaveForm_db',
+                user='root',
+                password=''
+            )
+            cursor = connection.cursor()
+            query = """
+                SELECT s.title, s.artist
+                FROM songs s
+                JOIN playlist_songs ps ON s.song_id = ps.song_id
+                JOIN playlists p ON ps.playlist_id = p.playlist_id
+                WHERE p.name = %s
+                ORDER BY ps.song_id ASC
+            """
+            cursor.execute(query, (playlist_name,))
+            songs = cursor.fetchall()
+
+            song_listbox.delete(0, END)
+            for song in songs:
+                song_listbox.insert(END, f"{song[0]} - {song[1]}")
+
+            if not songs:
+                print(f"No songs found for playlist: {playlist_name}")
+                return
+
+        except Exception as e:
+            print(f"Error loading songs for playlist: {e}")
+            return
+        finally:
+            if 'connection' in locals() and connection.is_connected():
+                cursor.close()
+                connection.close()
 
     if song_listbox.size() == 0:
         print("The song list is empty!")
@@ -158,7 +197,11 @@ def play_pause_song(song_info, is_playing, play_button, play_button_img, pause_b
             print("Error, Song info not found!")
             return is_playing
 
-        song_title, artist_name = song_info.split(" - ")
+        if " - " in song_info:
+            song_title, artist_name = song_info.split(" - ")
+        else:
+            song_title = song_info.strip()
+            artist_name = "Unknown Artist"
 
         if pygame.mixer.music.get_busy():
             is_playing = True
@@ -189,6 +232,7 @@ def play_pause_song(song_info, is_playing, play_button, play_button_img, pause_b
     except Exception as e:
         print(f"Błąd w play_pause_song: {e}")
         return is_playing
+
 
 
 

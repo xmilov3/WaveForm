@@ -1,52 +1,86 @@
-import os
-from tkinter import *
-from app_window import create_app_window
+import tkinter as tk
+from page_manager import PageManager
+from init_page import InitPage
+from app_window import AppWindow
+from login_window import LoginPage
+from register_window import RegisterPage
 from app.db.database import create_connection
-from register_window import create_register_window
-from init_page import create_init_page
-from login_window import create_login_window
+from app.func.session import user_session
+from app.gui.panels.middle_panel import create_middle_panel
+from app.func.load_pic_gui import load_top_logo
+from tkinter import messagebox
 
 def main():
-    
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    
+    root = tk.Tk()
+    root.withdraw()
+    root.title("WaveForm")
+    root.configure(bg="#1E052A")
+    root.geometry("1500x1000")
+    icon = load_top_logo()
+    root.iconphoto(True, icon)
+
     connection = create_connection()
     if not connection:
         print("Error! Unable to connect to database")
         return
 
-    def on_login_success():
-        root = create_app_window()
-        root.mainloop()
+    page_manager = PageManager(root)
+    root.grid_rowconfigure(0, weight=1)
+    root.grid_columnconfigure(0, weight=1)
 
-    def on_login():
-        create_login_window(connection, on_login_success, on_register)
+    def on_login_success(user_data):
+        user_id, username = user_data
+        user_session.set_user(user_id, username)
+        print(f"Session started for user: {username} (ID: {user_id})")
+        page_manager.show_page("AppWindow")
+        root.deiconify()
 
-    def on_register():
-        create_register_window(connection, on_login)
-        
     def auto_login():
         username = "xmilov3"
         password_hash = "admin"
-        
+
         cursor = connection.cursor()
-        query = "SELECT * FROM users WHERE username = %s AND password_hash = %s"
+        query = "SELECT user_id, username FROM users WHERE username = %s AND password_hash = %s"
         cursor.execute(query, (username, password_hash))
         user = cursor.fetchone()
-        
+
         if user:
             print("Auto-login successful")
-            on_login_success()
+            on_login_success(user)
             return True
         else:
             print("Auto-login failed. Invalid credentials.")
             return False
 
+    def open_login():
+        page_manager.show_page("LoginPage")
+
+    def open_register():
+        page_manager.show_page("RegisterPage")
+
+    init_page = InitPage(root, page_manager)
+    login_page = LoginPage(root, page_manager, connection)
+    register_page = RegisterPage(root, page_manager, connection)
+    app_window = AppWindow(root, page_manager)
+
+    page_manager.add_page("InitPage", init_page)
+    page_manager.add_page("LoginPage", login_page)
+    page_manager.add_page("RegisterPage", register_page)
+    page_manager.add_page("AppWindow", app_window)
+    page_manager.add_dynamic_panel(
+        "MiddlePanel",
+        lambda parent, playlist_name: create_middle_panel(app_window.main_frame, playlist_name)
+    )
+
     if not auto_login():
-        create_init_page(
-            on_signup=on_register,
-            on_signin=on_login
-        )
+        page_manager.show_page("InitPage")
+        root.deiconify()
+        page_manager.center_window(1500, 1000)
+    else:
+        page_manager.center_window(1500, 1000)
+
+    root.mainloop()
+
 
 if __name__ == "__main__":
     main()
