@@ -10,6 +10,7 @@ from app.func.music_controller import play_pause_song, stop_song, next_song, pre
 from app.func.playlist_utils import fetch_playlists
 
 
+
 pygame.mixer.init(channels=2)
 pygame.mixer.music.stop()
 
@@ -32,12 +33,8 @@ class AppWindow(tk.Frame):
         left_frame = create_left_panel(self.main_frame, self.page_manager)
 
         playlists = fetch_playlists()
-        first_playlist = playlists[0] if playlists else None
-
-        middle_frame, header_frame, songlist_frame, song_listbox = create_middle_panel(
-            self.main_frame, first_playlist
-        )
-        self.main_frame.update_idletasks()
+        first_playlist = playlists[0] if playlists else "Unknown Playlist"
+        middle_frame, header_frame, songlist_frame, song_listbox = create_middle_panel(self.main_frame, first_playlist)
 
         right_frame, queue_text_label, playlist_label, album_art_label, title_label, artist_label = create_right_panel(
             self.main_frame, playlist_name=first_playlist

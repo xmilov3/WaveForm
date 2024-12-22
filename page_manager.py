@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import Frame
 
 
 class PageManager:
@@ -34,15 +35,6 @@ class PageManager:
 
         self.root.update_idletasks()
 
-    def show_dynamic_panel(self, dynamic_panel_name, playlist_name):
-        if self.current_dynamic_panel:
-            self.current_dynamic_panel.grid_remove()
-
-        create_panel_func = self.dynamic_panels[dynamic_panel_name]
-        middle_frame, _, _, _ = create_panel_func(self.root, playlist_name)
-
-        middle_frame.grid(row=1, column=1, sticky="nsew")
-        self.current_dynamic_panel = middle_frame
 
 
     def show_dynamic_panel(self, dynamic_panel_name, playlist_name):
@@ -50,8 +42,13 @@ class PageManager:
             self.current_dynamic_panel.grid_remove()
         create_panel_func = self.dynamic_panels[dynamic_panel_name]
         middle_frame = create_panel_func(self.root, playlist_name)
+        
+        if not isinstance(middle_frame, Frame):
+            raise TypeError(f"The dynamic panel '{dynamic_panel_name}' did not return a Frame object. Received: {type(middle_frame)}")
+
         middle_frame.grid(row=1, column=1, sticky="nsew")
         self.current_dynamic_panel = middle_frame
+
 
 
 

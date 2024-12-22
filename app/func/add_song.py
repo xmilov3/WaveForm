@@ -1,8 +1,29 @@
 import os
 from app.db.db_operations import insert_song
-from app.func.playlist_utils import process_playlist_from_folder
 from app.db.database import create_connection
 from app.db.song_operations import insert_song
+from app.func.playlist_handler import create_playlist, delete_playlist
+from tkinter import messagebox, simpledialog, filedialog
+from app.func.playlist_utils import fetch_playlists
+
+
+def add_song_with_playlist(page_manager):
+    playlists = fetch_playlists()
+    if not playlists:
+        messagebox.showwarning("Warning", "No playlists available. Add a playlist first.")
+        return
+
+    selected_playlist = simpledialog.askstring("Select Playlist", f"Choose playlist:\n{', '.join(playlists)}")
+    if selected_playlist:
+        file_path = filedialog.askopenfilename(
+            title="Select a music file",
+            filetypes=[("MP3 Files", "*.mp3"), ("WAV Files", "*.wav")]
+        )
+        if file_path:
+            add_song(file_path, selected_playlist)
+            messagebox.showinfo("Success", f"Song added to playlist '{selected_playlist}'.")
+        else:
+            messagebox.showinfo("Info", "No file selected.")
 
 
 def add_song(file_path, playlist_name):

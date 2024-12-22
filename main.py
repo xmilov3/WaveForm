@@ -8,6 +8,8 @@ from app.db.database import create_connection
 from app.func.session import user_session
 from app.gui.panels.middle_panel import create_middle_panel
 from app.func.load_pic_gui import load_top_logo
+import tkinter as tk
+from app.gui.panels.left_panel import update_playlist_buttons, show_context_menu
 
 
 def main():
@@ -59,6 +61,8 @@ def main():
     page_manager.show_page("InitPage")
 
     page_manager.center_window(1500, 1000)
+    
+    
     root.update_idletasks()
     root.deiconify()
 

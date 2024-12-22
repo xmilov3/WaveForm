@@ -1,11 +1,59 @@
 import os
 import mysql.connector
 from app.db.database import create_connection
-from tkinter import simpledialog, filedialog, messagebox
-from app.db.db_operations import insert_song
-from app.func.playlist_utils import change_playlist_cover, update_playlist_buttons, delete_playlist, split_title_and_artist, process_playlist_from_folder, fetch_playlists
+from tkinter import Label, messagebox
 
 
+
+def process_playlist_from_folder(folder_path, playlist_name, user_id, created_by, insert_song_function):
+    connection = create_connection()
+    if not connection:
+        print("Cannot connect to database.")
+        return None
+
+    playlist_id = None
+    try:
+        cursor = connection.cursor()
+        query = """
+            INSERT INTO playlists (user_id, name, description, created_by, playlist_cover_path)
+            VALUES (%s, %s, %s, %s, %s)
+        """
+        cover_path = "app/gui/assets/covers/playlist_covers/default_cover.png"
+        cursor.execute(query, (user_id, playlist_name, "Importing playlist", created_by, cover_path))
+        connection.commit()
+        playlist_id = cursor.lastrowid
+
+        files = [f for f in os.listdir(folder_path) if f.endswith(('.mp3', '.wav'))]
+        for file_name in files:
+            file_path = os.path.join(folder_path, file_name)
+            title, artist = split_title_and_artist(file_name)
+
+            song_id = insert_song_function(
+                connection,
+                user_id=user_id,
+                title=title,
+                artist=artist,
+                album=playlist_name,
+                genre="Unknown Genre",
+                file_path=file_path,
+                cover_path=cover_path
+            )
+
+            if song_id:
+                cursor.execute(
+                    "INSERT INTO playlist_songs (playlist_id, song_id) VALUES (%s, %s)",
+                    (playlist_id, song_id)
+                )
+                connection.commit()
+                print(f"Added '{title}' by '{artist}' to '{playlist_name}'")
+        return playlist_id
+    except Exception as e:
+        print(f"Playlist processing error: {e}")
+    finally:
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
+    return playlist_id
 
 def get_playlist_id_if_exists(connection, playlist_name):
     try:
@@ -74,8 +122,6 @@ def create_playlist(user_id, playlist_name, folder_path, insert_song_function):
 
 
 def fetch_playlists():
-    from app.db.database import create_connection
-
     try:
         connection = create_connection()
         cursor = connection.cursor()
@@ -83,13 +129,27 @@ def fetch_playlists():
         playlists = [row[0] for row in cursor.fetchall()]
         return playlists
     except Exception as e:
-        print(f"Error fetching playlists: {e}")
+        print(f"Error downloading playlists: {e}")
         return []
     finally:
         if connection and connection.is_connected():
             cursor.close()
             connection.close()
 
+def split_title_and_artist(file_name):
+    try:
+        base_name = os.path.splitext(file_name)[0]
+        parts = base_name.split(" - ", 1)
+        if len(parts) == 2:
+            artist_name = parts[0].strip()
+            song_title = parts[1].strip()
+        else:
+            artist_name = "Unknown artist"
+            song_title = base_name.strip()
+        return song_title, artist_name
+    except Exception as e:
+        print(f"Error while splitting: {e}")
+        return "Unknown album", "Unknown artist"
             
 def load_playlist_songs(playlist_name):
     from app.db.database import create_connection
@@ -124,3 +184,23 @@ def load_playlist_songs(playlist_name):
             connection.close()
 
 
+def delete_playlist(playlist_name, playlist_frame, update_function, page_manager):
+    try:
+        connection = create_connection()
+        if not connection:
+            messagebox.showerror("Error", "Failed to connect to the database.")
+            return
+
+        cursor = connection.cursor()
+        query = "DELETE FROM playlists WHERE name = %s"
+        cursor.execute(query, (playlist_name,))
+        connection.commit()
+
+        messagebox.showinfo("Success", f"Playlist '{playlist_name}' deleted successfully!")
+        update_function(playlist_frame, page_manager)
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to delete playlist: {e}")
+    finally:
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()

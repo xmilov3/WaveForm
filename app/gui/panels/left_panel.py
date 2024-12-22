@@ -1,9 +1,11 @@
 from tkinter import *
+from tkinter import ttk, Menu
 from tkinter import simpledialog, filedialog, messagebox
 from app.func.add_song import add_song
 from app.db.db_operations import insert_song
 from app.func.add_playlist import create_empty_playlist, import_playlist_from_folder
-from app.func.playlist_utils import update_playlist_buttons, change_playlist_cover, delete_playlist, fetch_playlists
+from app.func.playlist_utils import update_playlist_buttons, show_context_menu, change_playlist_cover, delete_playlist, fetch_playlists
+from app.func.playlist_utils import *
 
 
 
@@ -18,92 +20,97 @@ def create_left_panel(parent, page_manager):
     playlist_frame = Frame(left_frame, bg='#2d0232')
     playlist_frame.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
 
-    Button(
+    style = ttk.Style()
+    style.configure(
+        "Custom.TButton",
+        font=("Arial", 14, "bold"),
+        foreground='#FFFFFF',
+        background='#50184A',
+        padding=5
+    )
+    style.map(
+        "Custom.TButton",
+        background=[('active', '#845162')],
+        foreground=[('active', '#FFFFFF')]
+    )
+
+    ttk.Button(
         buttons_frame,
         text="Add Song",
-        font=("Arial", 14, "bold"),
-        command=lambda: add_song_with_playlist(page_manager),
-        fg='#845162',
-        bg='#50184A',
-        activebackground='#845162',
-        activeforeground='#845162',
-        borderwidth=0
+        style="Custom.TButton",
+        command=lambda: add_song_with_playlist(page_manager)
     ).pack(fill="x", padx=10, pady=5)
 
-    Button(
+    ttk.Button(
         buttons_frame,
         text="Create Playlist",
-        font=("Arial", 14, "bold"),
-        command=lambda: create_empty_playlist(playlist_frame, page_manager),
-        fg='#845162',
-        bg='#50184A',
-        activebackground='#845162',
-        activeforeground='#845162',
-        borderwidth=0
+        style="Custom.TButton",
+        command=lambda: create_empty_playlist(playlist_frame, page_manager)
     ).pack(fill="x", padx=10, pady=5)
-    
-    Button(
+
+    ttk.Button(
         buttons_frame,
-        text="Import playlist",
-        font=("Arial", 14, "bold"),
-        command=lambda: import_playlist_from_folder(playlist_frame, page_manager),
-        fg='#845162',
-        bg='#50184A',
-        activebackground='#845162',
-        activeforeground='#845162',
-        borderwidth=0
+        text="Import Playlist",
+        style="Custom.TButton",
+        command=lambda: import_playlist_from_folder(playlist_frame, page_manager)
     ).pack(fill="x", padx=10, pady=5)
 
-
-    Button(
+    ttk.Button(
         buttons_frame,
         text="Analyze Song",
-        font=("Arial", 14, "bold"),
-        command=lambda: add_song_with_playlist(page_manager),
-        fg='#845162',
-        bg='#50184A',
-        activebackground='#845162',
-        activeforeground='#845162',
-        borderwidth=0,
-        padx=10, pady=5
+        style="Custom.TButton",
+        command=lambda: add_song_with_playlist(page_manager)
     ).pack(fill="x", padx=10, pady=5)
 
-    
-    
-    populate_playlists(playlist_frame, page_manager)
+    update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover, page_manager)
 
     return left_frame
+
+
 
 def populate_playlists(playlist_frame, page_manager):
     playlists = fetch_playlists()
 
-    listbox = getattr(playlist_frame, "listbox", None)
-    if not listbox:
-        listbox = Listbox(
-            playlist_frame,
-            bg="#2D0232",
-            fg="white",
-            font=("Arial", 14),
-            selectbackground="#50184A",
-            selectforeground="white",
-            borderwidth=0,
-            highlightthickness=0
-        )
-        listbox.pack(fill=BOTH, expand=True, padx=10, pady=10)
-        playlist_frame.listbox = listbox
-
-    listbox.delete(0, END)
+    for widget in playlist_frame.winfo_children():
+        widget.destroy()
 
     if playlists:
-        for playlist_name in playlists:
-            listbox.insert(END, playlist_name)
-        
-        listbox.bind(
-            "<<ListboxSelect>>",
-            lambda event: handle_playlist_selection(event, page_manager, listbox)
-        )
+        for i, playlist_name in enumerate(playlists):
+            playlist_button = Button(
+                playlist_frame,
+                text=playlist_name,
+                font=("Arial", 14, "bold"),
+                fg='#FFFFFF',
+                bg='#50184A',
+                activebackground='#845162',
+                activeforeground='#FFFFFF',
+                borderwidth=0
+            )
+            playlist_button.grid(row=i, column=0, sticky="ew", padx=5, pady=5)
+            
+            playlist_button.configure(
+                fg='#FFFFFF',
+                bg='#50184A',
+                activebackground='#845162',
+                activeforeground='#FFFFFF'
+            )
+            
+            playlist_button.bind(
+                "<Button-1>",
+                lambda event, name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
+            )
     else:
-        listbox.insert(END, "No playlists available.")
+        Label(
+            playlist_frame,
+            text="No playlists available.",
+            font=("Arial", 12),
+            fg="gray",
+            bg="#2d0232"
+        ).grid(row=0, column=0, padx=5, pady=5, sticky="ew")
+
+    playlist_frame.grid_columnconfigure(0, weight=1)
+
+
 
 
 def handle_playlist_selection(event, page_manager, listbox):
@@ -113,8 +120,46 @@ def handle_playlist_selection(event, page_manager, listbox):
         page_manager.show_dynamic_panel("MiddlePanel", playlist_name)
 
 
+def update_playlist_buttons(playlist_frame, delete_playlist_callback, change_cover_callback, page_manager):
+    for widget in playlist_frame.winfo_children():
+        widget.destroy()
 
-def add_song_with_playlist():
+    playlists = fetch_playlists()
+
+    for i, playlist_name in enumerate(playlists):
+        button = ttk.Button(
+            playlist_frame,
+            text=playlist_name,
+            style="Custom.TButton",
+            command=lambda name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
+        )
+        button.grid(row=i, column=0, sticky="ew", padx=5, pady=5)
+
+        button.bind("<Button-3>", lambda event, name=playlist_name: show_context_menu(event, name, playlist_frame, page_manager))
+
+    playlist_frame.grid_columnconfigure(0, weight=1)
+
+
+def show_context_menu(event, playlist_name, playlist_frame, page_manager):
+    menu = Menu(None, tearoff=0)
+    menu.add_command(
+        label="Delete Playlist",
+        command=lambda: delete_playlist_wrapper(playlist_name, playlist_frame, page_manager)
+    )
+    menu.add_command(
+        label="Change Cover",
+        command=lambda: change_playlist_cover(playlist_name)
+    )
+    menu.post(event.widget.winfo_rootx() + event.x, event.widget.winfo_rooty() + event.y)
+
+
+def delete_playlist_wrapper(playlist_name, playlist_frame, page_manager):
+    response = messagebox.askyesno("Delete Playlist", f"Are you sure you want to delete '{playlist_name}'?")
+    if response:
+        delete_playlist(playlist_name, playlist_frame, update_playlist_buttons, page_manager)
+
+
+def add_song_with_playlist(page_manager):
     playlists = fetch_playlists()
     if not playlists:
         messagebox.showwarning("Warning", "No playlists available. Add a playlist first.")
@@ -132,49 +177,3 @@ def add_song_with_playlist():
         else:
             messagebox.showinfo("Info", "No file selected.")
 
-
-def load_playlist_songs(playlist_name):
-    from app.db.database import create_connection
-    print(f"Loading songs for playlist: {playlist_name}")
-    try:
-        connection = create_connection()
-        if not connection:
-            print("Failed to connect to the database.")
-            return
-
-        cursor = connection.cursor()
-        query = """
-            SELECT songs.title, songs.artist 
-            FROM songs
-            JOIN playlist_songs ON songs.song_id = playlist_songs.song_id
-            JOIN playlists ON playlists.playlist_id = playlist_songs.playlist_id
-            WHERE playlists.name = %s
-        """
-        cursor.execute(query, (playlist_name,))
-        songs = cursor.fetchall()
-
-        if songs:
-            print(f"Songs in '{playlist_name}':")
-            for song in songs:
-                print(f"Title: {song[0]}, Artist: {song[1]}")
-        else:
-            print(f"No songs found in playlist '{playlist_name}'.")
-
-    except Exception as e:
-        print(f"Error loading playlist songs: {e}")
-    finally:
-        if connection and connection.is_connected():
-            cursor.close()
-            connection.close()
-
-def initialize_middle_frame(playlist_frame, page_manager):
-    playlists = fetch_playlists()
-    if playlists:
-        first_playlist = playlists[0]
-        page_manager.show_dynamic_panel("MiddlePanel", first_playlist)
-        playlist_frame.update_idletasks()
-    else:
-        print("No songs found to load.")
-
-    update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover, page_manager)
-    initialize_middle_frame(playlist_frame, page_manager)

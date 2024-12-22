@@ -3,10 +3,11 @@ from app.db.database import create_connection
 from app.func.session import user_session, center_window
 from app.func.add_song import insert_song
 from tkinter import filedialog, simpledialog, messagebox
-from app.func.playlist_handler import create_playlist, delete_playlist
+from app.func.playlist_handler import delete_playlist, create_playlist
 from app.func.playlist_utils import update_playlist_buttons, change_playlist_cover
-from app.func.playlist_utils import process_playlist_from_folder, split_title_and_artist
+from app.func.playlist_utils import process_playlist_from_folder
 from tkinter import *
+
 
 
 
@@ -30,6 +31,8 @@ def create_empty_playlist(playlist_frame, page_manager):
     Label(dialog, text="Cover Path:", font=("Arial", 12, "bold")).grid(row=2, column=0, sticky="w", padx=10, pady=10)
     cover_path_entry = Entry(dialog, font=("Arial", 12))
     cover_path_entry.grid(row=2, column=1, padx=10, pady=10, sticky="ew")
+
+
 
     def browse_cover():
         file_path = filedialog.askopenfilename(

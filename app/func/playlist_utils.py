@@ -1,8 +1,54 @@
 import os
-from tkinter import messagebox, Menu, Frame, Button, filedialog, Label
+from tkinter import Menu, Button, messagebox, filedialog
 from PIL import Image, ImageTk
 import mysql.connector
 from app.db.database import create_connection
+from app.func.playlist_handler import process_playlist_from_folder
+
+
+def update_playlist_buttons(playlist_frame, delete_playlist_callback, change_cover_callback, page_manager):
+    for widget in playlist_frame.winfo_children():
+        widget.destroy()
+
+    playlists = fetch_playlists()
+
+    for i, playlist_name in enumerate(playlists):
+        button = Button(
+            playlist_frame,
+            text=playlist_name,
+            font=("Arial", 14, "bold"),
+            fg="#FFFFFF",
+            bg="#50184A",
+            activebackground="#845162",
+            activeforeground="#FFFFFF",
+            borderwidth=0,
+            command=lambda name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
+        )
+        button.grid(row=i, column=0, sticky="ew", padx=5, pady=5)
+
+        button.bind("<Button-3>", lambda event, name=playlist_name: show_context_menu(event, name, playlist_frame, page_manager))
+
+    playlist_frame.grid_columnconfigure(0, weight=1)
+
+
+def show_context_menu(event, playlist_name, playlist_frame, page_manager):
+    menu = Menu(None, tearoff=0)
+    menu.add_command(
+        label="Delete Playlist",
+        command=lambda: delete_playlist_wrapper(playlist_name, playlist_frame, page_manager)
+    )
+    menu.add_command(
+        label="Change Cover",
+        command=lambda: change_playlist_cover(playlist_name)
+    )
+    menu.post(event.widget.winfo_rootx() + event.x, event.widget.winfo_rooty() + event.y)
+
+
+def delete_playlist_wrapper(playlist_name, playlist_frame, page_manager):
+    response = messagebox.askyesno("Delete Playlist", f"Are you sure you want to delete '{playlist_name}'?")
+    if response:
+        delete_playlist(playlist_name, playlist_frame, update_playlist_buttons, page_manager)
+
 
 def fetch_playlists():
     try:
@@ -19,14 +65,10 @@ def fetch_playlists():
             cursor.close()
             connection.close()
 
+
 def fetch_playlist_details(playlist_name):
     try:
-        connection = mysql.connector.connect(
-            host="localhost",
-            database="WaveForm_db",
-            user="root",
-            password=""
-        )
+        connection = create_connection()
         cursor = connection.cursor()
         query = """
             SELECT p.name, p.description, p.playlist_cover_path, p.created_by, COUNT(ps.song_id)
@@ -42,9 +84,12 @@ def fetch_playlist_details(playlist_name):
         print(f"Error getting playlist details '{playlist_name}': {e}")
         return None
     finally:
-        if connection.is_connected():
+        if cursor:
             cursor.close()
+        if connection.is_connected():
             connection.close()
+
+
 
 def fetch_songs_by_playlist(playlist_name):
     try:
@@ -78,6 +123,7 @@ def fetch_songs_by_playlist(playlist_name):
             cursor.close()
             connection.close()
 
+
 def load_cover_image(cover_path, label):
     try:
         img = Image.open(cover_path)
@@ -91,6 +137,23 @@ def load_cover_image(cover_path, label):
     except Exception as e:
         print(f"Image loading error: {e}")
         label.config(text="No Cover", fg="white", font=("Arial", 16, "bold"))
+
+
+def split_title_and_artist(file_name):
+    try:
+        base_name = os.path.splitext(file_name)[0]
+        parts = base_name.split(" - ", 1)
+        if len(parts) == 2:
+            artist_name = parts[0].strip()
+            song_title = parts[1].strip()
+        else:
+            artist_name = "Unknown artist"
+            song_title = base_name.strip()
+        return song_title, artist_name
+    except Exception as e:
+        print(f"Error while splitting: {e}")
+        return "Unknown album", "Unknown artist"
+
 
 def change_playlist_cover(playlist_name):
     cover_path = filedialog.askopenfilename(
@@ -107,134 +170,31 @@ def change_playlist_cover(playlist_name):
         query = "UPDATE playlists SET playlist_cover_path = %s WHERE name = %s"
         cursor.execute(query, (cover_path, playlist_name))
         connection.commit()
-
         messagebox.showinfo("Success", f"Cover updated for playlist '{playlist_name}'!")
     except Exception as e:
         messagebox.showerror("Error", f"Failed to update cover: {e}")
     finally:
-        if connection:
-            cursor.close()
-            connection.close()
-
-
-def split_title_and_artist(file_name):
-    try:
-        base_name = os.path.splitext(file_name)[0]
-        parts = base_name.split(" - ", 1)
-        if len(parts) == 2:
-            artist_name = parts[0].strip()
-            song_title = parts[1].strip()
-        else:
-            artist_name = "Uknown artist"
-            song_title = base_name.strip()
-        return song_title, artist_name
-    except Exception as e:
-        print(f"Error while splitting: {e}")
-        return "Unknown album", "Uknown artist"
-
-def process_playlist_from_folder(folder_path, playlist_name, user_id, created_by, insert_song_function):
-    connection = create_connection()
-    if not connection:
-        print("Cannot connect to database.")
-        return None
-
-    playlist_id = None
-    try:
-        cursor = connection.cursor()
-
-        query = """
-            INSERT INTO playlists (user_id, name, description, created_by, playlist_cover_path)
-            VALUES (%s, %s, %s, %s, %s)
-        """
-        cover_path = "app/gui/assets/covers/playlist_covers/default_cover.png"
-        cursor.execute(query, (user_id, playlist_name, "Importing playlist", created_by, cover_path))
-        connection.commit()
-        playlist_id = cursor.lastrowid
-
-        files = [f for f in os.listdir(folder_path) if f.endswith(('.mp3', '.wav'))]
-        for file_name in files:
-            file_path = os.path.join(folder_path, file_name)
-            title, artist = split_title_and_artist(file_name)
-
-            song_id = insert_song_function(
-                connection,
-                user_id=user_id,
-                title=title,
-                artist=artist,
-                album=playlist_name,
-                genre="Unknown Genre",
-                file_path=file_path,
-                cover_path=cover_path
-            )
-
-            if song_id:
-                cursor.execute(
-                    "INSERT INTO playlist_songs (playlist_id, song_id) VALUES (%s, %s)",
-                    (playlist_id, song_id)
-                )
-                connection.commit()
-                print(f"Added '{title}' by '{artist}' to '{playlist_name}'")
-        return playlist_id
-    except Exception as e:
-        print(f"Playlist processing error: {e}")
-    finally:
         if connection and connection.is_connected():
             cursor.close()
             connection.close()
-    return playlist_id
 
-def update_playlist_buttons(playlist_frame, delete_playlist_callback, change_cover_callback, page_manager):
-    for widget in playlist_frame.winfo_children():
-        widget.destroy()
-
-    playlists = fetch_playlists()
-
-    for i, playlist_name in enumerate(playlists):
-        playlist_button = Button(
-            playlist_frame,
-            text=playlist_name,
-            font=("Arial", 14, "bold"),
-            fg="#FFFFFF",
-            bg="#50184A",
-            activebackground="#50184A",
-            activeforeground="#FFFFFF"
-        )
-        playlist_button.grid(row=i, column=0, sticky="ew", padx=0, pady=1)
-        playlist_button.bind("<Button-3>", lambda event, name=playlist_name: show_playlist_menu(
-            event, name, playlist_frame, delete_playlist_callback, change_cover_callback
-        ))
-        playlist_button.bind("<Button-1>", lambda event, name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name))
-    playlist_frame.columnconfigure(0, weight=1)
-
-def delete_playlist(playlist_name, playlist_frame, update_playlist_buttons, page_manager):
+def delete_playlist(playlist_name, playlist_frame, update_function, page_manager):
     try:
         connection = create_connection()
         if not connection:
-            messagebox.showerror("Error", "Failed to connect to database.")
+            messagebox.showerror("Error", "Failed to connect to the database.")
             return
-        
+
         cursor = connection.cursor()
         query = "DELETE FROM playlists WHERE name = %s"
         cursor.execute(query, (playlist_name,))
         connection.commit()
-        
-        messagebox.showinfo("Success", f"Playlist '{playlist_name}' got removed!")
-        update_playlist_buttons(playlist_frame, delete_playlist, change_playlist_cover, page_manager)
+
+        messagebox.showinfo("Success", f"Playlist '{playlist_name}' deleted successfully!")
+        update_function(playlist_frame, page_manager)
     except Exception as e:
         messagebox.showerror("Error", f"Failed to delete playlist: {e}")
     finally:
         if connection and connection.is_connected():
             cursor.close()
             connection.close()
-
-def show_playlist_menu(event, playlist_name, playlist_frame, delete_playlist_callback, change_cover_callback):
-    menu = Menu(None, tearoff=0)
-    menu.add_command(
-        label="Delete Playlist",
-        command=lambda: delete_playlist_callback(playlist_name, playlist_frame, update_playlist_buttons)
-    )
-    menu.add_command(
-        label="Change Cover",
-        command=lambda: change_cover_callback(playlist_name)
-    )
-    menu.post(event.widget.winfo_rootx() + event.x, event.widget.winfo_rooty() + event.y)
