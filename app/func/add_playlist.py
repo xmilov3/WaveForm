@@ -11,7 +11,7 @@ from tkinter import *
 
 
 
-def create_empty_playlist(playlist_frame):
+def create_empty_playlist(playlist_frame, page_manager):
     user_id = user_session.user_id
     created_by = user_session.username
 
@@ -79,7 +79,7 @@ def create_empty_playlist(playlist_frame):
     dialog.mainloop()
 
 
-def import_playlist_from_folder(playlist_frame):
+def import_playlist_from_folder(playlist_frame, page_manager):
     user_id = user_session.user_id
     created_by = user_session.username
 

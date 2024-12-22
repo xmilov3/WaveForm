@@ -44,7 +44,7 @@ def update_playlist_buttons(playlist_frame, delete_playlist_callback, change_cov
 
 
 
-def delete_playlist(playlist_name, playlist_frame, update_playlist_buttons):
+def delete_playlist(playlist_name, playlist_frame, update_playlist_buttons, page_manager):
     try:
         connection = create_connection()
         if not connection:
