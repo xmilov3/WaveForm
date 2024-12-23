@@ -3,6 +3,7 @@ from app.db.database import create_connection
 from tkinter import messagebox
 from app.func.music_controller import initialize_first_song
 from app.func.shared_func import play_playlist
+from app.func.config import *
 
 
 pygame.mixer.init()

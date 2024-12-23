@@ -8,6 +8,7 @@ from app.func.playlist_utils import update_playlist_buttons, show_context_menu, 
 from app.func.playlist_utils import *
 import pygame
 from app.func.playlist_controller import *
+import tkinter as tk
 
 
 
@@ -34,7 +35,8 @@ def create_left_panel(
 ):
     left_frame = Frame(parent, bg='#1E052A', borderwidth=0)
     left_frame.grid(row=1, column=0, sticky='nsew')
-    left_frame.grid_rowconfigure(1, weight=1)
+    left_frame.grid_rowconfigure(0, weight=0) #Buttons
+    left_frame.grid_rowconfigure(1, weight=1) #Playlists
     left_frame.grid_columnconfigure(0, weight=1)
 
     buttons_frame = Frame(left_frame, bg='#2d0232')
@@ -88,7 +90,6 @@ def create_left_panel(
         command=lambda: add_song_with_playlist(page_manager)
     ).pack(fill="x", padx=10, pady=5)
 
-
     update_playlist_buttons(
         playlist_frame,
         delete_playlist,
@@ -107,6 +108,7 @@ def create_left_panel(
     )
 
     return left_frame
+
 
 def load_playlist_into_mixer(playlist_name):
     try:
@@ -127,6 +129,8 @@ def load_playlist_into_mixer(playlist_name):
         cursor.execute(query, (playlist_name,))
         songs = cursor.fetchall()
 
+        pygame.mixer.music.stop()
+
         if not songs:
             print(f"No songs found in playlist '{playlist_name}'")
             return
@@ -146,6 +150,7 @@ def load_playlist_into_mixer(playlist_name):
             connection.close()
 
 
+
 def on_playlist_click(playlist_name, page_manager):
     page_manager.show_dynamic_panel("MiddlePanel", playlist_name)
     load_playlist_into_mixer(playlist_name)
@@ -155,30 +160,24 @@ def populate_playlists(playlist_frame, page_manager):
     for widget in playlist_frame.winfo_children():
         widget.destroy()
 
-    playlists = fetch_playlists()
+    try:
+        playlists = fetch_playlists()
+    except Exception as e:
+        print(f"Error fetching playlists: {e}")
+        playlists = []
 
     if playlists:
-        for i, playlist_name in enumerate(playlists):
+        for playlist_name in playlists:
             playlist_button = Button(
                 playlist_frame,
                 text=playlist_name,
                 font=("Arial", 14, "bold"),
                 fg='black',
                 bg='#50184A',
-                # activebackground='#845162',
-                # activeforegrouknd='black',
                 borderwidth=0,
-                command=lambda name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
+                command=lambda name=playlist_name: on_playlist_click(name, page_manager)
             )
-            playlist_button.config(command=lambda name=playlist_name: on_playlist_click(name, page_manager))
             playlist_button.grid(sticky="ew", padx=5, pady=5)
-
-            playlist_button.configure(
-                fg='black',
-                bg='#50184A',
-                # activebackground='#845162',
-                # activeforeground='black'
-            )
     else:
         Label(
             playlist_frame,
@@ -193,7 +192,6 @@ def populate_playlists(playlist_frame, page_manager):
 
 
 
-
 def handle_playlist_selection(event, page_manager, listbox):
     selected_index = listbox.curselection()
     if selected_index:
@@ -202,40 +200,53 @@ def handle_playlist_selection(event, page_manager, listbox):
 
 
 def update_playlist_buttons(
-    playlist_frame, 
-    delete_playlist_callback, 
-    change_cover_callback, 
+    playlist_frame,
+    delete_playlist_callback,
+    change_cover_callback,
     page_manager,
-    song_listbox, 
-    play_pause_button, 
-    play_button_img, 
-    pause_button_img, 
-    title_label, 
-    artist_label, 
-    time_elapsed_label, 
-    time_remaining_label, 
-    progress_slider, 
+    song_listbox,
+    play_pause_button,
+    play_button_img,
+    pause_button_img,
+    title_label,
+    artist_label,
+    time_elapsed_label,
+    time_remaining_label,
+    progress_slider,
     bottom_frame
 ):
-    playlists = fetch_playlists()
+    for widget in playlist_frame.winfo_children():
+        widget.destroy()
+
+    try:
+        playlists = fetch_playlists()
+    except Exception as e:
+        print(f"Error fetching playlists: {e}")
+        playlists = []
+
     for playlist_name in playlists:
-        playlist_button = Button(
+        playlist_button = tk.Button(
             playlist_frame,
             text=playlist_name,
-            command=lambda name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
+            command=lambda name=playlist_name: initialize_first_song(
+                song_listbox,
+                play_pause_button,
+                play_button_img,
+                pause_button_img,
+                title_label,
+                artist_label,
+                time_elapsed_label,
+                time_remaining_label,
+                progress_slider,
+                bottom_frame,
+                playlist_name=name
+            ),
+            font=("Arial", 12),
+            bg="#50184A",
+            fg="#FFFFFF",
+            relief="flat",
         )
         playlist_button.grid(sticky="ew", padx=5, pady=5)
-        playlist_button.bind(
-            "<Button-1>",
-            lambda event, name=playlist_name: play_playlist(
-                name, song_listbox, play_pause_button, play_button_img, pause_button_img,
-                title_label, artist_label, time_elapsed_label, time_remaining_label, 
-                progress_slider, bottom_frame
-            )
-        )
-
-
-        playlist_frame.grid_columnconfigure(0, weight=1)
 
 
 def show_context_menu(event, playlist_name, playlist_frame, page_manager):
@@ -258,7 +269,12 @@ def delete_playlist_wrapper(playlist_name, playlist_frame, page_manager):
 
 
 def add_song_with_playlist(page_manager):
-    playlists = fetch_playlists()
+    try:
+        playlists = fetch_playlists()
+    except Exception as e:
+        print(f"Error fetching playlists: {e}")
+        playlists = []
+
     if not playlists:
         messagebox.showwarning("Warning", "No playlists available. Add a playlist first.")
         return
@@ -270,8 +286,10 @@ def add_song_with_playlist(page_manager):
             filetypes=[("MP3 Files", "*.mp3"), ("WAV Files", "*.wav")]
         )
         if file_path:
-            add_song_with_playlist(file_path, selected_playlist)
-            messagebox.showinfo("Success", f"Song added to playlist '{selected_playlist}'.")
+            try:
+                add_song_with_playlist(file_path, selected_playlist)
+                messagebox.showinfo("Success", f"Song added to playlist '{selected_playlist}'.")
+            except Exception as e:
+                messagebox.showerror("Error", f"Could not add song: {e}")
         else:
             messagebox.showinfo("Info", "No file selected.")
-
