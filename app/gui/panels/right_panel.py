@@ -77,7 +77,7 @@ def fetch_next_in_queue(playlist_name):
             connection.close()
 
 
-def create_right_panel(parent, playlist_name="Liked Songs"):
+def create_right_panel(parent, playlist_name=None):
     right_frame = Frame(parent, bg='#1E052A', borderwidth=0, highlightbackground='#845162', highlightthickness=0)
     right_frame.grid(row=1, column=2, sticky='nsew', padx=0, pady=0)
 
@@ -89,7 +89,7 @@ def create_right_panel(parent, playlist_name="Liked Songs"):
 
     playlist_label = Label(
         now_playing_frame,
-        text="Liked Songs",
+        text="Playlist Name",
         font=("Arial", 30, "bold"),
         fg='white',
         bg='#2d0232',
@@ -161,7 +161,10 @@ def create_right_panel(parent, playlist_name="Liked Songs"):
     right_frame.grid_rowconfigure(1, weight=8)
     right_frame.grid_columnconfigure(0, weight=1)
 
+    # return right_frame, queue_text_label, playlist_label, album_art_label, title_label, artist_label
+    # return right_frame, queue_text_label, playlist_label, album_art_label, title_label, artist_label
     return right_frame, queue_text_label, playlist_label, album_art_label, title_label, artist_label
+
 
 def update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name):
     print(f"Updating now playing for playlist: {playlist_name}")
@@ -195,6 +198,10 @@ def update_now_playing(playlist_label, album_art_label, title_label, artist_labe
 
 
 def update_next_in_queue(queue_text_label, playlist_name):
+    if queue_text_label is None:
+        print("Error: queue_text_label is None")
+        return
+
     print(f"Updating next in queue for playlist: {playlist_name}")
     next_songs = fetch_next_in_queue(playlist_name)
 

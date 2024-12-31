@@ -153,6 +153,7 @@ def load_playlist_into_mixer(playlist_name):
 
 def on_playlist_click(playlist_name, page_manager):
     page_manager.show_dynamic_panel("MiddlePanel", playlist_name)
+
     load_playlist_into_mixer(playlist_name)
 
 

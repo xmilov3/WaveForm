@@ -7,9 +7,11 @@ from app.func.music_controller import (
     update_next_in_queue, update_now_playing
 )
 
-def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_name, 
-                        playlist_label, album_art_label, title_label, artist_label,
-                        update_next_queue, update_now_playing):
+# def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_name, 
+#                         playlist_label, album_art_label, title_label, artist_label,
+#                         update_next_queue, update_now_playing):
+
+def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_name, playlist_label, album_art_label, update_next_in_queue, update_now_playing):
     global is_playing, user_sliding, current_song_position, song_length, currentsong, song_start_time
 
 
@@ -104,6 +106,16 @@ def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_nam
 
     update_next_in_queue(queue_text_label, playlist_name)
     update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
+
+
+    # def update_next_in_queue(queue_text_label, playlist_name):
+    #     if queue_text_label is None:
+    #         print("Queue text label is not initialized.")
+    #         return
+
+    #     # Reszta kodu
+    #     queue_text = f"Next in queue for playlist: {playlist_name}"
+    #     queue_text_label.config(text=queue_text)
 
 
     def previous_command():

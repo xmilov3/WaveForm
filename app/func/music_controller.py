@@ -14,20 +14,20 @@ from pydub import AudioSegment
 from app.gui.panels.right_panel import update_next_in_queue, update_now_playing
 from app.func.shared_func import play_playlist
 
-
-
-
-def create_song_listbox(songlist_frame):
+def create_song_listbox(parent, playlist_name, play_song_callback):
     song_listbox = Listbox(
-        songlist_frame, 
-        bg='#3C0F64', 
-        fg='grey', 
-        selectbackground='#9C27B0', 
+        parent,
+        bg='#2D0232',
+        fg='grey',
         selectforeground='grey',
-        font=("Arial", 14), 
+        font=("Arial", 14),
         relief="flat"
     )
-    song_listbox.place(relwidth=1, relheight=1)
+    song_listbox.grid(sticky="nsew", padx=5, pady=5)
+
+    parent.grid_rowconfigure(0, weight=1)
+    parent.grid_columnconfigure(0, weight=1)
+
     try:
         connection = mysql.connector.connect(
             host='localhost',
@@ -36,22 +36,113 @@ def create_song_listbox(songlist_frame):
             password=''
         )
         cursor = connection.cursor()
-        query = "SELECT title, artist FROM songs"
-        cursor.execute(query)
+        query = """
+            SELECT s.title, s.artist
+            FROM songs s
+            JOIN playlist_songs ps ON s.song_id = ps.song_id
+            JOIN playlists p ON ps.playlist_id = p.playlist_id
+            WHERE p.name = %s
+            ORDER BY ps.song_id ASC
+        """
+        cursor.execute(query, (playlist_name,))
         songs = cursor.fetchall()
 
         for song in songs:
             title, artist = song
             song_listbox.insert(END, f"{title} - {artist}")
 
+        if not songs:
+            print(f"Brak utworów w playliście: {playlist_name}")
+
     except mysql.connector.Error as e:
-        print(f"Database error: {e}")
+        print(f"Błąd bazy danych: {e}")
     finally:
         if 'connection' in locals() and connection.is_connected():
             cursor.close()
             connection.close()
 
+    song_listbox.bind("<Double-1>", lambda event: play_song_callback(song_listbox.get(ACTIVE)))
+
     return song_listbox
+
+
+def play_selected_song(selected_song):
+    try:
+        if " - " in selected_song:
+            song_title, artist_name = selected_song.split(" - ")
+        else:
+            print("Niepoprawny format utworu")
+            return
+
+        connection = mysql.connector.connect(
+            host='localhost',
+            database='WaveForm_db',
+            user='root',
+            password=''
+        )
+        cursor = connection.cursor()
+        query = "SELECT file_path FROM songs WHERE title = %s AND artist = %s"
+        cursor.execute(query, (song_title.strip(), artist_name.strip()))
+        result = cursor.fetchone()
+
+        if not result:
+            print(f"Nie znaleziono pliku dla utworu {song_title} - {artist_name}.")
+            return
+
+        file_path = result[0]
+
+        if not os.path.exists(file_path):
+            print(f"Plik nie istnieje: {file_path}")
+            return
+
+        # Odtwórz wybrany utwór
+        pygame.mixer.music.load(file_path)
+        pygame.mixer.music.play()
+        print(f"Odtwarzanie: {song_title} - {artist_name}")
+
+    except Exception as e:
+        print(f"Błąd w play_selected_song: {e}")
+    finally:
+        if 'connection' in locals() and connection.is_connected():
+            cursor.close()
+            connection.close()
+
+
+# def create_song_listbox(songlist_frame):
+#     song_listbox = Listbox(
+#         songlist_frame, 
+#         bg='#3C0F64', 
+#         fg='grey', 
+#         selectbackground='#9C27B0', 
+#         selectforeground='grey',
+#         font=("Arial", 14), 
+#         relief="flat"
+#     )
+#     song_listbox.place(relwidth=1, relheight=1)
+#     try:
+#         connection = mysql.connector.connect(
+#             host='localhost',
+#             database='WaveForm_db',
+#             user='root',
+#             password=''
+#         )
+#         cursor = connection.cursor()
+#         query = "SELECT title, artist FROM songs"
+#         cursor.execute(query)
+#         songs = cursor.fetchall()
+
+#         for song in songs:
+#             title, artist = song
+#             song_listbox.insert(END, f"{title} - {artist}")
+
+#     except mysql.connector.Error as e:
+#         print(f"Database error: {e}")
+#     finally:
+#         if 'connection' in locals() and connection.is_connected():
+#             cursor.close()
+#             connection.close()
+
+#     return song_listbox
 
 def sync_is_playing():
     global is_playing

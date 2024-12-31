@@ -59,7 +59,18 @@ def main():
     page_manager.add_page("AppWindow", app_window)
     page_manager.add_dynamic_panel(
     "MiddlePanel",
-    lambda parent, playlist_name: create_middle_panel(app_window.main_frame, playlist_name)
+    lambda parent, playlist_name: create_middle_panel(
+    app_window.main_frame,
+    playlist_name,
+    app_window.title_label,
+    app_window.artist_label,
+    app_window.time_elapsed_label,
+    app_window.time_remaining_label,
+    app_window.progress_slider,
+    app_window.progress_bar
+)
+
+    # lambda parent, playlist_name: create_middle_panel(app_window.main_frame, playlist_name)
 )
 
     page_manager.show_page("InitPage")

@@ -3,7 +3,7 @@ from PIL import Image, ImageTk
 import mysql.connector
 from app.func.playlist_utils import fetch_playlists
 import tkinter as tk
-
+from app.func.music_controller import play_selected_song
 
 
 def fetch_playlist_details(playlist_name):
@@ -34,8 +34,6 @@ def fetch_playlist_details(playlist_name):
         if 'connection' in locals() and connection.is_connected():
             cursor.close()
             connection.close()
-
-
 
 
 def create_header_frame(parent, playlist_name=None):
@@ -78,7 +76,7 @@ def create_header_frame(parent, playlist_name=None):
     return header_frame
 
 
-def create_song_listbox(parent, playlist_name):
+def create_song_listbox(parent, playlist_name, play_song_callback, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
     song_listbox = Listbox(
         parent,
         bg='#2D0232',
@@ -116,21 +114,31 @@ def create_song_listbox(parent, playlist_name):
             song_listbox.insert(END, f"{title} - {artist}")
 
         if not songs:
-            print(f"No songs found in playlist: {playlist_name}")
+            print(f"Brak utworów w playliście: {playlist_name}")
 
     except mysql.connector.Error as e:
-        print(f"Database error: {e}")
+        print(f"Błąd bazy danych: {e}")
     finally:
         if 'connection' in locals() and connection.is_connected():
             cursor.close()
             connection.close()
 
-    return song_listbox
+    song_listbox.bind(
+        "<Double-1>",
+        lambda event: play_selected_song(
+            song_listbox.get(ACTIVE),
+            song_listbox,
+            title_label,
+            artist_label,
+            time_elapsed_label,
+            time_remaining_label,
+            progress_slider
+        )
+    )
 
 
 
-
-def create_middle_panel(parent, playlist_name):
+def create_middle_panel(parent, playlist_name, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
     middle_frame = Frame(parent, bg="#1E052A", width=600, height=400)
     middle_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
 
@@ -142,11 +150,19 @@ def create_middle_panel(parent, playlist_name):
     songlist_frame = Frame(middle_frame, bg="#2D0232")
     songlist_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
 
-    song_listbox = create_song_listbox(songlist_frame, playlist_name)
+    song_listbox = create_song_listbox(
+        songlist_frame,
+        playlist_name,
+        play_selected_song,
+        title_label,
+        artist_label,
+        time_elapsed_label,
+        time_remaining_label,
+        progress_slider
+    )
 
     middle_frame.grid_rowconfigure(0, weight=0)
     middle_frame.grid_rowconfigure(1, weight=1)
     middle_frame.grid_columnconfigure(0, weight=1)
 
     return middle_frame, header_frame, songlist_frame, song_listbox
-

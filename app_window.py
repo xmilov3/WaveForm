@@ -6,7 +6,7 @@ from app.gui.panels.left_panel import create_left_panel
 from app.gui.panels.middle_panel import create_middle_panel
 from app.gui.panels.right_panel import create_right_panel, update_next_in_queue, update_now_playing
 from app.gui.panels.bottom_panel import create_bottom_panel
-from app.func.music_controller import play_pause_song, stop_song, next_song, previous_song, initialize_first_song, sync_is_playing, create_song_listbox
+from app.func.music_controller import play_pause_song, stop_song, next_song, previous_song, initialize_first_song, sync_is_playing, create_song_listbox, progress_bar
 from app.func.playlist_utils import fetch_playlists, update_playlist_buttons
 from app.gui.panels.left_panel import populate_playlists
 from mutagen.mp3 import MP3
@@ -30,18 +30,17 @@ class AppWindow(tk.Frame):
         super().__init__(parent, *args, **kwargs)
         self.page_manager = page_manager
         self.configure(bg='#150016')
+
+        self.delete_playlist_callback = self.delete_playlist
+        self.change_cover_callback = self.change_playlist_cover
+
         self.main_frame = tk.Frame(self, bg='#150016')
         self.main_frame.grid(row=0, column=0, sticky="nsew")
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        self.delete_playlist_callback = self.delete_playlist
-        self.change_cover_callback = self.change_playlist_cover
-
         self.init_panels()
-
-        populate_playlists(self.left_panel.playlist_frame, self.page_manager)
 
     def delete_playlist(self, playlist_name):
         print(f"Deleting playlist: {playlist_name}")
@@ -49,36 +48,101 @@ class AppWindow(tk.Frame):
     def change_playlist_cover(self, playlist_name):
         print(f"Changing cover for playlist: {playlist_name}")
 
-    def init_panels(self):
-        playlists = fetch_playlists()
-        first_playlist = playlists[0] if playlists else "Unknown Playlist"
-
-        self.middle_panel, self.header_frame, self.songlist_frame, self.song_listbox = create_middle_panel(
-            self.main_frame, first_playlist
+    def start_sync_loop(self):
+        progress_bar(
+            time_remaining_label=self.time_remaining_label,
+            time_elapsed_label=self.time_elapsed_label,
+            progress_slider=self.progress_slider,
+            bottom_frame=self.bottom_panel
         )
-        
-        self.top_panel = create_top_panel(self.main_frame, self.page_manager)
 
+    # def init_panels(self):
+    #     playlists = fetch_playlists()
+    #     first_playlist = playlists[0] if playlists else "Unknown Playlist"
+
+    #     self.middle_panel, self.header_frame, self.songlist_frame, self.song_listbox = create_middle_panel(
+    #         self.main_frame, first_playlist
+    #     )
+        
+    #     self.top_panel = create_top_panel(self.main_frame, self.page_manager)
+
+    #     playlists = fetch_playlists()
+    #     first_playlist = playlists[0] if playlists else "Unknown Playlist"
+
+
+    #     self.right_panel, self.queue_text_label, self.playlist_label, self.album_art_label, self.title_label, self.artist_label = create_right_panel(
+    #         self.main_frame, playlist_name=first_playlist
+    #     )
+
+    #     self.bottom_panel, self.time_remaining_label, self.time_elapsed_label, self.progress_slider, self.title_label, self.artist_label, self.play_pause_button, self.play_button_img, self.pause_button_img = create_bottom_panel(
+    #         self.main_frame,
+    #         self.song_listbox,
+    #         self.queue_text_label,
+    #         first_playlist,
+    #         self.playlist_label,
+    #         self.album_art_label,
+    #         self.title_label,
+    #         self.artist_label,
+    #         update_next_in_queue,
+    #         update_now_playing,
+    #     )
+
+    #     self.left_panel = create_left_panel(
+    #         self.main_frame,
+    #         self.page_manager,
+    #         self.song_listbox,
+    #         self.play_pause_button,
+    #         self.play_button_img,
+    #         self.pause_button_img,
+    #         self.title_label,
+    #         self.artist_label,
+    #         self.time_elapsed_label,
+    #         self.time_remaining_label,
+    #         self.progress_slider,
+    #         self.bottom_panel,
+    #         self.delete_playlist_callback,
+    #         self.change_cover_callback
+    #     )
+
+    #     self.configure_layout(self.top_panel, self.left_panel, self.middle_panel, self.right_panel, self.bottom_panel)
+
+
+
+    #     self.song_listbox.bind("<Double-Button-1>", lambda event: self.select_song_from_list())
+
+    #     self.start_sync_loop()
+
+    def init_panels(self):
+        # Fetch playlists and set the first playlist as default
         playlists = fetch_playlists()
         first_playlist = playlists[0] if playlists else "Unknown Playlist"
 
+        # Initialize the middle panel first to create self.song_listbox
+        self.middle_panel, self.header_frame, self.songlist_frame, self.song_listbox = create_middle_panel(
+            self.main_frame,
+            first_playlist,
+            None,  
+            None,
+            None,
+            None,
+            None
+        )
 
         self.right_panel, self.queue_text_label, self.playlist_label, self.album_art_label, self.title_label, self.artist_label = create_right_panel(
-            self.main_frame, playlist_name=first_playlist
+            self.main_frame,
+            playlist_name=first_playlist
         )
 
-        self.bottom_panel, self.time_remaining_label, self.time_elapsed_label, self.progress_slider, self.title_label, self.artist_label, self.play_pause_button, self.play_button_img, self.pause_button_img = create_bottom_panel(
+        self.bottom_panel, self.time_remaining_label, self.time_elapsed_label, self.progress_slider, self.play_pause_button, self.play_button_img, self.pause_button_img = create_bottom_panel(
             self.main_frame,
-            self.song_listbox,
+            self.song_listbox,  # Pass the initialized song_listbox
             self.queue_text_label,
             first_playlist,
             self.playlist_label,
-            self.album_art_label,
-            self.title_label,
-            self.artist_label,
-            update_next_in_queue,
-            update_now_playing,
+            self.album_art_label
         )
+
+        self.top_panel = create_top_panel(self.main_frame, self.page_manager)
 
         self.left_panel = create_left_panel(
             self.main_frame,
@@ -97,13 +161,14 @@ class AppWindow(tk.Frame):
             self.change_cover_callback
         )
 
+        # Configure the layout for all panels
         self.configure_layout(self.top_panel, self.left_panel, self.middle_panel, self.right_panel, self.bottom_panel)
 
 
 
-        self.song_listbox.bind("<Double-Button-1>", lambda event: self.select_song_from_list())
+        
 
-        self.start_sync_loop()
+
 
     def select_song_from_list(self):
         global currentsong
@@ -186,6 +251,25 @@ class AppWindow(tk.Frame):
         self.after(500, self.start_sync_loop)
     
 
+    def update_progress_bar(self):
+        global is_playing, current_song_position, song_start_time, song_length
+
+        if is_playing:
+            current_time_ms = pygame.mixer.music.get_pos()
+            if current_time_ms != -1:
+                current_time_s = current_time_ms / 1000.0
+                total_time = song_start_time + current_time_s
+                remaining_time = song_length - total_time
+
+                self.time_elapsed_label.config(text=time.strftime("%M:%S", time.gmtime(total_time)))
+                self.time_remaining_label.config(text=f"-{time.strftime('%M:%S', time.gmtime(remaining_time))}")
+                if song_length > 0:
+                    self.progress_slider.set((total_time / song_length) * 100)
+
+        self.after(500, self.update_progress_bar)
+
+
+
     def configure_layout(self, top_frame, left_frame, middle_frame, right_frame, bottom_frame):
         # Main Frame
         self.main_frame.grid_columnconfigure(0, weight=3)
@@ -220,3 +304,18 @@ class AppWindow(tk.Frame):
         bottom_frame.grid_columnconfigure(0, weight=3)
         bottom_frame.grid_columnconfigure(1, weight=6)
         bottom_frame.grid_columnconfigure(2, weight=1)
+
+
+
+def play_pause_song(self):
+    global is_playing
+
+    if is_playing:
+        pygame.mixer.music.pause()
+        self.play_pause_button.config(image=self.play_button_img)
+        print("Paused")
+    else:
+        pygame.mixer.music.unpause()
+        self.play_pause_button.config(image=self.pause_button_img)
+        print("Playing")
+    is_playing = not is_playing
