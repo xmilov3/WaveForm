@@ -52,6 +52,13 @@ def main():
     register_page = RegisterPage(root, page_manager, connection)
     app_window = AppWindow(root, page_manager)
     
+    def on_login_success(user_data):
+        user_id, username = user_data
+        user_session.set_user(user_id, username)
+        print(f"Session started for user: {username} (ID: {user_id})")
+        page_manager.show_page("AppWindow")
+        root.deiconify()
+
 
     page_manager.add_page("InitPage", init_page)
     page_manager.add_page("LoginPage", login_page)
@@ -60,17 +67,17 @@ def main():
     page_manager.add_dynamic_panel(
     "MiddlePanel",
     lambda parent, playlist_name: create_middle_panel(
-    app_window.main_frame,
-    playlist_name,
-    app_window.title_label,
-    app_window.artist_label,
-    app_window.time_elapsed_label,
-    app_window.time_remaining_label,
-    app_window.progress_slider,
-    app_window.progress_bar
-)
-
-    # lambda parent, playlist_name: create_middle_panel(app_window.main_frame, playlist_name)
+        app_window.main_frame,
+        playlist_name,
+        app_window.title_label,
+        app_window.artist_label,
+        # app_window.play_selected_song,
+        app_window.album_art_label,
+        app_window.time_elapsed_label,
+        app_window.time_remaining_label,
+        app_window.progress_slider
+    )
+    
 )
 
     page_manager.show_page("InitPage")

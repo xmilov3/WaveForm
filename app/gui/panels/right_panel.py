@@ -16,7 +16,13 @@ def fetch_current_song_details(playlist_name):
         cursor = connection.cursor()
 
         query = """
-            SELECT s.title, s.artist, p.name, s.cover_path
+            SELECT 
+                s.title AS song_title, 
+                s.artist AS song_artist, 
+                p.name AS playlist_name, 
+                s.cover_path AS cover_path, 
+                p.title AS playlist_title, 
+                p.cover_path AS playlist_cover_path
             FROM songs s
             JOIN playlist_songs ps ON s.song_id = ps.song_id
             JOIN playlists p ON ps.playlist_id = p.playlist_id
@@ -78,14 +84,20 @@ def fetch_next_in_queue(playlist_name):
 
 
 def create_right_panel(parent, playlist_name=None):
-    right_frame = Frame(parent, bg='#1E052A', borderwidth=0, highlightbackground='#845162', highlightthickness=0)
-    right_frame.grid(row=1, column=2, sticky='nsew', padx=0, pady=0)
+    right_frame = Frame(parent, bg='#1E052A', borderwidth=0, highlightbackground='#845162', highlightthickness=0, width=300)
+    right_frame.grid(row=1, column=2, sticky='nsew')
+
+    right_frame.grid_rowconfigure(0, weight=0) # Now Playing info
+    right_frame.grid_rowconfigure(1, weight=1)  # Next in queue
+    right_frame.grid_columnconfigure(0, weight=1)
 
     parent.grid_rowconfigure(1, weight=1)
-    parent.grid_columnconfigure(2, weight=4)
+    parent.grid_columnconfigure(2, weight=0)
+    right_frame.grid_propagate(False)
 
     now_playing_frame = Frame(right_frame, bg='#2d0232', borderwidth=0, highlightbackground='#845162', highlightthickness=2)
-    now_playing_frame.grid(row=0, column=0, sticky='ew', padx=10, pady=(30, 30))
+    now_playing_frame.grid(row=0, column=0, sticky='ew', padx=10, pady=10)
+    now_playing_frame.grid_propagate(False)
 
     playlist_label = Label(
         now_playing_frame,
@@ -95,7 +107,7 @@ def create_right_panel(parent, playlist_name=None):
         bg='#2d0232',
         anchor="w"
     )
-    playlist_label.pack(fill="both", expand=True, padx=10, pady=(10, 40))
+    playlist_label.pack(fill="both", expand=True, padx=10, pady=(10, 10))
 
     album_art_label = Label(
         now_playing_frame,
@@ -103,7 +115,7 @@ def create_right_panel(parent, playlist_name=None):
         borderwidth=0,
         highlightthickness=0
     )
-    album_art_label.pack(fill="x", padx=10, pady=(10, 5), expand=True)
+    album_art_label.pack(fill="x", padx=10, pady=(10, 10), expand=True)
 
     title_label = Label(
         now_playing_frame,
@@ -112,7 +124,7 @@ def create_right_panel(parent, playlist_name=None):
         font=("Arial", 14, "bold"),
         anchor="w"
     )
-    title_label.pack(fill="x", padx=10, pady=(5, 0))
+    title_label.pack(fill="x", padx=10, pady=(5, 5))
 
     artist_label = Label(
         now_playing_frame,
@@ -123,8 +135,10 @@ def create_right_panel(parent, playlist_name=None):
     )
     artist_label.pack(fill="x", padx=10, pady=(0, 10))
 
+
     next_in_queue_frame = Frame(right_frame, bg='#2d0232', borderwidth=0, highlightbackground='#845162', highlightthickness=2)
-    next_in_queue_frame.grid(row=1, column=0, sticky='nsew', padx=10, pady=(0, 60))
+    next_in_queue_frame.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
+    next_in_queue_frame.grid_columnconfigure(0, weight=1)
 
     queue_label = Label(
         next_in_queue_frame,
@@ -134,7 +148,7 @@ def create_right_panel(parent, playlist_name=None):
         bg='#2d0232',
         anchor="w"
     )
-    queue_label.pack(fill="both", expand=True, padx=10, pady=(0, 40))
+    queue_label.pack(fill="both", expand=True, padx=10, pady=(10, 10))
 
     queue_text_label = Label(
         next_in_queue_frame,
@@ -147,37 +161,25 @@ def create_right_panel(parent, playlist_name=None):
     )
     queue_text_label.pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
-    update_now_playing(
-        playlist_label=playlist_label,
-        album_art_label=album_art_label,
-        title_label=title_label,
-        artist_label=artist_label,
-        playlist_name=playlist_name
-    )
-
-    update_next_in_queue(queue_text_label, playlist_name)
-
-    right_frame.grid_rowconfigure(0, weight=4)
-    right_frame.grid_rowconfigure(1, weight=8)
-    right_frame.grid_columnconfigure(0, weight=1)
-
-    # return right_frame, queue_text_label, playlist_label, album_art_label, title_label, artist_label
-    # return right_frame, queue_text_label, playlist_label, album_art_label, title_label, artist_label
     return right_frame, queue_text_label, playlist_label, album_art_label, title_label, artist_label
-
 
 def update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name):
     print(f"Updating now playing for playlist: {playlist_name}")
     song_details = fetch_current_song_details(playlist_name)
 
     if song_details:
-        title, artist, playlist, cover_path = song_details
+        song_title, song_artist, playlist_name, song_cover_path, playlist_title, playlist_cover_path = song_details
 
-        playlist_label.config(text=playlist)
-        title_label.config(text=title)
-        artist_label.config(text=artist)
+        playlist_label.config(text=playlist_title if playlist_title else "Unknown Playlist")
 
-        if cover_path and os.path.exists(cover_path):
+        title_label.config(text=song_title if song_title else "No Song")
+        artist_label.config(text=song_artist if song_artist else "Unknown Artist")
+
+        cover_path = song_cover_path if song_cover_path and os.path.exists(song_cover_path) else (
+            playlist_cover_path if playlist_cover_path and os.path.exists(playlist_cover_path) else None
+        )
+
+        if cover_path:
             try:
                 img = Image.open(cover_path)
                 img = img.resize((200, 200), Image.LANCZOS)
@@ -185,10 +187,9 @@ def update_now_playing(playlist_label, album_art_label, title_label, artist_labe
                 album_art_label.config(image=album_image)
                 album_art_label.image = album_image
             except Exception as e:
-                print(f"Error loading album art image: {e}")
+                print(f"Error loading cover image: {e}")
                 album_art_label.config(image='', text="No Cover")
         else:
-            print("Invalid or missing cover path.")
             album_art_label.config(image='', text="No Cover")
     else:
         playlist_label.config(text="Unknown Playlist")

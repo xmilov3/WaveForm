@@ -43,6 +43,7 @@ class PageManager:
         create_panel_func = self.dynamic_panels[dynamic_panel_name]
         
         panels = create_panel_func(self.root, playlist_name)
+
         if not isinstance(panels, tuple) or not isinstance(panels[0], Frame):
             raise TypeError(f"The dynamic panel '{dynamic_panel_name}' did not return a valid tuple with Frame as the first element. Received: {type(panels)}")
 

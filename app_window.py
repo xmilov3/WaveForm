@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import *
+from tkinter import messagebox
 from app.func.config import *
 import pygame
 from app.func.load_pic_gui import load_top_logo
@@ -33,11 +33,13 @@ class AppWindow(tk.Frame):
     def __init__(self, parent, page_manager, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         
+        
         self.page_manager = page_manager
         self.configure(bg='#150016')
 
         self.main_frame = tk.Frame(self, bg='#150016')
         self.main_frame.grid(row=0, column=0, sticky="nsew")
+
 
         self.title_label = tk.Label(self.main_frame, text="Title", bg="#1E052A", fg="white")
         self.artist_label = tk.Label(self.main_frame, text="Artist", bg="#1E052A", fg="white")
@@ -98,6 +100,7 @@ class AppWindow(tk.Frame):
             self.first_playlist,
             self.title_label,
             self.artist_label,
+            self.album_art_label,
             self.time_elapsed_label,
             self.time_remaining_label,
             self.progress_slider
@@ -209,6 +212,71 @@ class AppWindow(tk.Frame):
             if 'connection' in locals() and connection.is_connected():
                 cursor.close()
                 connection.close()
+
+    def play_selected_song(self, selected_song, title_label, artist_label, album_art_label, time_elapsed_label, time_remaining_label):
+        try:
+            if " - " in selected_song:
+                song_title, artist_name = selected_song.split(" - ")
+            else:
+                messagebox.showerror("Error", "Invalid song format. Song should be in format 'Title - Artist'.")
+                return
+
+            connection = mysql.connector.connect(
+                host='localhost',
+                database='WaveForm_db',
+                user='root',
+                password=''
+            )
+            cursor = connection.cursor()
+
+            query = "SELECT file_path, cover_path FROM songs WHERE title = %s AND artist = %s"
+            cursor.execute(query, (song_title.strip(), artist_name.strip()))
+            result = cursor.fetchone()
+
+            if not result:
+                messagebox.showerror("Error", f"No file found for {song_title} - {artist_name}")
+                return
+
+            file_path, cover_path = result
+
+            if not os.path.exists(file_path):
+                messagebox.showerror("Error", f"File does not exist: {file_path}")
+                return
+
+            pygame.mixer.init()
+            pygame.mixer.music.load(file_path)
+            pygame.mixer.music.play()
+
+            song_length = MP3(file_path).info.length
+            title_label.config(text=song_title)
+            artist_label.config(text=artist_name)
+            time_elapsed_label.config(text="00:00")
+            time_remaining_label.config(text=f"-{int(song_length // 60):02}:{int(song_length % 60):02}")
+
+            if cover_path and os.path.exists(cover_path):
+                try:
+                    from PIL import Image, ImageTk
+                    img = Image.open(cover_path)
+                    img = img.resize((200, 200), Image.LANCZOS)
+                    album_image = ImageTk.PhotoImage(img)
+                    album_art_label.config(image=album_image)
+                    album_art_label.image = album_image
+                except Exception as e:
+                    print(f"Error loading album art: {e}")
+                    album_art_label.config(image='', text="No Cover")
+            else:
+                album_art_label.config(image='', text="No Cover")
+
+            print(f"Playing: {song_title} - {artist_name}")
+
+        except Exception as e:
+            print(f"Error in play_selected_song: {e}")
+
+        finally:
+            if 'connection' in locals() and connection.is_connected():
+                cursor.close()
+                connection.close()
+        
 
     def start_sync_loop(self):
         if is_playing:

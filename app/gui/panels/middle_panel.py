@@ -79,7 +79,7 @@ def create_header_frame(parent, playlist_name=None):
     return header_frame
 
 
-def create_song_listbox(parent, playlist_name, play_song_callback, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
+def create_song_listbox(parent, playlist_name, album_art_label, play_song_callback, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider ):
     song_listbox = Listbox(
         parent,
         bg='#2D0232',
@@ -126,16 +126,30 @@ def create_song_listbox(parent, playlist_name, play_song_callback, title_label, 
             cursor.close()
             connection.close()
 
+    song_listbox.bind("<Double-1>", lambda event: play_selected_song(
+        song_listbox.get(ACTIVE),
+        title_label,
+        artist_label,
+        album_art_label,
+        time_elapsed_label,
+        time_remaining_label,
+        progress_slider
+    ))
+
 
 def create_middle_panel(
     parent, 
     playlist_name, 
     title_label, 
-    artist_label, 
+    artist_label,
+    album_art_label,
     time_elapsed_label, 
-    time_remaining_label, 
-    progress_slider
+    time_remaining_label,
+    progress_slider 
 ):
+    
+    
+    
     middle_frame = Frame(parent, bg="#1E052A", width=600, height=400)
     middle_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
     middle_frame.grid_propagate(False)
@@ -152,6 +166,7 @@ def create_middle_panel(
         play_song_callback=play_selected_song,
         title_label=title_label,
         artist_label=artist_label,
+        album_art_label=album_art_label,
         time_elapsed_label=time_elapsed_label,
         time_remaining_label=time_remaining_label,
         progress_slider=progress_slider
@@ -206,11 +221,11 @@ def create_middle_panel(
         song_listbox.get(ACTIVE),
         title_label,
         artist_label,
+        album_art_label,
         time_elapsed_label,
         time_remaining_label,
         progress_slider
-    )
-)
+    ))
 
 
     middle_frame.grid_rowconfigure(0, weight=0)

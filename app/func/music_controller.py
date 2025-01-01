@@ -19,7 +19,7 @@ from app.func.shared_func import play_playlist
 
 
 
-def create_song_listbox(parent, playlist_name, play_song_callback, time_elapsed_label, time_remaining_label, progress_slider):
+def create_song_listbox(parent, playlist_name,  time_elapsed_label, time_remaining_label, album_art_label):
     song_listbox = Listbox(
         parent,
         bg='#2D0232',
@@ -42,12 +42,16 @@ def create_song_listbox(parent, playlist_name, play_song_callback, time_elapsed_
         )
         cursor = connection.cursor()
         query = """
-            SELECT s.title, s.artist
-            FROM songs s
-            JOIN playlist_songs ps ON s.song_id = ps.song_id
-            JOIN playlists p ON ps.playlist_id = p.playlist_id
-            WHERE p.name = %s
-            ORDER BY ps.song_id ASC
+            SELECT 
+            s.title AS song_title,
+            s.artist AS song_artist,
+            s.cover_path AS cover_path,
+            p.name AS playlist_name
+        FROM songs s
+        JOIN playlist_songs ps ON s.song_id = ps.song_id
+        JOIN playlists p ON ps.playlist_id = p.playlist_id
+        WHERE p.name = %s
+        LIMIT 1;
         """
         cursor.execute(query, (playlist_name,))
         songs = cursor.fetchall()
@@ -72,13 +76,13 @@ def create_song_listbox(parent, playlist_name, play_song_callback, time_elapsed_
             song_listbox.get(ACTIVE),
             title_label,
             artist_label,
+            album_art_label,
             time_elapsed_label,
-            time_remaining_label,
-            progress_slider
+            time_remaining_label
         )
     )
 
-    return song_listbox, time_remaining_label, progress_slider
+    return song_listbox, time_remaining_label
 
 
 
@@ -270,7 +274,7 @@ def initialize_first_song(
 
 
 
-def play_selected_song(selected_song, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
+def play_selected_song(selected_song, title_label, artist_label, album_art_label, time_elapsed_label, time_remaining_label, progress_slider):
     try:
         if " - " in selected_song:
             song_title, artist_name = selected_song.split(" - ")
@@ -285,7 +289,8 @@ def play_selected_song(selected_song, title_label, artist_label, time_elapsed_la
             password=''
         )
         cursor = connection.cursor()
-        query = "SELECT file_path FROM songs WHERE title = %s AND artist = %s"
+
+        query = "SELECT file_path, cover_path FROM songs WHERE title = %s AND artist = %s"
         cursor.execute(query, (song_title.strip(), artist_name.strip()))
         result = cursor.fetchone()
 
@@ -293,16 +298,16 @@ def play_selected_song(selected_song, title_label, artist_label, time_elapsed_la
             print(f"No file found for {song_title} - {artist_name}")
             return
 
-        file_path = result[0]
+        file_path, cover_path = result
 
         if not os.path.exists(file_path):
             print(f"File does not exist: {file_path}")
             return
 
+        pygame.mixer.init()
         pygame.mixer.music.load(file_path)
         pygame.mixer.music.play()
 
-        # Update UI
         song_length = MP3(file_path).info.length
         title_label.config(text=song_title)
         artist_label.config(text=artist_name)
@@ -310,17 +315,29 @@ def play_selected_song(selected_song, title_label, artist_label, time_elapsed_la
         time_remaining_label.config(text=f"-{int(song_length // 60):02}:{int(song_length % 60):02}")
         progress_slider.config(to=song_length)
 
+        if cover_path and os.path.exists(cover_path):
+            img = Image.open(cover_path)
+            img = img.resize((200, 200), Image.LANCZOS)
+            album_image = ImageTk.PhotoImage(img)
+            album_art_label.config(image=album_image)
+            album_art_label.image = album_image
+        else:
+            album_art_label.config(image='', text="No Cover")
+
         print(f"Playing: {song_title} - {artist_name}")
 
     except Exception as e:
         print(f"Error in play_selected_song: {e}")
+
     finally:
         if 'connection' in locals() and connection.is_connected():
             cursor.close()
             connection.close()
 
 
-def play_pause_song(song_info, is_playing, play_button, play_button_img, pause_button_img, title_label, artist_label):
+
+
+def play_pause_song(song_info, is_playing, play_button, play_button_img, pause_button_img, title_label, artist_label,):
     global current_song_position, song_start_time
 
     try:

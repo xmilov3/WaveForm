@@ -8,9 +8,16 @@ from app.func.music_controller import (
 )
 
 def create_bottom_panel(
-    main_frame, song_listbox, queue_text_label, playlist_name,
-    playlist_label, album_art_label, title_label, artist_label,
-    update_next_queue, update_now_playing
+    main_frame, 
+    song_listbox, 
+    queue_text_label, 
+    playlist_name,
+    playlist_label, 
+    album_art_label, 
+    title_label, 
+    artist_label,
+    update_next_queue, 
+    update_now_playing
 ):
     global is_playing, user_sliding, current_song_position, song_length, currentsong, song_start_time
 
@@ -82,6 +89,8 @@ def create_bottom_panel(
             title_label,
             artist_label
         )
+   
+    
 
     def next_command():
         global is_playing, current_song_position, time_remaining_label
@@ -131,8 +140,12 @@ def create_bottom_panel(
     update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
     previous_button = create_previous_button(bottom_frame_mid, lambda e=None: previous_command())
-    play_pause_button = create_play_pause_button(bottom_frame_mid, play_command=lambda: play_pause_command(),
-                                                 pause_command=lambda: play_pause_command())
+    play_pause_button = create_play_pause_button(
+        bottom_frame_mid,
+        play_command=lambda: play_pause_command(),
+        pause_command=lambda: play_pause_command()
+    )
+
     next_button = create_next_button(bottom_frame_mid, lambda e=None: next_command())
 
     previous_button.grid(row=0, column=0, padx=10, pady=5, sticky="e")
