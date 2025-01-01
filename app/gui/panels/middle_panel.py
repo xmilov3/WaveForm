@@ -1,9 +1,10 @@
 from tkinter import *
 from PIL import Image, ImageTk
 import mysql.connector
-from app.func.playlist_utils import fetch_playlists
+from app.func.playlist_handler import fetch_playlists
 import tkinter as tk
-from app.func.music_controller import play_selected_song
+from app.func.music_controller import play_selected_song, create_song_listbox
+from app.func.config import *
 
 
 def fetch_playlist_details(playlist_name):
@@ -34,6 +35,8 @@ def fetch_playlist_details(playlist_name):
         if 'connection' in locals() and connection.is_connected():
             cursor.close()
             connection.close()
+
+
 
 
 def create_header_frame(parent, playlist_name=None):
@@ -85,7 +88,7 @@ def create_song_listbox(parent, playlist_name, play_song_callback, title_label, 
         font=("Arial", 14),
         relief="flat"
     )
-    song_listbox.grid(sticky="nsew", padx=5, pady=5)
+
 
     parent.grid_rowconfigure(0, weight=1)
     parent.grid_columnconfigure(0, weight=1)
@@ -114,34 +117,27 @@ def create_song_listbox(parent, playlist_name, play_song_callback, title_label, 
             song_listbox.insert(END, f"{title} - {artist}")
 
         if not songs:
-            print(f"Brak utworów w playliście: {playlist_name}")
+            print(f"Playlist is empty: {playlist_name}")
 
     except mysql.connector.Error as e:
-        print(f"Błąd bazy danych: {e}")
+        print(f"Database error: {e}")
     finally:
         if 'connection' in locals() and connection.is_connected():
             cursor.close()
             connection.close()
 
-    song_listbox.bind(
-        "<Double-1>",
-        lambda event: play_selected_song(
-            song_listbox.get(ACTIVE),
-            song_listbox,
-            title_label,
-            artist_label,
-            time_elapsed_label,
-            time_remaining_label,
-            progress_slider
-        )
-    )
 
-
-
-def create_middle_panel(parent, playlist_name, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
+def create_middle_panel(
+    parent, 
+    playlist_name, 
+    title_label, 
+    artist_label, 
+    time_elapsed_label, 
+    time_remaining_label, 
+    progress_slider
+):
     middle_frame = Frame(parent, bg="#1E052A", width=600, height=400)
     middle_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
-
     middle_frame.grid_propagate(False)
 
     header_frame = create_header_frame(middle_frame, playlist_name)
@@ -151,18 +147,75 @@ def create_middle_panel(parent, playlist_name, title_label, artist_label, time_e
     songlist_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
 
     song_listbox = create_song_listbox(
+        parent=songlist_frame,
+        playlist_name=playlist_name,
+        play_song_callback=play_selected_song,
+        title_label=title_label,
+        artist_label=artist_label,
+        time_elapsed_label=time_elapsed_label,
+        time_remaining_label=time_remaining_label,
+        progress_slider=progress_slider
+    )
+
+    song_listbox = Listbox(
         songlist_frame,
-        playlist_name,
-        play_selected_song,
+        bg='#2D0232',
+        fg='grey',
+        selectforeground='grey',
+        font=("Arial", 14),
+        relief="flat"
+    )
+    song_listbox.grid(sticky="nsew", padx=5, pady=5)
+
+    try:
+        connection = mysql.connector.connect(
+            host='localhost',
+            database='WaveForm_db',
+            user='root',
+            password=''
+        )
+        cursor = connection.cursor()
+        query = """
+            SELECT s.title, s.artist
+            FROM songs s
+            JOIN playlist_songs ps ON s.song_id = ps.song_id
+            JOIN playlists p ON ps.playlist_id = p.playlist_id
+            WHERE p.name = %s
+            ORDER BY ps.song_id ASC
+        """
+        cursor.execute(query, (playlist_name,))
+        songs = cursor.fetchall()
+
+        for song in songs:
+            title, artist = song
+            song_listbox.insert(END, f"{title} - {artist}")
+
+        if not songs:
+            print(f"No songs in playlist: {playlist_name}")
+            
+        
+
+    except mysql.connector.Error as e:
+        print(f"Database error: {e}")
+    finally:
+        if 'connection' in locals() and connection.is_connected():
+            cursor.close()
+            connection.close()
+
+    song_listbox.bind("<Double-1>", lambda event: play_selected_song(
+        song_listbox.get(ACTIVE),
         title_label,
         artist_label,
         time_elapsed_label,
         time_remaining_label,
         progress_slider
     )
+)
+
 
     middle_frame.grid_rowconfigure(0, weight=0)
     middle_frame.grid_rowconfigure(1, weight=1)
     middle_frame.grid_columnconfigure(0, weight=1)
 
     return middle_frame, header_frame, songlist_frame, song_listbox
+

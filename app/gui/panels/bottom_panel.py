@@ -7,23 +7,23 @@ from app.func.music_controller import (
     update_next_in_queue, update_now_playing
 )
 
-# def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_name, 
-#                         playlist_label, album_art_label, title_label, artist_label,
-#                         update_next_queue, update_now_playing):
-
-def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_name, playlist_label, album_art_label, update_next_in_queue, update_now_playing):
+def create_bottom_panel(
+    main_frame, song_listbox, queue_text_label, playlist_name,
+    playlist_label, album_art_label, title_label, artist_label,
+    update_next_queue, update_now_playing
+):
     global is_playing, user_sliding, current_song_position, song_length, currentsong, song_start_time
-
 
     is_playing = False
     user_sliding = False
     current_song_position = 0
     song_length = 0
     currentsong = None
-    song_start_time=0
+    song_start_time = 0
 
     bottom_frame = Frame(main_frame, bg='#150016')
     bottom_frame.grid(row=2, column=0, columnspan=3, sticky='nsew', pady=1)
+
 
     bottom_frame_left = Frame(bottom_frame, bg='#150016')
     bottom_frame_left.grid(row=0, column=0, sticky='w', padx=10)
@@ -60,9 +60,12 @@ def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_nam
 
     def play_pause_command():
         global is_playing
-
-        if user_sliding:  
+        if user_sliding:
             print("Ignoring Play/Pause toggle during sliding")
+            return
+
+        if song_listbox.size() == 0:
+            print("No songs in the playlist!")
             return
 
         currentsong = song_listbox.get(ACTIVE)
@@ -81,10 +84,7 @@ def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_nam
         )
 
     def next_command():
-        global is_playing, current_song_position
-
-        print(f"Next command triggered")
-
+        global is_playing, current_song_position, time_remaining_label
         next_song(
             song_listbox,
             play_pause_button,
@@ -102,25 +102,13 @@ def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_nam
         )
         is_playing = True
         current_song_position = 0
-        
 
     update_next_in_queue(queue_text_label, playlist_name)
     update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
 
-    # def update_next_in_queue(queue_text_label, playlist_name):
-    #     if queue_text_label is None:
-    #         print("Queue text label is not initialized.")
-    #         return
-
-    #     # Reszta kodu
-    #     queue_text = f"Next in queue for playlist: {playlist_name}"
-    #     queue_text_label.config(text=queue_text)
-
-
     def previous_command():
-        global is_playing, current_song_position
-
+        global is_playing, current_song_position, time_remaining_label
         previous_song(
             song_listbox,
             play_pause_button,
@@ -136,7 +124,6 @@ def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_nam
             playlist_label,
             album_art_label
         )
-
         is_playing = True
         current_song_position = 0
 
@@ -152,6 +139,7 @@ def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_nam
     play_pause_button.grid(row=0, column=1, padx=10, pady=5)
     next_button.grid(row=0, column=2, padx=10, pady=5, sticky="w")
 
+    # Progress Bar
     bottom_center_bar = Frame(bottom_frame_mid, bg='#150016')
     bottom_center_bar.grid(row=1, column=0, columnspan=3, sticky='nsew', pady=10)
 
@@ -181,7 +169,6 @@ def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_nam
         showvalue=False
     )
     progress_slider.configure(borderwidth=0, relief="flat")
-
     progress_slider.bind("<ButtonPress-1>", lambda e: set_user_sliding(True))
     progress_slider.bind("<ButtonRelease-1>", lambda e: slide_music(
         progress_slider.get(),
@@ -194,8 +181,6 @@ def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_nam
         pause_button_img,
         song_listbox.get(ACTIVE)
     ))
-
-
     progress_slider.grid(row=0, column=1, padx=10)
 
     time_remaining_label = Label(
@@ -209,6 +194,7 @@ def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_nam
     )
     time_remaining_label.grid(row=0, column=2, padx=5)
 
+    # Right section: Volume Control
     bottom_frame_right = Frame(bottom_frame, bg='#150016')
     bottom_frame_right.grid(row=0, column=2, sticky='nsew', padx=10)
 
@@ -243,14 +229,5 @@ def create_bottom_panel(main_frame, song_listbox, queue_text_label, playlist_nam
 
     progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_center_bar)
 
-    return (
-        bottom_frame,
-        time_remaining_label,
-        time_elapsed_label,
-        progress_slider,
-        title_label,
-        artist_label,
-        play_pause_button,
-        play_button_img,
-        pause_button_img,
-    )
+    return bottom_frame, time_remaining_label, time_elapsed_label, progress_slider, play_pause_button, play_button_img, pause_button_img
+

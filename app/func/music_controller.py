@@ -14,7 +14,12 @@ from pydub import AudioSegment
 from app.gui.panels.right_panel import update_next_in_queue, update_now_playing
 from app.func.shared_func import play_playlist
 
-def create_song_listbox(parent, playlist_name, play_song_callback):
+
+
+
+
+
+def create_song_listbox(parent, playlist_name, play_song_callback, time_elapsed_label, time_remaining_label, progress_slider):
     song_listbox = Listbox(
         parent,
         bg='#2D0232',
@@ -61,17 +66,30 @@ def create_song_listbox(parent, playlist_name, play_song_callback):
             cursor.close()
             connection.close()
 
-    song_listbox.bind("<Double-1>", lambda event: play_song_callback(song_listbox.get(ACTIVE)))
+    song_listbox.bind(
+        "<Double-1>",
+        lambda event: play_selected_song(
+            song_listbox.get(ACTIVE),
+            title_label,
+            artist_label,
+            time_elapsed_label,
+            time_remaining_label,
+            progress_slider
+        )
+    )
 
-    return song_listbox
+    return song_listbox, time_remaining_label, progress_slider
 
 
-def play_selected_song(selected_song):
+
+
+    
+def play_selected_song(selected_song, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
     try:
         if " - " in selected_song:
             song_title, artist_name = selected_song.split(" - ")
         else:
-            print("Niepoprawny format utworu")
+            print("Invalid song format")
             return
 
         connection = mysql.connector.connect(
@@ -86,63 +104,36 @@ def play_selected_song(selected_song):
         result = cursor.fetchone()
 
         if not result:
-            print(f"Nie znaleziono pliku dla utworu {song_title} - {artist_name}.")
+            print(f"No file found for {song_title} - {artist_name}")
             return
 
         file_path = result[0]
 
         if not os.path.exists(file_path):
-            print(f"Plik nie istnieje: {file_path}")
+            print(f"File does not exist: {file_path}")
             return
 
-        # Odtwórz wybrany utwór
         pygame.mixer.music.load(file_path)
         pygame.mixer.music.play()
-        print(f"Odtwarzanie: {song_title} - {artist_name}")
+
+        song_length = MP3(file_path).info.length
+        title_label.config(text=song_title)
+        artist_label.config(text=artist_name)
+        time_elapsed_label.config(text="00:00")
+        time_remaining_label.config(text=f"-{int(song_length // 60):02}:{int(song_length % 60):02}")
+        progress_slider.config(to=song_length)
+
+        print(f"Playing: {song_title} - {artist_name}")
 
     except Exception as e:
-        print(f"Błąd w play_selected_song: {e}")
+        print(f"Error in play_selected_song: {e}")
     finally:
         if 'connection' in locals() and connection.is_connected():
             cursor.close()
             connection.close()
 
 
-# def create_song_listbox(songlist_frame):
-#     song_listbox = Listbox(
-#         songlist_frame, 
-#         bg='#3C0F64', 
-#         fg='grey', 
-#         selectbackground='#9C27B0', 
-#         selectforeground='grey',
-#         font=("Arial", 14), 
-#         relief="flat"
-#     )
-#     song_listbox.place(relwidth=1, relheight=1)
-#     try:
-#         connection = mysql.connector.connect(
-#             host='localhost',
-#             database='WaveForm_db',
-#             user='root',
-#             password=''
-#         )
-#         cursor = connection.cursor()
-#         query = "SELECT title, artist FROM songs"
-#         cursor.execute(query)
-#         songs = cursor.fetchall()
 
-#         for song in songs:
-#             title, artist = song
-#             song_listbox.insert(END, f"{title} - {artist}")
-
-#     except mysql.connector.Error as e:
-#         print(f"Database error: {e}")
-#     finally:
-#         if 'connection' in locals() and connection.is_connected():
-#             cursor.close()
-#             connection.close()
-
-#     return song_listbox
 
 def sync_is_playing():
     global is_playing
@@ -164,7 +155,8 @@ def initialize_first_song(
     bottom_frame,
     playlist_name=None
 ):
-    global currentsong, song_length, current_song_position, song_start_time, is_playing
+    global currentsong, song_length, current_song_position, song_start_time, is_playing, play_playlist
+        
 
     if playlist_name:
         try:
@@ -278,6 +270,54 @@ def initialize_first_song(
 
 
 
+def play_selected_song(selected_song, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
+    try:
+        if " - " in selected_song:
+            song_title, artist_name = selected_song.split(" - ")
+        else:
+            print("Invalid song format")
+            return
+
+        connection = mysql.connector.connect(
+            host='localhost',
+            database='WaveForm_db',
+            user='root',
+            password=''
+        )
+        cursor = connection.cursor()
+        query = "SELECT file_path FROM songs WHERE title = %s AND artist = %s"
+        cursor.execute(query, (song_title.strip(), artist_name.strip()))
+        result = cursor.fetchone()
+
+        if not result:
+            print(f"No file found for {song_title} - {artist_name}")
+            return
+
+        file_path = result[0]
+
+        if not os.path.exists(file_path):
+            print(f"File does not exist: {file_path}")
+            return
+
+        pygame.mixer.music.load(file_path)
+        pygame.mixer.music.play()
+
+        # Update UI
+        song_length = MP3(file_path).info.length
+        title_label.config(text=song_title)
+        artist_label.config(text=artist_name)
+        time_elapsed_label.config(text="00:00")
+        time_remaining_label.config(text=f"-{int(song_length // 60):02}:{int(song_length % 60):02}")
+        progress_slider.config(to=song_length)
+
+        print(f"Playing: {song_title} - {artist_name}")
+
+    except Exception as e:
+        print(f"Error in play_selected_song: {e}")
+    finally:
+        if 'connection' in locals() and connection.is_connected():
+            cursor.close()
+            connection.close()
 
 
 def play_pause_song(song_info, is_playing, play_button, play_button_img, pause_button_img, title_label, artist_label):
@@ -362,7 +402,9 @@ def next_song(song_listbox, play_pause_button, play_button_img, pause_button_img
     song_title, artist_name = currentsong.split(" - ")
 
     update_next_in_queue(queue_text_label, playlist_name)
-    update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
+    def update_now_playing(self, playlist_label, album_art_label, title_label, artist_label, playlist_name, time_elapsed_label, time_remaining_label):
+        update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name, time_elapsed_label, time_remaining_label)
+
 
     try:
         connection = mysql.connector.connect(

@@ -4,10 +4,22 @@ from PIL import Image, ImageTk
 import mysql.connector
 from app.db.database import create_connection
 from app.func.playlist_handler import process_playlist_from_folder
-
-
-
 from tkinter import Button, Menu
+from app.func.playlist_handler import fetch_playlists
+
+
+def create_connection():
+    try:
+        connection = mysql.connector.connect(
+            host="localhost",
+            database="WaveForm_db",
+            user="root",
+            password=""
+        )
+        return connection
+    except mysql.connector.Error as e:
+        print(f"Error connecting to database: {e}")
+        return None
 
 playlist_buttons = {}
 
@@ -65,21 +77,6 @@ def delete_playlist_wrapper(playlist_name, playlist_frame, page_manager):
     if response:
         delete_playlist(playlist_name, playlist_frame, update_playlist_buttons, page_manager)
 
-
-def fetch_playlists():
-    try:
-        connection = create_connection()
-        cursor = connection.cursor()
-        cursor.execute("SELECT name FROM playlists")
-        playlists = [row[0] for row in cursor.fetchall()]
-        return playlists
-    except Exception as e:
-        print(f"Error downloading playlists: {e}")
-        return []
-    finally:
-        if connection and connection.is_connected():
-            cursor.close()
-            connection.close()
 
 
 def fetch_playlist_details(playlist_name):
