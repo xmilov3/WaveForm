@@ -42,6 +42,7 @@ def fetch_playlist_details(playlist_name):
 
 def create_header_frame(parent, playlist_name=None):
     header_frame = Frame(parent, bg="#2D0232")
+    # header_frame.grid_propagate(False)
 
 
     header_image_label = Label(header_frame, bg="#2D0232")
@@ -168,12 +169,13 @@ def create_middle_panel(
     )
     add_song_button.grid(row=3, column=0, pady=10, sticky="ew")
 
-
+    
     
     header_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
     songlist_frame = Frame(middle_frame, bg="#2D0232")
     songlist_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+    middle_frame.grid_propagate(False)
 
     song_listbox = create_song_listbox(
         parent=songlist_frame,

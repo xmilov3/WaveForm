@@ -198,6 +198,7 @@ def update_now_playing(playlist_label, album_art_label, title_label, artist_labe
         album_art_label.config(image='', text="No Cover")
 
 
+
 def update_next_in_queue(queue_text_label, playlist_name):
     if queue_text_label is None:
         print("Error: queue_text_label is None")
