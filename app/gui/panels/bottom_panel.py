@@ -31,12 +31,12 @@ def create_bottom_panel(
     bottom_frame = Frame(main_frame, bg='#150016')
     bottom_frame.grid(row=2, column=0, columnspan=3, sticky='nsew', pady=1)
 
-
     bottom_frame_left = Frame(bottom_frame, bg='#150016')
     bottom_frame_left.grid(row=0, column=0, sticky='w', padx=10)
 
     title_label = Label(
         bottom_frame_left,
+        title_label,
         fg="gray",
         bg='#150016',
         font=("Arial", 18, "bold"),
@@ -47,6 +47,7 @@ def create_bottom_panel(
 
     artist_label = Label(
         bottom_frame_left,
+        artist_label,
         fg="gray",
         bg='#150016',
         font=("Arial", 14),
@@ -89,8 +90,8 @@ def create_bottom_panel(
             title_label,
             artist_label
         )
-   
-    
+
+        update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
     def next_command():
         global is_playing, current_song_position, time_remaining_label
@@ -112,9 +113,7 @@ def create_bottom_panel(
         is_playing = True
         current_song_position = 0
 
-    update_next_in_queue(queue_text_label, playlist_name)
-    update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
-
+        update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
     def previous_command():
         global is_playing, current_song_position, time_remaining_label
@@ -136,8 +135,7 @@ def create_bottom_panel(
         is_playing = True
         current_song_position = 0
 
-    update_next_in_queue(queue_text_label, playlist_name)
-    update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
+        update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
     previous_button = create_previous_button(bottom_frame_mid, lambda e=None: previous_command())
     play_pause_button = create_play_pause_button(
@@ -145,7 +143,6 @@ def create_bottom_panel(
         play_command=lambda: play_pause_command(),
         pause_command=lambda: play_pause_command()
     )
-
     next_button = create_next_button(bottom_frame_mid, lambda e=None: next_command())
 
     previous_button.grid(row=0, column=0, padx=10, pady=5, sticky="e")
@@ -242,5 +239,7 @@ def create_bottom_panel(
 
     progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_center_bar)
 
-    return bottom_frame, time_remaining_label, time_elapsed_label, progress_slider, play_pause_button, play_button_img, pause_button_img
+    update_next_queue(queue_text_label, playlist_name)
+    update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
+    return bottom_frame, time_remaining_label, time_elapsed_label, progress_slider, play_pause_button, play_button_img, pause_button_img

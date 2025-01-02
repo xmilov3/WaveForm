@@ -101,7 +101,7 @@ def create_right_panel(parent, playlist_name=None):
 
     playlist_label = Label(
         now_playing_frame,
-        text="Playlist Name",
+        text="Now Playing",
         font=("Arial", 30, "bold"),
         fg='white',
         bg='#2d0232',

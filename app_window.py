@@ -76,7 +76,7 @@ class AppWindow(tk.Frame):
             self.progress_slider,
             self.play_pause_button,
             self.play_button_img,
-            self.pause_button_img
+            self.pause_button_img,
         ) = create_bottom_panel(
             self.main_frame,
             None,
