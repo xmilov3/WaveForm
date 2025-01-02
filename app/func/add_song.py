@@ -7,7 +7,7 @@ from app.func.playlist_handler import create_playlist, delete_playlist
 from tkinter import messagebox, simpledialog, filedialog, END
 from app.func.playlist_utils import fetch_playlists
 from tkinter import Toplevel, Label, Listbox, Scrollbar, Button, filedialog, messagebox
-
+import re
 
 def add_song_to_playlist(file_path, playlist_name):
     connection = create_connection()
@@ -16,7 +16,15 @@ def add_song_to_playlist(file_path, playlist_name):
         return
 
     try:
-        title = os.path.basename(file_path).split('.')[0]
+        title_artist = os.path.basename(file_path).split('.')[0]
+
+        match = re.match(r"(.*?)\s*-\s*(.*)", title_artist)
+        if match:
+            artist = match.group(1).strip()
+            title = match.group(2).strip()
+        else:
+            artist = "Unknown Artist"
+            title = title_artist.strip()
 
         cursor = connection.cursor()
         insert_song_query = """
@@ -26,7 +34,7 @@ def add_song_to_playlist(file_path, playlist_name):
         cursor.execute(insert_song_query, (
             1,
             title,
-            "Unknown Artist",
+            artist,
             playlist_name,
             "Unknown Genre",
             file_path,
@@ -50,7 +58,10 @@ def add_song_to_playlist(file_path, playlist_name):
         cursor.execute(insert_playlist_song_query, (playlist_id, song_id))
         connection.commit()
 
-        print(f"Song '{title}' added to playlist '{playlist_name}'.")
+        playlist_songs_id = cursor.lastrowid
+
+        print(f"Song '{title}' by '{artist}' added to playlist '{playlist_name}'.")
+        print(f"playlist_songs_id: {playlist_songs_id}, playlist_id: {playlist_id}, song_id: {song_id}")
 
     except Exception as e:
         print(f"Error adding song: {e}")
@@ -58,7 +69,6 @@ def add_song_to_playlist(file_path, playlist_name):
         if connection and connection.is_connected():
             cursor.close()
             connection.close()
-
 
 def add_song_dialog(playlist_name, song_listbox):
     if not playlist_name:
@@ -80,7 +90,6 @@ def add_song_dialog(playlist_name, song_listbox):
             messagebox.showerror("Error", f"Failed to add song: {e}")
     else:
         messagebox.showinfo("Info", "No file selected.")
-
 
 def refresh_song_listbox(song_listbox, playlist_name):
     try:

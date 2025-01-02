@@ -168,18 +168,12 @@ def update_now_playing(playlist_label, album_art_label, title_label, artist_labe
     song_details = fetch_current_song_details(playlist_name)
 
     if song_details:
-        song_title, song_artist, playlist_name, song_cover_path, playlist_title, playlist_cover_path = song_details
+        title, artist, playlist, cover_path = song_details
+        title_label.config(text=title)
+        artist_label.config(text=artist)
+        playlist_label.config(text=playlist)
 
-        playlist_label.config(text=playlist_title if playlist_title else "Unknown Playlist")
-
-        title_label.config(text=song_title if song_title else "No Song")
-        artist_label.config(text=song_artist if song_artist else "Unknown Artist")
-
-        cover_path = song_cover_path if song_cover_path and os.path.exists(song_cover_path) else (
-            playlist_cover_path if playlist_cover_path and os.path.exists(playlist_cover_path) else None
-        )
-
-        if cover_path:
+        if cover_path and os.path.exists(cover_path):
             try:
                 img = Image.open(cover_path)
                 img = img.resize((200, 200), Image.LANCZOS)
@@ -187,15 +181,15 @@ def update_now_playing(playlist_label, album_art_label, title_label, artist_labe
                 album_art_label.config(image=album_image)
                 album_art_label.image = album_image
             except Exception as e:
-                print(f"Error loading cover image: {e}")
+                print(f"Error loading album art: {e}")
                 album_art_label.config(image='', text="No Cover")
         else:
             album_art_label.config(image='', text="No Cover")
     else:
-        playlist_label.config(text="Unknown Playlist")
         title_label.config(text="No Song")
         artist_label.config(text="Unknown Artist")
         album_art_label.config(image='', text="No Cover")
+
 
 
 
