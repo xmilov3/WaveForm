@@ -65,7 +65,7 @@ def fetch_next_in_queue(playlist_name):
             WHERE p.name = %s
             LIMIT 10 OFFSET 1
         """
-        cursor.execute(query, (playlist_name,))
+        cursor.execute(query, (playlist_name))
         queue_songs = cursor.fetchall()
 
         if queue_songs:

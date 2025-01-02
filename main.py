@@ -21,6 +21,8 @@ def main():
     root.geometry("1500x1000")
     icon = load_top_logo()
     root.iconphoto(True, icon)
+    root.deiconify()
+    
     
     
 
@@ -30,7 +32,6 @@ def main():
         print("Error! Unable to connect to database")
         return
     
-    page_manager = PageManager(root)
     root.grid_rowconfigure(0, weight=1)
     root.grid_columnconfigure(0, weight=1)
     
@@ -40,6 +41,7 @@ def main():
         user_session.set_user(user_id, username)
         print(f"Session started for user: {username} (ID: {user_id})")
         page_manager.show_page("AppWindow")
+        root.deiconify()
 
     def open_login():
         page_manager.show_page("LoginPage")
