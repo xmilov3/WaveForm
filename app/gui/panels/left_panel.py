@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk, Menu
 from tkinter import simpledialog, filedialog, messagebox
-from app.func.add_song import add_song_with_playlist
+from app.func.add_song import add_song_to_playlist
 from app.db.db_operations import insert_song
 from app.func.add_playlist import create_empty_playlist, import_playlist_from_folder
 from app.func.playlist_utils import update_playlist_buttons, show_context_menu, change_playlist_cover, delete_playlist, fetch_playlists
@@ -62,12 +62,7 @@ def create_left_panel(
         foreground=[('active', '#FFFFFF')]
     )
 
-    ttk.Button(
-        buttons_frame,
-        text="Add Song",
-        style="Custom.TButton",
-        command=lambda: add_song_with_playlist(page_manager)
-    ).pack(fill="x", padx=10, pady=5)
+
 
     ttk.Button(
         buttons_frame,

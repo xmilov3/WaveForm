@@ -5,6 +5,7 @@ from app.func.playlist_handler import fetch_playlists
 import tkinter as tk
 from app.func.music_controller import play_selected_song, create_song_listbox
 from app.func.config import *
+from app.func.add_song import add_song_to_playlist, add_song_dialog
 
 
 def fetch_playlist_details(playlist_name):
@@ -42,11 +43,13 @@ def fetch_playlist_details(playlist_name):
 def create_header_frame(parent, playlist_name=None):
     header_frame = Frame(parent, bg="#2D0232")
 
+
     header_image_label = Label(header_frame, bg="#2D0232")
     header_image_label.grid(row=0, column=0, rowspan=3, padx=5, pady=5, sticky="nw")
 
     header_label = Label(header_frame, text="", font=("Arial", 36, "bold"), fg="gray", bg="#2D0232")
     header_label.grid(row=0, column=1, sticky="w", padx=(10, 0), pady=(0, 5))
+    
 
     user_label = Label(header_frame, text="", font=("Arial", 20), fg="gray", bg="#2D0232")
     user_label.grid(row=1, column=1, sticky="w", padx=(10, 0))
@@ -154,7 +157,19 @@ def create_middle_panel(
     middle_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
     middle_frame.grid_propagate(False)
 
+    
     header_frame = create_header_frame(middle_frame, playlist_name)
+    header_frame.grid_rowconfigure(3, weight=1)
+    add_song_button = Button(
+        header_frame,
+        text="Add Song to Playlist",
+        font=("Arial", 12, "bold"),
+        command=lambda: add_song_dialog(playlist_name, song_listbox)
+    )
+    add_song_button.grid(row=3, column=0, pady=10, sticky="ew")
+
+
+    
     header_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
     songlist_frame = Frame(middle_frame, bg="#2D0232")
