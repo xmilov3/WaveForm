@@ -12,12 +12,6 @@ from app.func.playlist_controller import *
 import tkinter as tk
 
 
-
-
-
-
-
-
 def create_left_panel(parent, page_manager):
     
     left_frame = Frame(parent, bg='#1E052A', borderwidth=0)
@@ -80,10 +74,9 @@ def create_left_panel(parent, page_manager):
 
 
 
-def on_playlist_click(playlist_name, page_manager):
-    page_manager.show_dynamic_panel("MiddlePanel", playlist_name)
 
-
+def on_playlist_click(playlist_name, app_window):
+    app_window.update_middle_panel(playlist_name)
 
 def populate_playlists(playlist_frame, page_manager):
     for widget in playlist_frame.winfo_children():

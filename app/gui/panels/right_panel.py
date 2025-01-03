@@ -19,9 +19,8 @@ def fetch_current_song_details(playlist_name):
             SELECT 
                 s.title AS song_title, 
                 s.artist AS song_artist, 
-                p.name AS playlist_name, 
-                s.cover_path AS cover_path, 
-                p.title AS playlist_title, 
+                s.cover_path AS song_cover_path, 
+                p.name AS name, 
                 p.cover_path AS playlist_cover_path
             FROM songs s
             JOIN playlist_songs ps ON s.song_id = ps.song_id
@@ -58,7 +57,7 @@ def fetch_next_in_queue(playlist_name):
         cursor = connection.cursor()
 
         query = """
-            SELECT s.title, s.artist
+            SELECT s.title, s.artist, s.cover_path
             FROM songs s
             JOIN playlist_songs ps ON s.song_id = ps.song_id
             JOIN playlists p ON ps.playlist_id = p.playlist_id
@@ -164,32 +163,58 @@ def create_right_panel(parent, playlist_name=None):
     return right_frame, queue_text_label, playlist_label, album_art_label, title_label, artist_label
 
 def update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name):
-    print(f"Updating now playing for playlist: {playlist_name}")
-    song_details = fetch_current_song_details(playlist_name)
+    try:
+        connection = mysql.connector.connect(
+            host='localhost',
+            database='WaveForm_db',
+            user='root',
+            password=''
+        )
+        cursor = connection.cursor()
 
-    if song_details:
-        title, artist, playlist, cover_path = song_details
-        title_label.config(text=title)
-        artist_label.config(text=artist)
-        playlist_label.config(text=playlist)
+        query = """
+            SELECT s.title, s.artist, s.cover_path
+            FROM songs s
+            JOIN playlist_songs ps ON s.song_id = ps.song_id
+            JOIN playlists p ON ps.playlist_id = p.playlist_id
+            WHERE p.name = %s
+            ORDER BY ps.song_id ASC LIMIT 1
+        """
+        cursor.execute(query, (playlist_name,))
+        song = cursor.fetchone()
 
-        if cover_path and os.path.exists(cover_path):
-            try:
-                img = Image.open(cover_path)
-                img = img.resize((200, 200), Image.LANCZOS)
-                album_image = ImageTk.PhotoImage(img)
-                album_art_label.config(image=album_image)
-                album_art_label.image = album_image
-            except Exception as e:
-                print(f"Error loading album art: {e}")
-                album_art_label.config(image='', text="No Cover")
+        if song:
+            song_title, artist_name, cover_path = song
+            title_label.config(text=song_title)
+            artist_label.config(text=artist_name)
+
+            if album_art_label:
+                if cover_path and os.path.exists(cover_path):
+                    try:
+                        from PIL import Image, ImageTk
+                        img = Image.open(cover_path)
+                        img = img.resize((200, 200), Image.LANCZOS)
+                        album_image = ImageTk.PhotoImage(img)
+                        album_art_label.config(image=album_image)
+                        album_art_label.image = album_image
+                    except Exception as e:
+                        print(f"Error loading album art: {e}")
+                        album_art_label.config(image='', text="No Cover")
+                else:
+                    album_art_label.config(image='', text="No Cover")
         else:
-            album_art_label.config(image='', text="No Cover")
-    else:
-        title_label.config(text="No Song")
-        artist_label.config(text="Unknown Artist")
-        album_art_label.config(image='', text="No Cover")
+            print(f"No songs found in playlist: {playlist_name}")
+            title_label.config(text="No Song")
+            artist_label.config(text="No Artist")
+            if album_art_label:
+                album_art_label.config(image='', text="No Cover")
 
+    except mysql.connector.Error as e:
+        print(f"Error while fetching current song details: {e}")
+    finally:
+        if 'connection' in locals() and connection.is_connected():
+            cursor.close()
+            connection.close()
 
 
 

@@ -94,7 +94,7 @@ def create_bottom_panel(
         update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
     def next_command():
-        global is_playing, current_song_position, time_remaining_label
+        global is_playing, current_song_position
         next_song(
             song_listbox,
             play_pause_button,
@@ -108,7 +108,8 @@ def create_bottom_panel(
             queue_text_label,
             playlist_name,
             playlist_label,
-            album_art_label
+            album_art_label,
+            bottom_frame_left
         )
         is_playing = True
         current_song_position = 0
@@ -116,7 +117,7 @@ def create_bottom_panel(
         update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
     def previous_command():
-        global is_playing, current_song_position, time_remaining_label
+        global is_playing, current_song_position
         previous_song(
             song_listbox,
             play_pause_button,
@@ -130,7 +131,8 @@ def create_bottom_panel(
             queue_text_label,
             playlist_name,
             playlist_label,
-            album_art_label
+            album_art_label,
+            bottom_frame_left
         )
         is_playing = True
         current_song_position = 0

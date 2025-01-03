@@ -19,7 +19,45 @@ from app.func.shared_func import play_playlist
 
 
 
-def create_song_listbox(parent, playlist_name,  time_elapsed_label, time_remaining_label, album_art_label):
+def populate_song_listbox(song_listbox, playlist_name):
+    try:
+        connection = mysql.connector.connect(
+            host='localhost',
+            database='WaveForm_db',
+            user='root',
+            password=''
+        )
+        cursor = connection.cursor()
+
+        query = """
+            SELECT 
+                s.title AS song_title,
+                s.artist AS song_artist
+            FROM songs s
+            JOIN playlist_songs ps ON s.song_id = ps.song_id
+            JOIN playlists p ON ps.playlist_id = p.playlist_id
+            WHERE p.name = %s
+        """
+        cursor.execute(query, (playlist_name,))
+        songs = cursor.fetchall()
+
+        song_listbox.delete(0, END)
+
+        for title, artist in songs:
+            song_listbox.insert(END, f"{title} - {artist}")
+
+        if not songs:
+            song_listbox.insert(END, "Playlist is empty.")
+            print(f"Playlist is empty: {playlist_name}")
+
+    except mysql.connector.Error as e:
+        print(f"Error while loading song_listbox: {e}")
+    finally:
+        if 'connection' in locals() and connection.is_connected():
+            cursor.close()
+            connection.close()
+
+def initialize_song_listbox(parent, playlist_name, album_art_label, play_song_callback, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
     song_listbox = Listbox(
         parent,
         bg='#2D0232',
@@ -33,6 +71,22 @@ def create_song_listbox(parent, playlist_name,  time_elapsed_label, time_remaini
     parent.grid_rowconfigure(0, weight=1)
     parent.grid_columnconfigure(0, weight=1)
 
+    populate_song_listbox(song_listbox, playlist_name)
+
+    song_listbox.bind("<Double-1>", lambda event: play_song_callback(
+        song_listbox.get(ACTIVE),
+        title_label,
+        artist_label,
+        album_art_label,
+        time_elapsed_label,
+        time_remaining_label,
+        progress_slider
+    ))
+
+    return song_listbox
+
+
+def populate_song_listbox(song_listbox, playlist_name):
     try:
         connection = mysql.connector.connect(
             host='localhost',
@@ -41,67 +95,41 @@ def create_song_listbox(parent, playlist_name,  time_elapsed_label, time_remaini
             password=''
         )
         cursor = connection.cursor()
+
         query = """
             SELECT 
-            s.title AS song_title,
-            s.artist AS song_artist,
-            s.cover_path AS cover_path,
-            p.name AS playlist_name
-        FROM songs s
-        JOIN playlist_songs ps ON s.song_id = ps.song_id
-        JOIN playlists p ON ps.playlist_id = p.playlist_id
-        WHERE p.name = %s
-        LIMIT 1;
+                s.title AS song_title,
+                s.artist AS song_artist
+            FROM songs s
+            JOIN playlist_songs ps ON s.song_id = ps.song_id
+            JOIN playlists p ON ps.playlist_id = p.playlist_id
+            WHERE p.name = %s
         """
         cursor.execute(query, (playlist_name,))
         songs = cursor.fetchall()
 
-        for song in songs:
-            title, artist = song
+        song_listbox.delete(0, END)
+
+        for title, artist in songs:
             song_listbox.insert(END, f"{title} - {artist}")
 
         if not songs:
-            print(f"Brak utworów w playliście: {playlist_name}")
+            song_listbox.insert(END, "Playlist is empty.")
+            print(f"Playlist is empty: {playlist_name}")
 
     except mysql.connector.Error as e:
-        print(f"Błąd bazy danych: {e}")
+        print(f"Error while loading song_listbox: {e}")
     finally:
         if 'connection' in locals() and connection.is_connected():
             cursor.close()
             connection.close()
 
-    song_listbox.bind(
-        "<Double-1>",
-        lambda event: play_selected_song(
-            song_listbox.get(ACTIVE),
-            title_label,
-            artist_label,
-            album_art_label,
-            time_elapsed_label,
-            time_remaining_label
-        )
-    )
-
-    return song_listbox, time_remaining_label, title_label, artist_label
-
-
-
-
-    
-def play_selected_song(
-    selected_song, 
-    title_label, 
-    artist_label, 
-    album_art_label, 
-    time_elapsed_label, 
-    time_remaining_label, 
-    progress_slider
-):
+def play_selected_song(selected_song, title_label, artist_label, album_art_label, time_elapsed_label, time_remaining_label, progress_slider):
     try:
         if " - " in selected_song:
-            song_title, artist_name = map(str.strip, selected_song.split(" - ", 1))
+            song_title, artist_name = selected_song.split(" - ")
         else:
-            print("Invalid song format")
+            print("Invalid song format.")
             return
 
         connection = mysql.connector.connect(
@@ -112,73 +140,36 @@ def play_selected_song(
         )
         cursor = connection.cursor()
 
-        query = "SELECT file_path, cover_path FROM songs WHERE title = %s AND artist = %s"
-        cursor.execute(query, (song_title, artist_name))
+        query = "SELECT file_path FROM songs WHERE title = %s AND artist = %s"
+        cursor.execute(query, (song_title.strip(), artist_name.strip()))
         result = cursor.fetchone()
 
+        if cursor.with_rows:
+            cursor.fetchall()
+
         if not result:
-            print(f"No file found for {song_title} - {artist_name}")
+            print(f"No file found for {selected_song}.")
             return
 
-        file_path, cover_path = result
+        file_path = result[0]
 
-        if not os.path.exists(file_path):
-            print(f"File does not exist: {file_path}")
-            return
-
-        if file_path.endswith('.mp3'):
-            pygame.mixer.music.load(file_path)
-            pygame.mixer.music.play()
-        elif file_path.endswith('.wav'):
-            pygame.mixer.Sound(file_path).play()
-        else:
-            print("Unsupported file format.")
-            return
+        pygame.mixer.music.load(file_path)
+        pygame.mixer.music.play()
 
         title_label.config(text=song_title)
         artist_label.config(text=artist_name)
 
-        try:
-            if file_path.endswith('.mp3'):
-                from mutagen.mp3 import MP3
-                song_length = MP3(file_path).info.length
-            elif file_path.endswith('.wav'):
-                import wave
-                with wave.open(file_path, 'r') as wav_file:
-                    frames = wav_file.getnframes()
-                    rate = wav_file.getframerate()
-                    song_length = frames / float(rate)
-            else:
-                song_length = 0
-        except Exception as e:
-            print(f"Error reading song length: {e}")
-            song_length = 0
-
-        time_elapsed_label.config(text="00:00")
-        time_remaining_label.config(text=f"-{int(song_length // 60):02}:{int(song_length % 60):02}")
-        progress_slider.config(to=song_length)
-
-        if cover_path and os.path.exists(cover_path):
-            try:
-                img = Image.open(cover_path)
-                img = img.resize((200, 200), Image.LANCZOS)
-                album_image = ImageTk.PhotoImage(img)
-                album_art_label.config(image=album_image)
-                album_art_label.image = album_image
-            except Exception as e:
-                print(f"Error loading album art: {e}")
-                album_art_label.config(image='', text="No Cover")
-        else:
-            album_art_label.config(image='', text="No Cover")
-
         print(f"Playing: {song_title} - {artist_name}")
 
+    except mysql.connector.Error as e:
+        print(f"MySQL Error: {e}")
     except Exception as e:
-        print(f"Error in play_selected_song: {e}")
+        print(f"Error playing song: {e}")
     finally:
         if 'connection' in locals() and connection.is_connected():
             cursor.close()
             connection.close()
+
 
 
 

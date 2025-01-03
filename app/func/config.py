@@ -7,6 +7,7 @@ user_sliding = False
 was_sliding = False
 title_label = None
 artist_label = None
+global_song_listbox = None
 
 
 #nice colors:

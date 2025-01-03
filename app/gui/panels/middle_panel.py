@@ -3,10 +3,10 @@ from PIL import Image, ImageTk
 import mysql.connector
 from app.func.playlist_handler import fetch_playlists
 import tkinter as tk
-from app.func.music_controller import play_selected_song, create_song_listbox
+from app.func.music_controller import play_selected_song
 from app.func.config import *
 from app.func.add_song import add_song_to_playlist, add_song_dialog
-
+from app.func.music_controller import initialize_song_listbox, play_selected_song
 
 def fetch_playlist_details(playlist_name):
     try:
@@ -82,64 +82,8 @@ def create_header_frame(parent, playlist_name=None):
     return header_frame
 
 
-def create_song_listbox(parent, playlist_name, album_art_label, play_song_callback, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
-    song_listbox = Listbox(
-        parent,
-        bg='#2D0232',
-        fg='grey',
-        selectforeground='grey',
-        font=("Arial", 14),
-        relief="flat"
-    )
-    song_listbox.grid(sticky="nsew", padx=5, pady=5)
 
-    parent.grid_rowconfigure(0, weight=1)
-    parent.grid_columnconfigure(0, weight=1)
 
-    try:
-        connection = mysql.connector.connect(
-            host='localhost',
-            database='WaveForm_db',
-            user='root',
-            password=''
-        )
-        cursor = connection.cursor()
-        query = """
-            SELECT s.title, s.artist
-            FROM songs s
-            JOIN playlist_songs ps ON s.song_id = ps.song_id
-            JOIN playlists p ON ps.playlist_id = p.playlist_id
-            WHERE p.name = %s
-            ORDER BY ps.song_id ASC
-        """
-        cursor.execute(query, (playlist_name,))
-        songs = cursor.fetchall()
-
-        if songs:
-            for song in songs:
-                title, artist = song
-                song_listbox.insert(END, f"{title} - {artist}")
-        else:
-            song_listbox.insert(END, "No songs in playlist.")
-
-    except mysql.connector.Error as e:
-        print(f"Database error: {e}")
-    finally:
-        if 'connection' in locals() and connection.is_connected():
-            cursor.close()
-            connection.close()
-
-    song_listbox.bind("<Double-1>", lambda event: play_selected_song(
-        song_listbox.get(ACTIVE),
-        title_label,
-        artist_label,
-        album_art_label,
-        time_elapsed_label,
-        time_remaining_label,
-        progress_slider
-    ))
-
-    return song_listbox
 
 def display_playlist_details_only(playlist_name, middle_panel, title_label, artist_label, album_art_label, 
                                   time_elapsed_label, time_remaining_label, progress_slider):
@@ -181,14 +125,12 @@ def create_middle_panel(
         command=lambda: add_song_dialog(playlist_name, song_listbox)
     )
     add_song_button.grid(row=3, column=0, pady=10, sticky="ew")
-
     header_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
     songlist_frame = Frame(middle_frame, bg="#2D0232")
     songlist_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
-    middle_frame.grid_propagate(False)
 
-    song_listbox = create_song_listbox(
+    song_listbox = initialize_song_listbox(
         parent=songlist_frame,
         playlist_name=playlist_name,
         album_art_label=album_art_label,

@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, Listbox, BOTH, SINGLE
 from app.func.config import *
 import pygame
 from app.func.load_pic_gui import load_top_logo
@@ -8,7 +8,8 @@ from app.gui.panels.left_panel import create_left_panel
 from app.gui.panels.middle_panel import create_middle_panel
 from app.gui.panels.right_panel import create_right_panel, update_next_in_queue, update_now_playing
 from app.gui.panels.bottom_panel import create_bottom_panel
-from app.func.music_controller import play_pause_song, stop_song, next_song, previous_song, initialize_first_song, sync_is_playing, create_song_listbox, progress_bar
+from app.func.music_controller import play_pause_song, stop_song, next_song, previous_song, initialize_first_song, sync_is_playing, populate_song_listbox, progress_bar, play_selected_song
+
 from app.func.playlist_utils import fetch_playlists
 from app.gui.panels.left_panel import populate_playlists
 from mutagen.mp3 import MP3
@@ -70,41 +71,42 @@ class AppWindow(tk.Frame):
         ) = create_right_panel(self.main_frame, playlist_name=self.first_playlist)
 
         (
+            self.middle_panel,
+            self.header_frame,
+            self.songlist_frame,
+            self.song_listbox
+        ) = create_middle_panel(
+            parent=self.main_frame,
+            playlist_name=self.first_playlist,
+            title_label=self.title_label,
+            artist_label=self.artist_label,
+            album_art_label=None,
+            time_elapsed_label=self.time_elapsed_label,
+            time_remaining_label=self.time_remaining_label,
+            progress_slider=self.progress_slider
+        )
+
+        (
             self.bottom_panel,
             self.time_remaining_label,
             self.time_elapsed_label,
             self.progress_slider,
             self.play_pause_button,
             self.play_button_img,
-            self.pause_button_img,
+            self.pause_button_img
         ) = create_bottom_panel(
             self.main_frame,
-            None,
-            self.queue_text_label,
+            self.song_listbox,
+            None,  # self.queue_label
             self.first_playlist,
-            self.playlist_label,
-            self.album_art_label,
+            None,  # self.playlist_label
+            None,  # self.album_label
             self.title_label,
             self.artist_label,
             update_next_in_queue,
             update_now_playing
         )
 
-        (
-            self.middle_panel,
-            self.header_frame, 
-            self.songlist_frame, 
-            self.song_listbox
-        ) = create_middle_panel(
-            self.main_frame,
-            self.first_playlist,
-            self.title_label,
-            self.artist_label,
-            self.album_art_label,
-            self.time_elapsed_label,
-            self.time_remaining_label,
-            self.progress_slider
-        )
 
         if self.song_listbox:
             self.song_listbox.bind("<Double-Button-1>", lambda event: self.select_song_from_list())
@@ -144,6 +146,8 @@ class AppWindow(tk.Frame):
         currentsong = self.song_listbox.get(selected_index)
         self.load_song(currentsong)
 
+    
+
     def load_song(self, song_info):
         global currentsong, song_length, current_song_position, song_start_time, is_playing
 
@@ -155,10 +159,13 @@ class AppWindow(tk.Frame):
                 user='root',
                 password=''
             )
-            cursor = connection.cursor()
+            cursor = connection.cursor(buffered=True)
+
             query = "SELECT file_path FROM songs WHERE title = %s AND artist = %s"
             cursor.execute(query, (song_title.strip(), artist_name.strip()))
             result = cursor.fetchone()
+
+            cursor.fetchall()
 
             if not result:
                 print(f"File for song {song_title} - {artist_name} not found.")
@@ -201,6 +208,7 @@ class AppWindow(tk.Frame):
             if 'connection' in locals() and connection.is_connected():
                 cursor.close()
                 connection.close()
+
 
     def play_selected_song(self, selected_song, title_label, artist_label, album_art_label, time_elapsed_label, time_remaining_label):
         try:
@@ -265,6 +273,29 @@ class AppWindow(tk.Frame):
             if 'connection' in locals() and connection.is_connected():
                 cursor.close()
                 connection.close()
+
+    def on_song_double_click(self, event):
+        global is_playing
+
+        selected_index = self.song_listbox.curselection()
+        if not selected_index:
+            print("No song selected!")
+            return
+
+        song_info = self.song_listbox.get(selected_index[0])
+        if not song_info:
+            print("Error: No song info available!")
+            return
+
+        is_playing = play_pause_song(
+            song_info,
+            is_playing,
+            self.play_pause_button,
+            self.play_button_img,
+            self.pause_button_img,
+            self.title_label,
+            self.artist_label
+        )
         
 
     def start_sync_loop(self):
