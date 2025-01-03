@@ -5,6 +5,7 @@ from app.func.add_song import add_song_to_playlist
 from app.db.db_operations import insert_song
 from app.func.add_playlist import create_empty_playlist, import_playlist_from_folder
 from app.func.playlist_utils import update_playlist_buttons, show_context_menu, change_playlist_cover, delete_playlist, fetch_playlists
+from app.gui.panels.middle_panel import display_playlist_details_only
 from app.func.playlist_utils import *
 import pygame
 from app.func.playlist_controller import *
@@ -17,26 +18,12 @@ import tkinter as tk
 
 
 
-def create_left_panel(
-    parent, 
-    page_manager, 
-    song_listbox, 
-    play_pause_button, 
-    play_button_img, 
-    pause_button_img, 
-    title_label, 
-    artist_label, 
-    time_elapsed_label, 
-    time_remaining_label, 
-    progress_slider, 
-    bottom_frame,
-    delete_playlist_callback,
-    change_cover_callback  
-):
+def create_left_panel(parent, page_manager):
+    
     left_frame = Frame(parent, bg='#1E052A', borderwidth=0)
     left_frame.grid(row=1, column=0, sticky='nsew')
-    left_frame.grid_rowconfigure(0, weight=0) #Buttons
-    left_frame.grid_rowconfigure(1, weight=1) #Playlists
+    left_frame.grid_rowconfigure(0, weight=0)  # Buttons
+    left_frame.grid_rowconfigure(1, weight=1)  # Playlists
     left_frame.grid_columnconfigure(0, weight=1)
 
     buttons_frame = Frame(left_frame, bg='#2d0232')
@@ -62,8 +49,6 @@ def create_left_panel(
         foreground=[('active', '#FFFFFF')]
     )
 
-
-
     ttk.Button(
         buttons_frame,
         text="Create Playlist",
@@ -85,71 +70,19 @@ def create_left_panel(
         command=lambda: add_song_with_playlist(page_manager)
     ).pack(fill="x", padx=10, pady=5)
 
-    update_playlist_buttons(
-        playlist_frame,
-        delete_playlist,
-        change_playlist_cover,
-        page_manager,
-        song_listbox,
-        play_pause_button,
-        play_button_img,
-        pause_button_img,
-        title_label,
-        artist_label,
-        time_elapsed_label,
-        time_remaining_label,
-        progress_slider,
-        bottom_frame
-    )
+    
 
     return left_frame
 
 
-def load_playlist_into_mixer(playlist_name):
-    try:
-        connection = mysql.connector.connect(
-            host='localhost',
-            database='WaveForm_db',
-            user='root',
-            password=''
-        )
-        cursor = connection.cursor()
-        query = """
-            SELECT songs.file_path
-            FROM songs
-            JOIN playlist_songs ON songs.song_id = playlist_songs.song_id
-            JOIN playlists ON playlists.playlist_id = playlist_songs.playlist_id
-            WHERE playlists.name = %s
-        """
-        cursor.execute(query, (playlist_name,))
-        songs = cursor.fetchall()
 
-        pygame.mixer.music.stop()
 
-        if not songs:
-            print(f"No songs found in playlist '{playlist_name}'")
-            return
-
-        first_song_path = songs[0][0]
-        if os.path.exists(first_song_path):
-            pygame.mixer.music.load(first_song_path)
-            print(f"Loaded first song from playlist '{playlist_name}': {first_song_path}")
-        else:
-            print(f"File does not exist: {first_song_path}")
-
-    except Exception as e:
-        print(f"Error loading playlist into mixer: {e}")
-    finally:
-        if 'connection' in locals() and connection.is_connected():
-            cursor.close()
-            connection.close()
 
 
 
 def on_playlist_click(playlist_name, page_manager):
     page_manager.show_dynamic_panel("MiddlePanel", playlist_name)
 
-    load_playlist_into_mixer(playlist_name)
 
 
 def populate_playlists(playlist_frame, page_manager):
@@ -171,7 +104,7 @@ def populate_playlists(playlist_frame, page_manager):
                 fg='black',
                 bg='#50184A',
                 borderwidth=0,
-                command=lambda name=playlist_name: on_playlist_click(name, page_manager)
+                command=lambda name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
             )
             playlist_button.grid(sticky="ew", padx=5, pady=5)
     else:
@@ -184,6 +117,9 @@ def populate_playlists(playlist_frame, page_manager):
         ).grid(row=0, column=0, padx=5, pady=5, sticky="ew")
 
     playlist_frame.grid_columnconfigure(0, weight=1)
+
+
+
 
 
 

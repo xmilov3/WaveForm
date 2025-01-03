@@ -115,20 +115,9 @@ class AppWindow(tk.Frame):
 
         self.left_panel = create_left_panel(
             self.main_frame,
-            self.page_manager,
-            self.song_listbox,
-            self.play_pause_button,
-            self.play_button_img,
-            self.pause_button_img,
-            self.title_label,
-            self.artist_label,
-            self.time_elapsed_label,
-            self.time_remaining_label,
-            self.progress_slider,
-            self.bottom_panel,
-            self.delete_playlist,
-            self.change_playlist_cover
+            self.page_manager
         )
+
 
         self.configure_layout(self.top_panel, self.left_panel, self.middle_panel, self.right_panel, self.bottom_panel)
 

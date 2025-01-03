@@ -41,3 +41,4 @@ def create_next_button(parent, command):
     button.image = next_button_img  
     button.bind("<Button-1>", command)
     return button
+

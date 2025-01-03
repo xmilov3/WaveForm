@@ -42,7 +42,6 @@ def fetch_playlist_details(playlist_name):
 
 def create_header_frame(parent, playlist_name=None):
     header_frame = Frame(parent, bg="#2D0232")
-    # header_frame.grid_propagate(False)
 
 
     header_image_label = Label(header_frame, bg="#2D0232")
@@ -83,7 +82,7 @@ def create_header_frame(parent, playlist_name=None):
     return header_frame
 
 
-def create_song_listbox(parent, playlist_name, album_art_label, play_song_callback, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider ):
+def create_song_listbox(parent, playlist_name, album_art_label, play_song_callback, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
     song_listbox = Listbox(
         parent,
         bg='#2D0232',
@@ -92,7 +91,7 @@ def create_song_listbox(parent, playlist_name, album_art_label, play_song_callba
         font=("Arial", 14),
         relief="flat"
     )
-
+    song_listbox.grid(sticky="nsew", padx=5, pady=5)
 
     parent.grid_rowconfigure(0, weight=1)
     parent.grid_columnconfigure(0, weight=1)
@@ -116,12 +115,12 @@ def create_song_listbox(parent, playlist_name, album_art_label, play_song_callba
         cursor.execute(query, (playlist_name,))
         songs = cursor.fetchall()
 
-        for song in songs:
-            title, artist = song
-            song_listbox.insert(END, f"{title} - {artist}")
-
-        if not songs:
-            print(f"Playlist is empty: {playlist_name}")
+        if songs:
+            for song in songs:
+                title, artist = song
+                song_listbox.insert(END, f"{title} - {artist}")
+        else:
+            song_listbox.insert(END, "No songs in playlist.")
 
     except mysql.connector.Error as e:
         print(f"Database error: {e}")
@@ -139,6 +138,24 @@ def create_song_listbox(parent, playlist_name, album_art_label, play_song_callba
         time_remaining_label,
         progress_slider
     ))
+
+    return song_listbox
+
+def display_playlist_details_only(playlist_name, middle_panel, title_label, artist_label, album_art_label, 
+                                  time_elapsed_label, time_remaining_label, progress_slider):
+    for widget in middle_panel.winfo_children():
+        widget.destroy()
+
+    create_middle_panel(
+        parent=middle_panel,
+        playlist_name=playlist_name,
+        title_label=title_label,
+        artist_label=artist_label,
+        album_art_label=album_art_label,
+        time_elapsed_label=time_elapsed_label,
+        time_remaining_label=time_remaining_label,
+        progress_slider=progress_slider
+    )
 
 
 def create_middle_panel(
@@ -151,14 +168,10 @@ def create_middle_panel(
     time_remaining_label,
     progress_slider 
 ):
-    
-    
-    
     middle_frame = Frame(parent, bg="#1E052A", width=600, height=400)
     middle_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
     middle_frame.grid_propagate(False)
 
-    
     header_frame = create_header_frame(middle_frame, playlist_name)
     header_frame.grid_rowconfigure(3, weight=1)
     add_song_button = Button(
@@ -169,8 +182,6 @@ def create_middle_panel(
     )
     add_song_button.grid(row=3, column=0, pady=10, sticky="ew")
 
-    
-    
     header_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
     songlist_frame = Frame(middle_frame, bg="#2D0232")
@@ -180,74 +191,17 @@ def create_middle_panel(
     song_listbox = create_song_listbox(
         parent=songlist_frame,
         playlist_name=playlist_name,
+        album_art_label=album_art_label,
         play_song_callback=play_selected_song,
         title_label=title_label,
         artist_label=artist_label,
-        album_art_label=album_art_label,
         time_elapsed_label=time_elapsed_label,
         time_remaining_label=time_remaining_label,
         progress_slider=progress_slider
     )
-
-    song_listbox = Listbox(
-        songlist_frame,
-        bg='#2D0232',
-        fg='grey',
-        selectforeground='grey',
-        font=("Arial", 14),
-        relief="flat"
-    )
-    song_listbox.grid(sticky="nsew", padx=5, pady=5)
-
-    try:
-        connection = mysql.connector.connect(
-            host='localhost',
-            database='WaveForm_db',
-            user='root',
-            password=''
-        )
-        cursor = connection.cursor()
-        query = """
-            SELECT s.title, s.artist
-            FROM songs s
-            JOIN playlist_songs ps ON s.song_id = ps.song_id
-            JOIN playlists p ON ps.playlist_id = p.playlist_id
-            WHERE p.name = %s
-            ORDER BY ps.song_id ASC
-        """
-        cursor.execute(query, (playlist_name,))
-        songs = cursor.fetchall()
-
-        for song in songs:
-            title, artist = song
-            song_listbox.insert(END, f"{title} - {artist}")
-
-        if not songs:
-            print(f"No songs in playlist: {playlist_name}")
-            
-        
-
-    except mysql.connector.Error as e:
-        print(f"Database error: {e}")
-    finally:
-        if 'connection' in locals() and connection.is_connected():
-            cursor.close()
-            connection.close()
-
-    song_listbox.bind("<Double-1>", lambda event: play_selected_song(
-        song_listbox.get(ACTIVE),
-        title_label,
-        artist_label,
-        album_art_label,
-        time_elapsed_label,
-        time_remaining_label,
-        progress_slider
-    ))
-
 
     middle_frame.grid_rowconfigure(0, weight=0)
     middle_frame.grid_rowconfigure(1, weight=1)
     middle_frame.grid_columnconfigure(0, weight=1)
 
     return middle_frame, header_frame, songlist_frame, song_listbox
-
