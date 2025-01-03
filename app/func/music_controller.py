@@ -520,8 +520,8 @@ def previous_song(song_listbox, play_pause_button, play_button_img, pause_button
     song_title, artist_name = currentsong.split(" - ")
 
     update_next_in_queue(queue_text_label, playlist_name)
-    update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
-    update_now_playing(bottom_frame_left,title_label, artist_label)
+    def update_now_playing(self, playlist_label, bottom_frame_left, album_art_label, title_label, artist_label, playlist_name, time_elapsed_label, time_remaining_label):
+        update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name, time_elapsed_label, time_remaining_label)
 
     try:
         connection = mysql.connector.connect(
