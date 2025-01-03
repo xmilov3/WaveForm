@@ -174,6 +174,12 @@ def update_playlist_buttons(
         playlist_button.grid(sticky="ew", padx=5, pady=5)
 
 
+def update_left_panel(title_label, artist_label, song_title, artist_name):
+    title_label.config(text=song_title.strip())
+    artist_label.config(text=artist_name.strip())
+    print(f"Left panel updated: {song_title} - {artist_name}")
+
+
 def show_context_menu(event, playlist_name, playlist_frame, page_manager):
     menu = Menu(None, tearoff=0)
     menu.add_command(

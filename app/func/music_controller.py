@@ -19,6 +19,7 @@ from app.func.shared_func import play_playlist
 
 
 
+
 def populate_song_listbox(song_listbox, playlist_name):
     try:
         connection = mysql.connector.connect(
@@ -119,52 +120,6 @@ def populate_song_listbox(song_listbox, playlist_name):
 
     except mysql.connector.Error as e:
         print(f"Error while loading song_listbox: {e}")
-    finally:
-        if 'connection' in locals() and connection.is_connected():
-            cursor.close()
-            connection.close()
-
-def play_selected_song(selected_song, title_label, artist_label, album_art_label, time_elapsed_label, time_remaining_label, progress_slider):
-    try:
-        if " - " in selected_song:
-            song_title, artist_name = selected_song.split(" - ")
-        else:
-            print("Invalid song format.")
-            return
-
-        connection = mysql.connector.connect(
-            host='localhost',
-            database='WaveForm_db',
-            user='root',
-            password=''
-        )
-        cursor = connection.cursor()
-
-        query = "SELECT file_path FROM songs WHERE title = %s AND artist = %s"
-        cursor.execute(query, (song_title.strip(), artist_name.strip()))
-        result = cursor.fetchone()
-
-        if cursor.with_rows:
-            cursor.fetchall()
-
-        if not result:
-            print(f"No file found for {selected_song}.")
-            return
-
-        file_path = result[0]
-
-        pygame.mixer.music.load(file_path)
-        pygame.mixer.music.play()
-
-        title_label.config(text=song_title)
-        artist_label.config(text=artist_name)
-
-        print(f"Playing: {song_title} - {artist_name}")
-
-    except mysql.connector.Error as e:
-        print(f"MySQL Error: {e}")
-    except Exception as e:
-        print(f"Error playing song: {e}")
     finally:
         if 'connection' in locals() and connection.is_connected():
             cursor.close()
@@ -310,6 +265,9 @@ def initialize_first_song(
 
 
 def play_selected_song(selected_song, title_label, artist_label, album_art_label, time_elapsed_label, time_remaining_label, progress_slider):
+    global is_playing
+    is_playing= True
+
     try:
         if " - " in selected_song:
             song_title, artist_name = selected_song.split(" - ")
@@ -339,13 +297,24 @@ def play_selected_song(selected_song, title_label, artist_label, album_art_label
             print(f"File does not exist: {file_path}")
             return
 
-        pygame.mixer.init()
-        pygame.mixer.music.load(file_path)
-        pygame.mixer.music.play()
+        file_extension = os.path.splitext(file_path)[-1].lower()
+        if file_extension == ".mp3":
+            song_length = MP3(file_path).info.length
+            pygame.mixer.init()
+            pygame.mixer.music.load(file_path)
+            pygame.mixer.music.play()
+        elif file_extension == ".wav":
+            audio = AudioSegment.from_file(file_path, format="wav")
+            song_length = len(audio) / 1000.0
+            pygame.mixer.init()
+            pygame.mixer.music.load(file_path)
+            pygame.mixer.music.play()
+        else:
+            print(f"Unsupported file format: {file_path}")
+            return
 
-        song_length = MP3(file_path).info.length
-        title_label.config(text=song_title)
-        artist_label.config(text=artist_name)
+        title_label.config(text=song_title.strip())
+        artist_label.config(text=artist_name.strip())
         time_elapsed_label.config(text="00:00")
         time_remaining_label.config(text=f"-{int(song_length // 60):02}:{int(song_length % 60):02}")
         progress_slider.config(to=song_length)
@@ -366,8 +335,10 @@ def play_selected_song(selected_song, title_label, artist_label, album_art_label
 
     finally:
         if 'connection' in locals() and connection.is_connected():
+            cursor.fetchall()
             cursor.close()
             connection.close()
+
 
 
 
