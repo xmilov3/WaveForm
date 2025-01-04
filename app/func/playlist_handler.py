@@ -45,7 +45,7 @@ def process_playlist_from_folder(folder_path, playlist_name, user_id, created_by
             if song_id:
                 cursor.execute(
                     "INSERT INTO playlist_songs (playlist_id, song_id) VALUES (%s, %s)",
-                    (playlist_id, song_id)
+                    (playlist_id, song_id,)
                 )
                 connection.commit()
                 print(f"Added '{title}' by '{artist}' to '{playlist_name}'")
@@ -89,7 +89,7 @@ def create_playlist(user_id, playlist_name, folder_path, insert_song_function):
                 INSERT INTO playlists (user_id, name, description, created_by, playlist_cover_path)
                 VALUES (%s, %s, %s, %s, %s)
             """
-            cursor.execute(query, (user_id, playlist_name, "User-created playlist", user_id, playlist_cover_path))
+            cursor.execute(query, (user_id, playlist_name, "User-created playlist", user_id, playlist_cover_path,))
             connection.commit()
             playlist_id = cursor.lastrowid
             print(f"Playlist '{playlist_name}' created with ID: {playlist_id}.")
