@@ -4,7 +4,7 @@ from app.func.config import *
 from app.func.music_controller import (
     play_pause_song, next_song, previous_song, progress_bar, slide_music, 
     stop_song, set_user_sliding, initialize_first_song, control_volume, 
-    update_next_in_queue, update_now_playing
+    update_next_in_queue, initialize_song_listbox, current_song_listbox, set_current_song_by_index, play_selected_song, update_now_playing
 )
 
 def create_bottom_panel(
@@ -19,7 +19,11 @@ def create_bottom_panel(
     update_next_queue, 
     update_now_playing
 ):
+    
+    
     global is_playing, user_sliding, current_song_position, song_length, currentsong, song_start_time
+
+    
 
     is_playing = False
     user_sliding = False
@@ -30,6 +34,15 @@ def create_bottom_panel(
 
     bottom_frame = Frame(main_frame, bg='#150016')
     bottom_frame.grid(row=2, column=0, columnspan=3, sticky='nsew', pady=1)
+
+    def update_song_listbox(new_song_listbox):
+        nonlocal song_listbox
+        song_listbox = new_song_listbox
+        print("Song listbox updated in bottom_panel")
+
+    bottom_frame.update_song_listbox = update_song_listbox
+
+
 
     bottom_frame_left = Frame(bottom_frame, bg='#150016')
     bottom_frame_left.grid(row=0, column=0, sticky='w', padx=10)
@@ -64,62 +77,68 @@ def create_bottom_panel(
         pause_button_img = create_play_pause_button.__globals__['load_pause_button']()
     except Exception as e:
         print(f"Error while loading buttons: {e}")
-        return bottom_frame
+
+    
+    
 
     def play_pause_command():
-        global is_playing
-        if user_sliding:
-            print("Ignoring Play/Pause toggle during sliding")
-            return
-
-        if song_listbox.size() == 0:
+        global is_playing, currentsong
+        if not song_listbox or song_listbox.size() == 0:
             print("No songs in the playlist!")
             return
 
-        currentsong = song_listbox.get(ACTIVE)
-        if not currentsong:
-            print("No song selected!")
-            return
+        if currentsong is None:
+            selected_index = song_listbox.curselection()
+            if not selected_index:
+                print("No song selected! Setting first song as default.")
+                currentsong = set_current_song_by_index(song_listbox, 0)
+            else:
+                currentsong = set_current_song_by_index(song_listbox, selected_index[0])
 
-        is_playing = play_pause_song(
-            currentsong,
-            is_playing,
-            play_pause_button,
-            play_button_img,
-            pause_button_img,
-            title_label,
-            artist_label
-        )
+        if currentsong:
+            print(f"Toggling play/pause for: {currentsong}")
+            is_playing = play_pause_song(
+                currentsong,
+                is_playing,
+                play_pause_button,
+                play_button_img,
+                pause_button_img,
+                title_label,
+                artist_label
+            )
+            update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
-        update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
     def next_command():
-        global is_playing, current_song_position
-        next_song(
-            song_listbox,
-            play_pause_button,
-            play_button_img,
-            pause_button_img,
-            title_label,
-            artist_label,
-            time_elapsed_label,
-            time_remaining_label,
-            progress_slider,
-            queue_text_label,
-            playlist_name,
-            playlist_label,
-            album_art_label,
-            bottom_frame_left
-        )
-        is_playing = True
-        current_song_position = 0
+        global is_playing, currentsong
 
-        update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
+        selected_index = song_listbox.curselection()
+        if not selected_index:
+            print("No song selected in next_command! Setting to first song.")
+            currentsong = set_current_song_by_index(song_listbox, 0)
+            return
+
+        next_index = (selected_index[0] + 1) % song_listbox.size()
+        currentsong = set_current_song_by_index(song_listbox, next_index)
+
+        if currentsong:
+            is_playing = True
+            print(f"Playing next song: {currentsong}")
+            play_selected_song(
+                currentsong,
+                title_label,
+                artist_label,
+                album_art_label,
+                time_elapsed_label,
+                time_remaining_label,
+                progress_slider
+            )
+
 
     def previous_command():
-        global is_playing, current_song_position
+        global is_playing, current_song_position, currentsong
         previous_song(
-            song_listbox,
+            currentsong,
             play_pause_button,
             play_button_img,
             pause_button_img,
@@ -146,6 +165,8 @@ def create_bottom_panel(
         pause_command=lambda: play_pause_command()
     )
     next_button = create_next_button(bottom_frame_mid, lambda e=None: next_command())
+
+
 
     previous_button.grid(row=0, column=0, padx=10, pady=5, sticky="e")
     play_pause_button.grid(row=0, column=1, padx=10, pady=5)
@@ -191,7 +212,7 @@ def create_bottom_panel(
         play_pause_button,
         play_button_img,
         pause_button_img,
-        song_listbox.get(ACTIVE)
+        currentsong
     ))
     progress_slider.grid(row=0, column=1, padx=10)
 
@@ -206,7 +227,6 @@ def create_bottom_panel(
     )
     time_remaining_label.grid(row=0, column=2, padx=5)
 
-    # Right section: Volume Control
     bottom_frame_right = Frame(bottom_frame, bg='#150016')
     bottom_frame_right.grid(row=0, column=2, sticky='nsew', padx=10)
 
@@ -244,4 +264,12 @@ def create_bottom_panel(
     update_next_queue(queue_text_label, playlist_name)
     update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
-    return bottom_frame, time_remaining_label, time_elapsed_label, progress_slider, play_pause_button, play_button_img, pause_button_img
+    return (
+        bottom_frame,
+        time_remaining_label,
+        time_elapsed_label,
+        progress_slider,
+        play_pause_button,
+        play_button_img,
+        pause_button_img
+    )

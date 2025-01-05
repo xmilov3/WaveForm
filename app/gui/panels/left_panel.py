@@ -12,7 +12,7 @@ from app.func.playlist_controller import *
 import tkinter as tk
 
 
-def create_left_panel(parent, page_manager):
+def create_left_panel(parent, page_manager, **kwargs):
     
     left_frame = Frame(parent, bg='#1E052A', borderwidth=0)
     left_frame.grid(row=1, column=0, sticky='nsew')
@@ -70,11 +70,6 @@ def create_left_panel(parent, page_manager):
 
 
 
-
-
-
-
-
 def on_playlist_click(playlist_name, app_window):
     app_window.update_middle_panel(playlist_name)
 
@@ -110,10 +105,6 @@ def populate_playlists(playlist_frame, page_manager):
         ).grid(row=0, column=0, padx=5, pady=5, sticky="ew")
 
     playlist_frame.grid_columnconfigure(0, weight=1)
-
-
-
-
 
 
 
