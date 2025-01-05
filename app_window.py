@@ -69,7 +69,10 @@ class AppWindow(tk.Frame):
             self.album_art_label,
             self.title_label,
             self.artist_label
-        ) = create_right_panel(self.main_frame, playlist_name=self.first_playlist)
+        ) = create_right_panel(
+            self.main_frame, 
+            playlist_name=self.first_playlist
+            )
 
         (
             self.middle_panel,
@@ -175,6 +178,8 @@ class AppWindow(tk.Frame):
 
 
         selected_song = self.song_listbox.get(selected_index)
+        global currentsong
+        currentsong = selected_song
         print(f"Activated song index: {selected_index[0]}")
         play_selected_song(
             selected_song,
@@ -185,6 +190,13 @@ class AppWindow(tk.Frame):
             self.time_remaining_label,
             self.progress_slider
         )
+        update_now_playing(
+        self.playlist_label,
+        self.album_art_label,
+        self.title_label,
+        self.artist_label,
+        self.first_playlist
+    )
 
 
 
@@ -210,6 +222,13 @@ class AppWindow(tk.Frame):
                     self.time_remaining_label,
                     self.progress_slider
                 )
+                update_now_playing(
+                self.playlist_label,
+                self.album_art_label,
+                self.title_label,
+                self.artist_label,
+                new_playlist_name
+            )
         else:
             print("Playlist is empty.")
             currentsong = None

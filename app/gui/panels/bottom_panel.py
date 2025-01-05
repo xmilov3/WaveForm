@@ -1,4 +1,4 @@
-from tkinter import Frame, Label, Scale, HORIZONTAL, ACTIVE, TOP
+from tkinter import Frame, Label, Scale, HORIZONTAL, ACTIVE, TOP, END
 from app.widgets import create_play_pause_button, create_previous_button, create_next_button
 from app.func.config import *
 from app.func.music_controller import (
@@ -23,8 +23,6 @@ def create_bottom_panel(
     
     global is_playing, user_sliding, current_song_position, song_length, currentsong, song_start_time
 
-    
-
     is_playing = False
     user_sliding = False
     current_song_position = 0
@@ -41,7 +39,6 @@ def create_bottom_panel(
         print("Song listbox updated in bottom_panel")
 
     bottom_frame.update_song_listbox = update_song_listbox
-
 
 
     bottom_frame_left = Frame(bottom_frame, bg='#150016')
@@ -77,12 +74,12 @@ def create_bottom_panel(
         pause_button_img = create_play_pause_button.__globals__['load_pause_button']()
     except Exception as e:
         print(f"Error while loading buttons: {e}")
+        return bottom_frame
 
     
-    
-
     def play_pause_command():
         global is_playing, currentsong
+
         if not song_listbox or song_listbox.size() == 0:
             print("No songs in the playlist!")
             return
@@ -106,39 +103,40 @@ def create_bottom_panel(
                 title_label,
                 artist_label
             )
+
             update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
 
     def next_command():
-        global is_playing, currentsong
-
-        selected_index = song_listbox.curselection()
-        if not selected_index:
-            print("No song selected in next_command! Setting to first song.")
-            currentsong = set_current_song_by_index(song_listbox, 0)
-            return
-
-        next_index = (selected_index[0] + 1) % song_listbox.size()
-        currentsong = set_current_song_by_index(song_listbox, next_index)
-
-        if currentsong:
-            is_playing = True
-            print(f"Playing next song: {currentsong}")
-            play_selected_song(
-                currentsong,
-                title_label,
-                artist_label,
-                album_art_label,
-                time_elapsed_label,
-                time_remaining_label,
-                progress_slider
-            )
+        global currentsong, is_playing, current_song_position
+        next_song(
+            # currentsong,
+            song_listbox,
+            play_pause_button,
+            play_button_img,
+            pause_button_img,
+            title_label,
+            artist_label,
+            time_elapsed_label,
+            time_remaining_label,
+            progress_slider,
+            queue_text_label,
+            playlist_name,
+            playlist_label,
+            album_art_label,
+            bottom_frame_left
+        )
+        is_playing = True
+        current_song_position = 0
+        update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
+    next_button = create_next_button(bottom_frame_mid, lambda e=None: next_command())
 
 
     def previous_command():
-        global is_playing, current_song_position, currentsong
+        global is_playing, currentsong, current_song_position
         previous_song(
-            currentsong,
+            # currentsong,
+            song_listbox,
             play_pause_button,
             play_button_img,
             pause_button_img,
@@ -256,7 +254,7 @@ def create_bottom_panel(
         showvalue=False,
         command=lambda value: control_volume(value, volume_label)
     )
-    volume_slider.set(50)
+    volume_slider.set(10) #too loud for 50 on default
     volume_slider.grid(row=1, column=0, padx=10)
 
     progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_center_bar)

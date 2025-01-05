@@ -31,12 +31,12 @@ def set_current_song_by_index(song_listbox, index):
     song_listbox.select_clear(0, END)
     song_listbox.select_set(index)
     song_listbox.activate(index)
+
     currentsong = song_listbox.get(index)
     print(f"Set current song: {currentsong} (index: {index})")
+    return currentsong
 
 
-
-    
 def initialize_song_listbox(parent, playlist_name, album_art_label, play_song_callback, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
     song_listbox = Listbox(
         parent,
@@ -78,9 +78,6 @@ def initialize_song_listbox(parent, playlist_name, album_art_label, play_song_ca
 
     song_listbox.bind("<Double-1>", on_song_select)
     return song_listbox
-
-
-
 
 
 def populate_song_listbox(song_listbox, playlist_name):
@@ -302,53 +299,86 @@ def load_song(song_info):
             cursor.close()
         if 'connection' in locals() and connection.is_connected():
             connection.close()
-        # sync_is_playing()
+        sync_is_playing()
 
 
-def play_selected_song(song_info, title_label, artist_label, album_art_label, time_elapsed_label, time_remaining_label, progress_slider=None):
-    global currentsong
-
-    print(f"Attempting to play song: {song_info}")
-    song_data = load_song(song_info)
-    if not song_data:
-        print(f"Failed to load song: {song_info}")
-        return
+def play_selected_song(selected_song, title_label, artist_label, album_art_label, time_elapsed_label, time_remaining_label, progress_slider):
+    global is_playing
+    is_playing= True
 
     try:
-        pygame.mixer.music.load(song_data["file_path"])
-        pygame.mixer.music.play()
-        currentsong = song_info
-        print(f"Playing song: {song_data['title']} - {song_data['artist']}")
+        if " - " in selected_song:
+            song_title, artist_name = selected_song.split(" - ")
+        else:
+            print("Invalid song format")
+            return
 
-        title_label.config(text=song_data["title"])
-        artist_label.config(text=song_data["artist"])
-        time_elapsed_label.config(text="00:00")
-        time_remaining_label.config(
-            text=f"-{int(song_data['song_length'] // 60):02}:{int(song_data['song_length'] % 60):02}"
+        connection = mysql.connector.connect(
+            host='localhost',
+            database='WaveForm_db',
+            user='root',
+            password=''
         )
+        cursor = connection.cursor()
 
-        if progress_slider:
-            progress_slider.config(to=song_data["song_length"])
+        query = "SELECT file_path, cover_path FROM songs WHERE title = %s AND artist = %s"
+        cursor.execute(query, (song_title.strip(), artist_name.strip()))
+        result = cursor.fetchone()
 
-        if song_data["cover_path"] and os.path.exists(song_data["cover_path"]):
-            try:
-                img = Image.open(song_data["cover_path"])
-                img = img.resize((200, 200), Image.LANCZOS)
-                album_image = ImageTk.PhotoImage(img)
-                album_art_label.config(image=album_image)
-                album_art_label.image = album_image
-            except Exception as e:
-                print(f"Error loading album art: {e}")
-                album_art_label.config(image='', text="No Cover")
+        if not result:
+            print(f"No file found for {song_title} - {artist_name}")
+            return
+
+        file_path, cover_path = result
+
+        if not os.path.exists(file_path):
+            print(f"File does not exist: {file_path}")
+            return
+
+        file_extension = os.path.splitext(file_path)[-1].lower()
+        if file_extension == ".mp3":
+            song_length = MP3(file_path).info.length
+            pygame.mixer.init()
+            pygame.mixer.music.load(file_path)
+            pygame.mixer.music.play()
+        elif file_extension == ".wav":
+            audio = AudioSegment.from_file(file_path, format="wav")
+            song_length = len(audio) / 1000.0
+            pygame.mixer.init()
+            pygame.mixer.music.load(file_path)
+            pygame.mixer.music.play()
+        else:
+            print(f"Unsupported file format: {file_path}")
+            return
+        title_label.config(text=song_title.strip())
+        artist_label.config(text=artist_name.strip())
+        time_elapsed_label.config(text="00:00")
+        time_remaining_label.config(text=f"-{int(song_length // 60):02}:{int(song_length % 60):02}")
+        progress_slider.config(to=song_length)
+        if cover_path and os.path.exists(cover_path):
+            img = Image.open(cover_path)
+            img = img.resize((200, 200), Image.LANCZOS)
+            album_image = ImageTk.PhotoImage(img)
+            album_art_label.config(image=album_image)
+            album_art_label.image = album_image
         else:
             album_art_label.config(image='', text="No Cover")
 
+        print(f"Playing: {song_title} - {artist_name}")
+
     except Exception as e:
         print(f"Error in play_selected_song: {e}")
+    finally:
+        if 'connection' in locals() and connection.is_connected():
+            cursor.fetchall()
+            cursor.close()
+            connection.close()
+
+
         
 
-def play_pause_song(song_info, is_playing, play_button, play_button_img, pause_button_img, title_label, artist_label,):
-    global current_song_position, song_start_time
+def play_pause_song(song_info, is_playing, play_button, play_button_img, pause_button_img, title_label, artist_label):
+    global current_song_position, song_start_time, currentsong
 
     try:
         if not song_info:
@@ -383,12 +413,11 @@ def play_pause_song(song_info, is_playing, play_button, play_button_img, pause_b
                 song_start_time = 0
             play_button.config(image=pause_button_img)
             is_playing = True
-            sync_is_playing()
+        sync_is_playing()
 
-        return is_playing
 
     except Exception as e:
-        print(f"Błąd w play_pause_song: {e}")
+        print(f"Error in play_pause_song: {e}")
         return is_playing
 
 
@@ -403,19 +432,14 @@ def stop_song(play_button, play_button_img):
     song_start_time = 0  
     print("Song paused")
     return is_playing
-    sync_is_playing()
 
 
 def next_song(song_listbox, play_pause_button, play_button_img, pause_button_img, 
               title_label, artist_label, time_elapsed_label, time_remaining_label, 
               progress_slider, queue_text_label, playlist_name, playlist_label, album_art_label, bottom_frame_left):
-    global currentsong, is_playing, current_song_position, song_length, song_start_time
+    global currentsong, is_playing, current_song_position, song_length, song_start_timem
 
-    if not hasattr(song_listbox, "size") or not hasattr(song_listbox, "curselection"):
-        print(f"Error: song_listbox is not a valid Listbox object. Received: {type(song_listbox)}")
-        return
-
-    if song_listbox.size() == 0:
+    if not hasattr(song_listbox, "size") or song_listbox.size() == 0:
         print("The song list is empty!")
         return
 
@@ -491,6 +515,7 @@ def next_song(song_listbox, play_pause_button, play_button_img, pause_button_img
 
     finally:
         if 'cursor' in locals() and cursor:
+            cursor.fetchall()
             cursor.close()
         if 'connection' in locals() and connection.is_connected():
             connection.close()
@@ -520,6 +545,7 @@ def previous_song(song_listbox, play_pause_button, play_button_img, pause_button
     song_listbox.activate(previous_index)
 
     currentsong = song_listbox.get(previous_index)
+    print(f"Set current song: {currentsong} (index: {previous_index})")
     song_title, artist_name = currentsong.split(" - ")
 
     update_next_in_queue(queue_text_label, playlist_name)
@@ -591,11 +617,6 @@ def previous_song(song_listbox, play_pause_button, play_button_img, pause_button
         if 'connection' in locals() and connection.is_connected():
             cursor.close()
             connection.close()
-    sync_is_playing()
-
-
-
-
 
 
     
@@ -681,8 +702,6 @@ def slide_music(value, time_elapsed_label, time_remaining_label, bottom_frame, p
     progress_slider.set((new_time / song_length) * 100)
 
     bottom_frame.after(100, lambda: set_user_sliding(False))
-
-
 
 
 def set_user_sliding(value):
