@@ -8,7 +8,7 @@ def authenticate_user(connection, username, password):
         
         return user is not None 
     except Exception as e:
-        print(f"Błąd podczas autoryzacji: {e}")
+        print(f"Error while authentication: {e}")
         return False
 
 def register_user(connection, username, email, password, birth_date, gender):

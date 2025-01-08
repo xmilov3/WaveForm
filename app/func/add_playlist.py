@@ -51,7 +51,7 @@ def create_empty_playlist(playlist_frame, page_manager):
         cover_path = cover_path_entry.get().strip()
 
         if not cover_path:
-            cover_path = "app/gui/assets/covers/playlist_covers/default_cover.png"
+            cover_path = "/Users/bartek/Desktop/Politechnika/Praca inżynierska/WaveForm_newest_copy/app/gui/assets/covers/playlist_covers/default_cover.png"
 
         if not playlist_name:
             messagebox.showerror("Error", "Playlist name is required!")
@@ -138,7 +138,7 @@ def import_playlist_from_folder(playlist_frame, page_manager):
         cover_path = cover_path_entry.get().strip()
 
         if not cover_path:
-            cover_path = "app/gui/assets/covers/playlist_covers/default_cover.png"
+            cover_path = "/Users/bartek/Desktop/Politechnika/Praca inżynierska/WaveForm_newest_copy/app/gui/assets/covers/playlist_covers/default_cover.png"
 
         if not playlist_name:
             messagebox.showerror("Error", "Playlist name is required!")

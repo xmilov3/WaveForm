@@ -9,12 +9,12 @@ def show_user_menu(event, logo_label, page_manager):
     menu = Menu(logo_label, tearoff=0, bg="white", fg="black", font=("Arial", 12))
     menu.add_command(label=f"Logged as: {username}", state="disabled")
     menu.add_separator()
-    menu.add_command(label="Settings", command=lambda: open_settings(page_manager))
+    # menu.add_command(label="Settings", command=lambda: open_settings(page_manager))
     menu.add_command(label="Exit", command=quit_app)
     menu.post(event.x_root, event.y_root)
 
-def open_settings(page_manager):
-    page_manager.show_dynamic_panel("SettingsPanel")
+# def open_settings(page_manager):
+    # page_manager.show_dynamic_panel("SettingsPanel")
 
 def quit_app():
     exit()
