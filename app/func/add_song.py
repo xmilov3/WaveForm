@@ -38,7 +38,7 @@ def add_song_to_playlist(file_path, playlist_name):
             playlist_name,
             "Unknown Genre",
             file_path,
-            "app/gui/assets/covers/song_covers/song_cover.png"
+            "/Users/bartek/Desktop/Politechnika/Praca inżynierska/WaveForm_newest_copy/app/gui/assets/covers/playlist_covers/default_cover.png"
         ))
         connection.commit()
 

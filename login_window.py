@@ -73,7 +73,7 @@ class LoginPage(tk.Frame):
                 self.page_manager.show_page("AppWindow")
             else:
                 print("Invalid login credentials.")
-                messagebox.showerror("Login Failed", "Invalid email or password.")
+                messagebox.showerror("Login Failed", "Invalid credentials.")
         except Exception as e:
             print(f"Error during login: {e}")
             messagebox.showerror("Error", f"An error occurred: {e}")

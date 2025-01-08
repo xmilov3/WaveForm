@@ -16,7 +16,7 @@ def analyze_song(file_path=None):
             file_path = filedialog.askopenfilename(
                 title="Select a File to Analyze",
                 filetypes=(
-                    ("Audio Files", "*.mp3;*.wav;*.flac"),
+                    ("Audio Files", "*.mp3;*.wav;"),
                     ("All Files", "*.*")
                 )
             )

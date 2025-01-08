@@ -27,12 +27,10 @@ def load_default_cover():
     return default_cover
 
 def load_play_button():
-    print("Ładowanie przycisku Play")  
     play_button = PhotoImage(file=get_full_path('../gui/assets/buttons/play_button.png'))
     return play_button
 
 def load_pause_button():
-    print("Ładowanie przycisku Pause")   
     pause_button = PhotoImage(file=get_full_path('../gui/assets/buttons/pause_button.png'))
     return pause_button
 
