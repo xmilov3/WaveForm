@@ -83,84 +83,50 @@ def fetch_next_in_queue(playlist_name):
 
 
 def create_right_panel(parent, playlist_name=None):
-    right_frame = Frame(parent, bg='#1E052A', borderwidth=0, highlightbackground='#845162', highlightthickness=0, width=300)
+    right_frame = Frame(parent, bg='#1E052A', width=300)
     right_frame.grid(row=1, column=2, sticky='nsew')
-
-    right_frame.grid_rowconfigure(0, weight=0) # Now Playing info
-    right_frame.grid_rowconfigure(1, weight=1)  # Next in queue
-    right_frame.grid_columnconfigure(0, weight=1)
-
-    parent.grid_rowconfigure(1, weight=1)
-    parent.grid_columnconfigure(2, weight=0)
     right_frame.grid_propagate(False)
 
-    now_playing_frame = Frame(right_frame, bg='#2d0232', borderwidth=0, highlightbackground='#845162', highlightthickness=2)
-    now_playing_frame.grid(row=0, column=0, sticky='ew', padx=10, pady=10)
-    now_playing_frame.grid_propagate(False)
+    right_frame.grid_rowconfigure(0, weight=2)  # Now Playing Frame
+    right_frame.grid_rowconfigure(1, weight=1)  # Queue frame
+    right_frame.grid_columnconfigure(0, weight=1)
 
-    playlist_label = Label(
-        now_playing_frame,
-        text="Now Playing",
-        font=("Arial", 30, "bold"),
-        fg='white',
-        bg='#2d0232',
-        anchor="w"
-    )
-    playlist_label.pack(fill="both", expand=True, padx=10, pady=(10, 10))
+    now_playing_frame = Frame(right_frame, bg='#2d0232')
+    now_playing_frame.grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
+   
+    now_playing_frame.grid_rowconfigure(0, weight=0)
+    now_playing_frame.grid_rowconfigure(1, weight=2)
+    now_playing_frame.grid_rowconfigure(2, weight=0)
+    now_playing_frame.grid_rowconfigure(3, weight=0)
+    now_playing_frame.grid_columnconfigure(0, weight=1)
 
-    album_art_label = Label(
-        now_playing_frame,
-        bg='#2d0232',
-        borderwidth=0,
-        highlightthickness=0
-    )
-    album_art_label.pack(fill="x", padx=10, pady=(10, 10), expand=True)
+    playlist_label = Label(now_playing_frame, text="Now Playing", font=("Arial", 30, "bold"), fg='white', bg='#2d0232')
+    playlist_label.grid(row=0, column=0, sticky='nsew', padx=5, pady=2)
 
-    title_label = Label(
-        now_playing_frame,
-        fg="white",
-        bg='#2d0232',
-        font=("Arial", 14, "bold"),
-        anchor="w"
-    )
-    title_label.pack(fill="x", padx=10, pady=(5, 5))
+    album_art_label = Label(now_playing_frame, bg='#2d0232')
+    album_art_label.grid(row=1, column=0, sticky='nsew', padx=5, pady=2)
 
-    artist_label = Label(
-        now_playing_frame,
-        fg="gray",
-        bg='#2d0232',
-        font=("Arial", 16),
-        anchor="w"
-    )
-    artist_label.pack(fill="x", padx=10, pady=(0, 10))
+    title_label = Label(now_playing_frame, fg="white", bg='#2d0232', font=("Arial", 14, "bold"))
+    title_label.grid(row=2, column=0, sticky='nsew', padx=5, pady=2)
 
+    artist_label = Label(now_playing_frame, fg="gray", bg='#2d0232', font=("Arial", 16))
+    artist_label.grid(row=3, column=0, sticky='nsew', padx=5, pady=2)
 
-    next_in_queue_frame = Frame(right_frame, bg='#2d0232', borderwidth=0, highlightbackground='#845162', highlightthickness=2)
-    next_in_queue_frame.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
+    next_in_queue_frame = Frame(right_frame, bg='#2d0232')
+    next_in_queue_frame.grid(row=1, column=0, sticky='nsew', padx=5, pady=5)
+
+    next_in_queue_frame.grid_rowconfigure(0, weight=0)  # Queue label
+    next_in_queue_frame.grid_rowconfigure(1, weight=1)  # Queue content
     next_in_queue_frame.grid_columnconfigure(0, weight=1)
 
-    queue_label = Label(
-        next_in_queue_frame,
-        text="Next in Queue",
-        font=("Arial", 14, "bold"),
-        fg='white',
-        bg='#2d0232',
-        anchor="w"
-    )
-    queue_label.pack(fill="both", expand=True, padx=10, pady=(10, 10))
+    queue_label = Label(next_in_queue_frame, text="Next in Queue", font=("Arial", 14, "bold"), fg='white', bg='#2d0232')
+    queue_label.grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
 
-    queue_text_label = Label(
-        next_in_queue_frame,
-        text="",
-        bg='#2d0232',
-        fg="white",
-        font=("Arial", 12),
-        justify="left",
-        anchor="nw"
-    )
-    queue_text_label.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+    queue_text_label = Label(next_in_queue_frame, bg='#2d0232', fg="white", font=("Arial", 12))
+    queue_text_label.grid(row=1, column=0, sticky='nsew', padx=5, pady=5)
 
     return right_frame, queue_text_label, playlist_label, album_art_label, title_label, artist_label
+
 
 def update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name):
     try:
@@ -193,7 +159,7 @@ def update_now_playing(playlist_label, album_art_label, title_label, artist_labe
                     try:
                         from PIL import Image, ImageTk
                         img = Image.open(cover_path)
-                        img = img.resize((200, 200), Image.LANCZOS)
+                        img = img.resize((300, 300), Image.LANCZOS)
                         album_image = ImageTk.PhotoImage(img)
                         album_art_label.config(image=album_image)
                         album_art_label.image = album_image

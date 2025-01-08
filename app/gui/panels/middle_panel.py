@@ -48,14 +48,14 @@ def create_header_frame(parent, playlist_name=None):
     header_image_label.grid(row=0, column=0, rowspan=3, padx=5, pady=5, sticky="nw")
 
     header_label = Label(header_frame, text="", font=("Arial", 36, "bold"), fg="gray", bg="#2D0232")
-    header_label.grid(row=0, column=1, sticky="w", padx=(10, 0), pady=(0, 5))
+    header_label.grid(row=0, column=1, sticky="w")
     
 
     user_label = Label(header_frame, text="", font=("Arial", 20), fg="gray", bg="#2D0232")
-    user_label.grid(row=1, column=1, sticky="w", padx=(10, 0))
+    user_label.grid(row=1, column=1, sticky="w")
 
     song_count_label = Label(header_frame, text="", font=("Arial", 16), fg="white", bg="#2D0232")
-    song_count_label.grid(row=2, column=1, sticky="w", padx=(10, 0), pady=(0, 5))
+    song_count_label.grid(row=2, column=1, sticky="w")
 
     details = fetch_playlist_details(playlist_name)
     if details:
@@ -113,7 +113,7 @@ def create_middle_panel(
     progress_slider 
 ):
     middle_frame = Frame(parent, bg="#1E052A", width=600, height=400)
-    middle_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
+    middle_frame.grid(row=1, column=1, sticky="nsew")
     middle_frame.grid_propagate(False)
 
     header_frame = create_header_frame(middle_frame, playlist_name)
@@ -126,7 +126,6 @@ def create_middle_panel(
     )
     add_song_button.grid(row=3, column=0, pady=10, sticky="ew")
     header_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
-
     songlist_frame = Frame(middle_frame, bg="#2D0232")
     songlist_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
 

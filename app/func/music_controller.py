@@ -207,6 +207,7 @@ def initialize_first_song(
     song_listbox.select_clear(0, END)
     song_listbox.select_set(0)
     song_listbox.activate(0)
+    song_listbox.see(0)
 
     currentsong = song_listbox.get(0)
     if not currentsong:
@@ -269,34 +270,35 @@ def initialize_first_song(
     sync_is_playing()
 
 def handle_double_click(song_listbox, play_pause_button, play_button_img, pause_button_img, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider, album_art_label):
-    global currentsong, song_length, current_song_position, song_start_time, is_playing
-    
+    global currentsong
+
     selected_index = song_listbox.curselection()
     if not selected_index:
-        print("No song selected!")
         return
-    
-    pygame.mixer.music.stop()
-    current_song_position = 0
-    song_start_time = 0
-    is_playing = False
-    
+
+    song_listbox.selection_clear(0, END)
+    song_listbox.selection_set(selected_index)
+    song_listbox.activate(selected_index)
+    song_listbox.see(selected_index)
+
     currentsong = song_listbox.get(selected_index)
-    if not currentsong:
-        print("Error: no song selected!")
-        return
     
     play_selected_song(
-        currentsong, 
-        title_label, 
-        artist_label, 
+        currentsong,
+        title_label,
+        artist_label,
         album_art_label,
-        time_elapsed_label, 
+        time_elapsed_label,
         time_remaining_label,
         progress_slider,
         play_pause_button,
         pause_button_img
     )
+
+    if hasattr(play_pause_button, 'queue_text_label'):
+        update_next_in_queue(play_pause_button.queue_text_label, play_pause_button.current_playlist)
+    if hasattr(play_pause_button, 'playlist_label'):
+        update_now_playing(play_pause_button.playlist_label, album_art_label, title_label, artist_label, play_pause_button.current_playlist)
 
 def select_song_from_list(song_listbox, play_pause_button, play_button_img, pause_button_img, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider, album_art_label):
     global currentsong, song_length, current_song_position, song_start_time, is_playing
@@ -392,7 +394,7 @@ def play_selected_song(selected_song, title_label, artist_label, album_art_label
 
         if cover_path and os.path.exists(cover_path):
             img = Image.open(cover_path)
-            img = img.resize((200, 200), Image.LANCZOS)
+            img = img.resize((300, 300), Image.LANCZOS)
             album_image = ImageTk.PhotoImage(img)
             album_art_label.config(image=album_image)
             album_art_label.image = album_image

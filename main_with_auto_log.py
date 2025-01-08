@@ -19,6 +19,7 @@ def main():
    root.geometry("1500x1000")
    icon = load_top_logo()
    root.iconphoto(True, icon)
+   root.deiconify()
 
    connection = create_connection()
    if not connection:
