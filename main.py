@@ -8,7 +8,6 @@ from app.db.database import create_connection
 from app.func.session import user_session
 from app.gui.panels.middle_panel import create_middle_panel
 from app.func.load_pic_gui import load_top_logo
-import tkinter as tk
 
 
 def main():
@@ -21,10 +20,6 @@ def main():
     icon = load_top_logo()
     root.iconphoto(True, icon)
     root.deiconify()
-    
-    
-    
-
 
     connection = create_connection()
     if not connection:
@@ -33,7 +28,6 @@ def main():
     
     root.grid_rowconfigure(0, weight=1)
     root.grid_columnconfigure(0, weight=1)
-    
 
     def on_login_success(user_data):
         user_id, username = user_data
@@ -52,45 +46,34 @@ def main():
     login_page = LoginPage(root, page_manager, connection)
     register_page = RegisterPage(root, page_manager, connection)
     app_window = AppWindow(root, page_manager)
-    
-    def on_login_success(user_data):
-        user_id, username = user_data
-        user_session.set_user(user_id, username)
-        print(f"Session started for user: {username} (ID: {user_id})")
-        page_manager.show_page("AppWindow")
-        root.deiconify()
 
+    page_manager.current_window = app_window  # Changed from set_current_window to direct assignment
 
     page_manager.add_page("InitPage", init_page)
     page_manager.add_page("LoginPage", login_page)
     page_manager.add_page("RegisterPage", register_page)
     page_manager.add_page("AppWindow", app_window)
-    page_manager.add_dynamic_panel(
-    "MiddlePanel",
-    lambda parent, playlist_name: create_middle_panel(
-        app_window.main_frame,
-        playlist_name,
-        app_window.title_label,
-        app_window.artist_label,
-        # app_window.play_selected_song,
-        app_window.album_art_label,
-        app_window.time_elapsed_label,
-        app_window.time_remaining_label,
-        app_window.progress_slider
-    )
     
-)
+    page_manager.add_dynamic_panel(
+        "MiddlePanel",
+        lambda parent, playlist_name: create_middle_panel(
+            app_window.main_frame,
+            playlist_name,
+            app_window.title_label,
+            app_window.artist_label,
+            app_window.album_art_label,
+            app_window.time_elapsed_label,
+            app_window.time_remaining_label,
+            app_window.progress_slider
+        )
+    )
 
     page_manager.show_page("InitPage")
-
     page_manager.center_window(1500, 1000)
-    
     
     root.update_idletasks()
     root.deiconify()
-
     root.mainloop()
-
 
 if __name__ == "__main__":
     main()

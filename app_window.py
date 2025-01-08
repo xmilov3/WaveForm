@@ -9,7 +9,6 @@ from app.gui.panels.middle_panel import create_middle_panel
 from app.gui.panels.right_panel import create_right_panel, update_next_in_queue, update_now_playing
 from app.gui.panels.bottom_panel import create_bottom_panel
 from app.func.music_controller import play_pause_song, stop_song, next_song, previous_song, initialize_first_song, sync_is_playing, populate_song_listbox, progress_bar, play_selected_song, handle_double_click
-
 from app.func.playlist_utils import fetch_playlists
 from app.gui.panels.left_panel import populate_playlists
 from mutagen.mp3 import MP3
@@ -21,8 +20,6 @@ import time
 pygame.mixer.init(channels=2)
 pygame.mixer.music.stop()
 
-
-
 currentsong = None
 song_length = 0
 current_song_position = 0
@@ -30,18 +27,16 @@ song_start_time = 0
 is_playing = False
 user_sliding = False
 
-
 class AppWindow(tk.Frame):
     def __init__(self, parent, page_manager, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         
-        
         self.page_manager = page_manager
+        self.current_playlist = None
         self.configure(bg='#150016')
 
         self.main_frame = tk.Frame(self, bg='#150016')
         self.main_frame.grid(row=0, column=0, sticky="nsew")
-
 
         self.title_label = tk.Label(self.main_frame, text="Title", bg="#1E052A", fg="white")
         self.artist_label = tk.Label(self.main_frame, text="Artist", bg="#1E052A", fg="white")
@@ -52,7 +47,6 @@ class AppWindow(tk.Frame):
         playlists = fetch_playlists()
         self.first_playlist = playlists[0] if playlists else "Unknown Playlist"
 
-
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
@@ -60,8 +54,6 @@ class AppWindow(tk.Frame):
         populate_playlists(self.left_panel.playlist_frame, self.page_manager)
 
     def init_panels(self):
-        
-
         (
             self.right_panel,
             self.queue_text_label,
@@ -69,7 +61,10 @@ class AppWindow(tk.Frame):
             self.album_art_label,
             self.title_label,
             self.artist_label
-        ) = create_right_panel(self.main_frame, playlist_name=self.first_playlist)
+         ) = create_right_panel(
+             self.main_frame, 
+             playlist_name=self.first_playlist
+             )
 
         (
             self.middle_panel,
@@ -98,41 +93,34 @@ class AppWindow(tk.Frame):
         ) = create_bottom_panel(
             self.main_frame,
             self.song_listbox,
-            None,  # self.queue_label
+            None,
             self.first_playlist,
-            None,  # self.playlist_label
-            None,  # self.album_label
+            None,
+            None,
             self.title_label,
             self.artist_label,
             update_next_in_queue,
             update_now_playing
         )
 
-
         if self.song_listbox:
             self.song_listbox.bind("<Double-Button-1>", lambda event: handle_double_click(
-        self.song_listbox,
-        self.play_pause_button,
-        self.play_button_img,
-        self.pause_button_img,
-        self.title_label,
-        self.artist_label,
-        self.time_elapsed_label,
-        self.time_remaining_label,
-        self.progress_slider,
-        self.album_art_label
-    ))
-            # self.song_listbox.bind("<Double-Button-1>", lambda event: self.select_song_from_list())
+                self.song_listbox,
+                self.play_pause_button,
+                self.play_button_img,
+                self.pause_button_img,
+                self.title_label,
+                self.artist_label,
+                self.time_elapsed_label,
+                self.time_remaining_label,
+                self.progress_slider,
+                self.album_art_label
+            ))
         else:
             print("Error: song_listbox is not initialized.")
 
         self.top_panel = create_top_panel(self.main_frame, self.page_manager)
-
-        self.left_panel = create_left_panel(
-            self.main_frame,
-            self.page_manager
-        )
-
+        self.left_panel = create_left_panel(self.main_frame, self.page_manager)
 
         self.configure_layout(self.top_panel, self.left_panel, self.middle_panel, self.right_panel, self.bottom_panel)
 
@@ -141,15 +129,18 @@ class AppWindow(tk.Frame):
 
         self.start_sync_loop()
 
-
-
     def delete_playlist(self, playlist_name):
         print(f"Deleting playlist: {playlist_name}")
 
     def change_playlist_cover(self, playlist_name):
         print(f"Changing cover for playlist: {playlist_name}")
 
-        
+    def update_song_listbox(self, playlist_name):
+        if self.song_listbox:
+            self.current_playlist = playlist_name
+            populate_song_listbox(self.song_listbox, playlist_name)
+            update_next_in_queue(self.queue_text_label, playlist_name)
+            update_now_playing(self.playlist_label, self.album_art_label, self.title_label, self.artist_label, playlist_name)
 
     def start_sync_loop(self):
         if is_playing:

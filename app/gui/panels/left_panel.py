@@ -84,19 +84,19 @@ def create_left_panel(parent, page_manager):
 
 
 
-def on_playlist_click(playlist_name, app_window):
-    app_window.update_middle_panel(playlist_name)
-
+def on_playlist_click(playlist_name, page_manager):
+    page_manager.selected_playlist = playlist_name
+    if page_manager.update_song_listbox:
+        page_manager.update_song_listbox(playlist_name)
+    page_manager.show_dynamic_panel("MiddlePanel", playlist_name)
+    
+    
 def populate_playlists(playlist_frame, page_manager):
     for widget in playlist_frame.winfo_children():
         widget.destroy()
 
-    try:
-        playlists = fetch_playlists()
-    except Exception as e:
-        print(f"Error fetching playlists: {e}")
-        playlists = []
-
+    playlists = fetch_playlists()
+    
     if playlists:
         for playlist_name in playlists:
             playlist_button = Button(
@@ -106,24 +106,32 @@ def populate_playlists(playlist_frame, page_manager):
                 fg='black',
                 bg='#50184A',
                 borderwidth=0,
-                command=lambda name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
+                command=lambda name=playlist_name: playlist_button_click(name, page_manager)
             )
             playlist_button.grid(sticky="ew", padx=5, pady=5)
-    else:
-        Label(
-            playlist_frame,
-            text="No playlists available.",
-            font=("Arial", 14, "bold"),
-            fg="gray",
-            bg="#2d0232"
-        ).grid(row=0, column=0, padx=5, pady=5, sticky="ew")
 
-    playlist_frame.grid_columnconfigure(0, weight=1)
-
-
-
-
-
+def playlist_button_click(playlist_name, page_manager):
+    page_manager.selected_playlist = playlist_name
+    page_manager.current_window.update_song_listbox(playlist_name)
+    page_manager.show_dynamic_panel("MiddlePanel", playlist_name)
+    
+    initialize_first_song(
+        page_manager.current_window.song_listbox,
+        page_manager.current_window.play_pause_button,
+        page_manager.current_window.play_button_img,
+        page_manager.current_window.pause_button_img,
+        page_manager.current_window.title_label,
+        page_manager.current_window.artist_label,
+        page_manager.current_window.time_elapsed_label,
+        page_manager.current_window.time_remaining_label,
+        page_manager.current_window.progress_slider,
+        page_manager.current_window.bottom_panel,
+        playlist_name
+    )
+def on_playlist_click(playlist_name, page_manager):
+    page_manager.selected_playlist = playlist_name
+    page_manager.current_window.update_song_listbox(playlist_name)
+    page_manager.show_dynamic_panel("MiddlePanel", playlist_name)
 
 
 def handle_playlist_selection(event, page_manager, listbox):
