@@ -4,7 +4,7 @@ from app.func.config import *
 from app.func.music_controller import (
     play_pause_song, next_song, previous_song, progress_bar, slide_music, 
     stop_song, set_user_sliding, initialize_first_song, control_volume, 
-    update_next_in_queue, update_now_playing, play_selected_song, load_song
+    update_next_in_queue, update_now_playing
 )
 
 def create_bottom_panel(
@@ -67,32 +67,31 @@ def create_bottom_panel(
         return bottom_frame
 
     def play_pause_command():
-        global is_playing, currentsong
+        global is_playing
+        if user_sliding:
+            print("Ignoring Play/Pause toggle during sliding")
+            return
 
+        if song_listbox.size() == 0:
+            print("No songs in the playlist!")
+            return
+
+        currentsong = song_listbox.get(ACTIVE)
         if not currentsong:
-            if song_listbox.size() > 0:
-                currentsong = song_listbox.get(0)
-                song_listbox.select_set(0)
-                print(f"Loading first song: {currentsong}")
-                load_song(currentsong)
-            else:
-                print("No songs available to play!")
-                return
+            print("No song selected!")
+            return
 
         is_playing = play_pause_song(
-            is_playing=is_playing,
-            play_button=play_pause_button,
-            play_button_img=play_button_img,
-            pause_button_img=pause_button_img,
-            title_label=title_label,
-            artist_label=artist_label,
-            song_info=currentsong
-            
+            currentsong,
+            is_playing,
+            play_pause_button,
+            play_button_img,
+            pause_button_img,
+            title_label,
+            artist_label
         )
 
-        # update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
-
-
+        update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
     def next_command():
         global is_playing, current_song_position
@@ -207,6 +206,7 @@ def create_bottom_panel(
     )
     time_remaining_label.grid(row=0, column=2, padx=5)
 
+    # Right section: Volume Control
     bottom_frame_right = Frame(bottom_frame, bg='#150016')
     bottom_frame_right.grid(row=0, column=2, sticky='nsew', padx=10)
 
@@ -236,7 +236,7 @@ def create_bottom_panel(
         showvalue=False,
         command=lambda value: control_volume(value, volume_label)
     )
-    volume_slider.set(20) # too loud fot 50 on default
+    volume_slider.set(50)
     volume_slider.grid(row=1, column=0, padx=10)
 
     progress_bar(time_remaining_label, time_elapsed_label, progress_slider, bottom_center_bar)

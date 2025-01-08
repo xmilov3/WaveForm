@@ -1,5 +1,4 @@
 from tkinter import *
-from tkinter import messagebox
 from customtkinter import *
 import pygame
 import time
@@ -59,18 +58,7 @@ def populate_song_listbox(song_listbox, playlist_name):
             cursor.close()
             connection.close()
 
-
-def initialize_song_listbox(
-    parent,
-    playlist_name,
-    album_art_label,
-    play_song_callback,
-    title_label,
-    artist_label,
-    time_elapsed_label,
-    time_remaining_label,
-    progress_slider
-):
+def initialize_song_listbox(parent, playlist_name, album_art_label, play_song_callback, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
     song_listbox = Listbox(
         parent,
         bg='#2D0232',
@@ -86,42 +74,57 @@ def initialize_song_listbox(
 
     populate_song_listbox(song_listbox, playlist_name)
 
-    song_listbox.bind(
-        "<Double-1>",
-        lambda event: play_song_callback(
-            song_listbox.get(ACTIVE),
-            title_label,
-            artist_label,
-            album_art_label,
-            time_elapsed_label,
-            time_remaining_label
-        )
-    )
+    song_listbox.bind("<Double-1>", lambda event: play_song_callback(
+        song_listbox.get(ACTIVE),
+        title_label,
+        artist_label,
+        album_art_label,
+        time_elapsed_label,
+        time_remaining_label,
+        progress_slider
+    ))
 
     return song_listbox
 
-def on_song_double_click(self, event):
-        global is_playing
 
-        selected_index = self.song_listbox.curselection()
-        if not selected_index:
-            print("No song selected!")
-            return
-
-        song_info = self.song_listbox.get(selected_index[0])
-        if not song_info:
-            print("Error: No song info available!")
-            return
-
-        is_playing = play_pause_song(
-            song_info,
-            is_playing,
-            self.play_pause_button,
-            self.play_button_img,
-            self.pause_button_img,
-            self.title_label,
-            self.artist_label
+def populate_song_listbox(song_listbox, playlist_name):
+    try:
+        connection = mysql.connector.connect(
+            host='localhost',
+            database='WaveForm_db',
+            user='root',
+            password=''
         )
+        cursor = connection.cursor()
+
+        query = """
+            SELECT 
+                s.title AS song_title,
+                s.artist AS song_artist
+            FROM songs s
+            JOIN playlist_songs ps ON s.song_id = ps.song_id
+            JOIN playlists p ON ps.playlist_id = p.playlist_id
+            WHERE p.name = %s
+        """
+        cursor.execute(query, (playlist_name,))
+        songs = cursor.fetchall()
+
+        song_listbox.delete(0, END)
+
+        for title, artist in songs:
+            song_listbox.insert(END, f"{title} - {artist}")
+
+        if not songs:
+            song_listbox.insert(END, "Playlist is empty.")
+            print(f"Playlist is empty: {playlist_name}")
+
+    except mysql.connector.Error as e:
+        print(f"Error while loading song_listbox: {e}")
+    finally:
+        if 'connection' in locals() and connection.is_connected():
+            cursor.close()
+            connection.close()
+
 
 
 
@@ -146,7 +149,8 @@ def initialize_first_song(
     bottom_frame,
     playlist_name=None
 ):
-    global currentsong, song_length, current_song_position, song_start_time, is_playing
+    global currentsong, song_length, current_song_position, song_start_time, is_playing, play_playlist
+        
 
     if playlist_name:
         try:
@@ -240,19 +244,14 @@ def initialize_first_song(
             print(f"Unsupported file format: {file_extension}")
             return
 
-        pygame.mixer.music.play()
-        is_playing = True
-        current_song_position = 0
-        song_start_time = 0
-
-        play_pause_button.config(image=pause_button_img)
+        play_pause_button.config(image=play_button_img) 
         time_elapsed_label.config(text="00:00")
         time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(song_length)))
         progress_slider.set(0)
         title_label.config(text=song_title)
         artist_label.config(text=artist_name)
 
-        print(f"First song initialized and playing: {song_title} - {artist_name}")
+        print(f"First song initialized: {song_title} - {artist_name}")
 
     except Exception as e:
         print(f"Error in initialize_first_song: {e}")
@@ -264,104 +263,18 @@ def initialize_first_song(
     sync_is_playing()
 
 
-def select_song_from_list(self):
-    global currentsong
-    selected_index = self.song_listbox.curselection()
-    if not selected_index:
-        print("No song selected!")
-        return None
 
-    currentsong = self.song_listbox.get(selected_index)
-    
-    self.load_song(currentsong)
-    
-    return currentsong
-
-def load_song(song_info):
-    global currentsong, song_length
+def play_selected_song(selected_song, title_label, artist_label, album_art_label, time_elapsed_label, time_remaining_label, progress_slider):
+    global is_playing
+    is_playing= True
 
     try:
-        song_title, artist_name = song_info.split(" - ")
-        connection = mysql.connector.connect(
-            host='localhost',
-            database='WaveForm_db',
-            user='root',
-            password=''
-        )
-        cursor = connection.cursor()
-        query = "SELECT file_path FROM songs WHERE title = %s AND artist = %s"
-        cursor.execute(query, (song_title.strip(), artist_name.strip()))
-        result = cursor.fetchone()
-
-        if not result:
-            print(f"File for song {song_title} - {artist_name} not found.")
-            return
-
-        file_path = result[0]
-        if not os.path.exists(file_path):
-            print(f"File does not exist: {file_path}")
-            return
-
-        if file_path.endswith(".mp3"):
-            pygame.mixer.music.load(file_path)
-            song_length = MP3(file_path).info.length
-        elif file_path.endswith(".wav"):
-            audio = AudioSegment.from_file(file_path, format="wav")
-            pygame.mixer.music.load(file_path)
-            song_length = len(audio) / 1000.0
+        if " - " in selected_song:
+            song_title, artist_name = selected_song.split(" - ")
         else:
-            print("Unsupported file format")
+            print("Invalid song format")
             return
 
-        currentsong = song_info
-        print(f"Loaded song: {currentsong}")
-
-    except Exception as e:
-        print(f"Error loading song: {e}")
-    finally:
-        if 'connection' in locals() and connection.is_connected():
-            cursor.close()
-            connection.close()
-
-
-def play_selected_song(
-    song_listbox,
-    play_pause_button,
-    play_button_img,
-    pause_button_img,
-    title_label,
-    artist_label,
-    album_art_label,
-    time_elapsed_label,
-    time_remaining_label,
-    progress_slider,
-    queue_text_label,
-    playlist_name,
-    playlist_label
-):
-    global currentsong, is_playing, current_song_position, song_length, song_start_time
-
-    if song_listbox.size() == 0:
-        print("The song list is empty!")
-        return
-
-    current_index = song_listbox.curselection()
-    if not current_index:
-        print("No song selected!")
-        return
-
-    selected_index = current_index[0]
-    song_listbox.select_clear(0, END)
-    song_listbox.select_set(selected_index)
-    song_listbox.activate(selected_index)
-
-    currentsong = song_listbox.get(selected_index)
-    song_title, artist_name = currentsong.split(" - ")
-
-    update_next_in_queue(queue_text_label, playlist_name)
-    update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
-
-    try:
         connection = mysql.connector.connect(
             host='localhost',
             database='WaveForm_db',
@@ -369,68 +282,70 @@ def play_selected_song(
             password=''
         )
         cursor = connection.cursor()
-        query = "SELECT file_path FROM songs WHERE title = %s AND artist = %s"
+
+        query = "SELECT file_path, cover_path FROM songs WHERE title = %s AND artist = %s"
         cursor.execute(query, (song_title.strip(), artist_name.strip()))
         result = cursor.fetchone()
 
         if not result:
-            print(f"File for song {song_title} - {artist_name} not found.")
+            print(f"No file found for {song_title} - {artist_name}")
             return
 
-        file_path = result[0]
+        file_path, cover_path = result
 
         if not os.path.exists(file_path):
             print(f"File does not exist: {file_path}")
             return
 
         file_extension = os.path.splitext(file_path)[-1].lower()
-
         if file_extension == ".mp3":
-            try:
-                pygame.mixer.music.load(file_path)
-                pygame.mixer.music.play()
-                song_length = MP3(file_path).info.length
-            except Exception as e:
-                print(f"Error playing MP3: {e}")
-                return
-
+            song_length = MP3(file_path).info.length
+            pygame.mixer.init()
+            pygame.mixer.music.load(file_path)
+            pygame.mixer.music.play()
         elif file_extension == ".wav":
-            try:
-                audio = AudioSegment.from_file(file_path, format="wav")
-                pygame.mixer.music.load(file_path)
-                pygame.mixer.music.play()
-                song_length = len(audio) / 1000.0
-            except Exception as e:
-                print(f"Error playing WAV: {e}")
-                return
-
+            audio = AudioSegment.from_file(file_path, format="wav")
+            song_length = len(audio) / 1000.0
+            pygame.mixer.init()
+            pygame.mixer.music.load(file_path)
+            pygame.mixer.music.play()
         else:
-            print(f"Unsupported file format: {file_extension}")
+            print(f"Unsupported file format: {file_path}")
             return
 
-        current_song_position = 0
-        song_start_time = 0
-        is_playing = True
-
-        play_pause_button.config(image=pause_button_img)
+        title_label.config(text=song_title.strip())
+        artist_label.config(text=artist_name.strip())
         time_elapsed_label.config(text="00:00")
-        time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(song_length)))
-        progress_slider.set(0)
-        title_label.config(text=song_title)
-        artist_label.config(text=artist_name)
+        time_remaining_label.config(text=f"-{int(song_length // 60):02}:{int(song_length % 60):02}")
+        progress_slider.config(to=song_length)
+
+        if cover_path and os.path.exists(cover_path):
+            img = Image.open(cover_path)
+            img = img.resize((200, 200), Image.LANCZOS)
+            album_image = ImageTk.PhotoImage(img)
+            album_art_label.config(image=album_image)
+            album_art_label.image = album_image
+        else:
+            album_art_label.config(image='', text="No Cover")
+
+        print(f"Playing: {song_title} - {artist_name}")
 
     except Exception as e:
         print(f"Error in play_selected_song: {e}")
+
     finally:
         if 'connection' in locals() and connection.is_connected():
+            cursor.fetchall()
             cursor.close()
             connection.close()
-    sync_is_playing()
 
 
-def play_pause_song(song_info, is_playing, play_button, play_button_img, pause_button_img, title_label, artist_label):
-    global current_song_position, song_start_time, currentsong
-    
+
+
+
+def play_pause_song(song_info, is_playing, play_button, play_button_img, pause_button_img, title_label, artist_label,):
+    global current_song_position, song_start_time
+
     try:
         if not song_info:
             print("Error, Song info not found!")
@@ -469,7 +384,7 @@ def play_pause_song(song_info, is_playing, play_button, play_button_img, pause_b
         return is_playing
 
     except Exception as e:
-        print(f"Error in play_pause_song: {e}")
+        print(f"Błąd w play_pause_song: {e}")
         return is_playing
 
 
@@ -605,7 +520,8 @@ def previous_song(song_listbox, play_pause_button, play_button_img, pause_button
     song_title, artist_name = currentsong.split(" - ")
 
     update_next_in_queue(queue_text_label, playlist_name)
-    update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
+    def update_now_playing(self, playlist_label, bottom_frame_left, album_art_label, title_label, artist_label, playlist_name, time_elapsed_label, time_remaining_label):
+        update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name, time_elapsed_label, time_remaining_label)
 
     try:
         connection = mysql.connector.connect(
@@ -664,6 +580,7 @@ def previous_song(song_listbox, play_pause_button, play_button_img, pause_button
         progress_slider.set(0)
         title_label.config(text=song_title)
         artist_label.config(text=artist_name)
+        update_now_playing(text=song_title, artist_name=artist_name)
 
     except Exception as e:
         print(f"Error in previous_song: {e}")

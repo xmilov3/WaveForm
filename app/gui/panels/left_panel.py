@@ -4,6 +4,7 @@ from tkinter import simpledialog, filedialog, messagebox
 from app.func.add_song import add_song_to_playlist
 from app.db.db_operations import insert_song
 from app.func.add_playlist import create_empty_playlist, import_playlist_from_folder
+from app.func.analyze_song import analyze_song
 from app.func.playlist_utils import update_playlist_buttons, show_context_menu, change_playlist_cover, delete_playlist, fetch_playlists
 from app.gui.panels.middle_panel import display_playlist_details_only
 from app.func.playlist_utils import *
@@ -12,7 +13,7 @@ from app.func.playlist_controller import *
 import tkinter as tk
 
 
-def create_left_panel(parent, page_manager, **kwargs):
+def create_left_panel(parent, page_manager):
     
     left_frame = Frame(parent, bg='#1E052A', borderwidth=0)
     left_frame.grid(row=1, column=0, sticky='nsew')
@@ -57,11 +58,24 @@ def create_left_panel(parent, page_manager, **kwargs):
         command=lambda: import_playlist_from_folder(playlist_frame, page_manager)
     ).pack(fill="x", padx=10, pady=5)
 
+    def analyze_song_with_dialog():
+        file_path = filedialog.askopenfilename(
+            title="Select a File to Analyze",
+            filetypes=(
+                ("Pliki MP3", "*.mp3"),
+                ("Pliki WAV", "*.wav"),
+                ("Wszystkie pliki", "*.*")
+            )
+        )
+        
+        if file_path:  
+            analyze_song(file_path)
+
     ttk.Button(
         buttons_frame,
         text="Analyze Song",
         style="Custom.TButton",
-        command=lambda: add_song_with_playlist(page_manager)
+        command=analyze_song_with_dialog
     ).pack(fill="x", padx=10, pady=5)
 
     
@@ -105,6 +119,10 @@ def populate_playlists(playlist_frame, page_manager):
         ).grid(row=0, column=0, padx=5, pady=5, sticky="ew")
 
     playlist_frame.grid_columnconfigure(0, weight=1)
+
+
+
+
 
 
 

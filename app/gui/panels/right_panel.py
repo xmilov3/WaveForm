@@ -218,52 +218,17 @@ def update_now_playing(playlist_label, album_art_label, title_label, artist_labe
 
 
 
-def update_next_in_queue(queue_text_label, playlist_name, current_index=None):
-    if not playlist_name:
-        print("No playlist name provided to update_next_in_queue.")
+def update_next_in_queue(queue_text_label, playlist_name):
+    if queue_text_label is None:
+        print("Error: queue_text_label is None")
         return
 
-    try:
-        print(f"Fetching next songs for playlist: {playlist_name}")
-        connection = mysql.connector.connect(
-            host='localhost',
-            database='WaveForm_db',
-            user='root',
-            password=''
-        )
-        cursor = connection.cursor()
+    print(f"Updating next in queue for playlist: {playlist_name}")
+    next_songs = fetch_next_in_queue(playlist_name)
 
-        query = """
-            SELECT 
-                s.title AS song_title,
-                s.artist AS song_artist
-            FROM songs s
-            JOIN playlist_songs ps ON s.song_id = ps.song_id
-            JOIN playlists p ON ps.playlist_id = p.playlist_id
-            WHERE p.name = %s
-        """
-        cursor.execute(query, (playlist_name,))
-        songs = cursor.fetchall()
+    if next_songs:
+        queue_text = "\n".join([f"{title} - {artist}" for title, artist in next_songs])
+    else:
+        queue_text = "No songs in queue."
 
-        if not songs:
-            print(f"No songs found in playlist: {playlist_name}")
-            queue_text_label.config(text="No songs in queue.")
-            return
-
-        if current_index is not None:
-            next_songs = songs[current_index + 1:] + songs[:current_index]
-        else:
-            next_songs = songs
-
-        display_queue = next_songs[:5]
-        queue_text_label.config(text="\n".join(f"{song[0]} - {song[1]}" for song in display_queue))
-        print("Next queue updated:", display_queue)
-
-    except Exception as e:
-        print(f"Error while fetching next songs: {e}")
-
-    finally:
-        if 'cursor' in locals() and cursor:
-            cursor.close()
-        if 'connection' in locals() and connection.is_connected():
-            connection.close()
+    queue_text_label.config(text=queue_text)
