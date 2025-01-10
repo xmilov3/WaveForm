@@ -19,16 +19,17 @@ def create_empty_playlist(playlist_frame, page_manager):
     dialog = Toplevel()
     dialog.title("Create Playlist")
     center_window(dialog, 500, 300)
+    dialog.configure(bg="#1E052A")
 
-    Label(dialog, text="Playlist Name:", font=("Arial", 12, "bold")).grid(row=0, column=0, sticky="w", padx=10, pady=10)
+    Label(dialog, text="Playlist Name:", font=("Arial", 12, "bold"), fg="white", bg="#1E052A").grid(row=0, column=0, sticky="w", padx=10, pady=10)
     playlist_name_entry = Entry(dialog, font=("Arial", 12))
     playlist_name_entry.grid(row=0, column=1, columnspan=2, padx=10, pady=10, sticky="ew")
 
-    Label(dialog, text="Description:", font=("Arial", 12, "bold")).grid(row=1, column=0, sticky="w", padx=10, pady=10)
+    Label(dialog, text="Description:", font=("Arial", 12, "bold"), fg="white", bg="#1E052A").grid(row=1, column=0, sticky="w", padx=10, pady=10)
     description_entry = Entry(dialog, font=("Arial", 12))
     description_entry.grid(row=1, column=1, columnspan=2, padx=10, pady=10, sticky="ew")
 
-    Label(dialog, text="Cover Path:", font=("Arial", 12, "bold")).grid(row=2, column=0, sticky="w", padx=10, pady=10)
+    Label(dialog, text="Cover Path:", font=("Arial", 12, "bold"), fg="white", bg="#1E052A").grid(row=2, column=0, sticky="w", padx=10, pady=10)
     cover_path_entry = Entry(dialog, font=("Arial", 12))
     cover_path_entry.grid(row=2, column=1, padx=10, pady=10, sticky="ew")
 
