@@ -22,10 +22,10 @@ def create_left_panel(parent, page_manager):
     left_frame.grid_columnconfigure(0, weight=1)
 
     buttons_frame = Frame(left_frame, bg='#2d0232')
-    buttons_frame.grid(row=0, column=0, sticky='ew', padx=10, pady=10)
+    buttons_frame.grid(row=0, column=0, sticky='nsew', padx=5, pady=10)
 
     playlist_frame = Frame(left_frame, bg='#2d0232')
-    playlist_frame.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
+    playlist_frame.grid(row=1, column=0, sticky='nsew', padx=5, pady=10)
     playlist_frame.grid_columnconfigure(0, weight=1)
 
     left_frame.playlist_frame = playlist_frame

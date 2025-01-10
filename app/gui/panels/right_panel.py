@@ -56,15 +56,38 @@ def fetch_next_in_queue(playlist_name):
         )
         cursor = connection.cursor()
 
+        current_song_query = """
+            SELECT ps.song_id
+            FROM playlist_songs ps
+            JOIN playlists p ON ps.playlist_id = p.playlist_id
+            WHERE p.name = %s
+            ORDER BY ps.playlist_songs_id ASC
+            LIMIT 1
+        """
+        cursor.execute(current_song_query, (playlist_name,))
+        current_song = cursor.fetchone()
+
+        if not current_song:
+            return []
+
         query = """
-            SELECT s.title, s.artist, s.cover_path
+            SELECT s.title, s.artist
             FROM songs s
             JOIN playlist_songs ps ON s.song_id = ps.song_id
             JOIN playlists p ON ps.playlist_id = p.playlist_id
             WHERE p.name = %s
-            LIMIT 10 OFFSET 1
+            AND ps.playlist_songs_id > (
+                SELECT ps2.playlist_songs_id
+                FROM playlist_songs ps2
+                JOIN playlists p2 ON ps2.playlist_id = p2.playlist_id
+                WHERE p2.name = %s
+                ORDER BY ps2.playlist_songs_id ASC
+                LIMIT 1
+            )
+            ORDER BY ps.playlist_songs_id ASC
+            LIMIT 5
         """
-        cursor.execute(query, (playlist_name))
+        cursor.execute(query, (playlist_name, playlist_name))
         queue_songs = cursor.fetchall()
 
         if queue_songs:
@@ -81,6 +104,23 @@ def fetch_next_in_queue(playlist_name):
             cursor.close()
             connection.close()
 
+def update_next_in_queue(queue_text_label, playlist_name):
+    if queue_text_label is None:
+        print("Error: queue_text_label is None")
+        return
+
+    print(f"Updating next in queue for playlist: {playlist_name}")
+    next_songs = fetch_next_in_queue(playlist_name)
+
+    if next_songs:
+        queue_text = "\n"
+        for i, (title, artist) in enumerate(next_songs, 1):
+            queue_text += f"{title} - {artist}\n"
+    else:
+        queue_text = "No more songs in queue"
+
+    queue_text_label.config(text=queue_text)
+
 
 def create_right_panel(parent, playlist_name=None):
     right_frame = Frame(parent, bg='#1E052A', width=300)
@@ -92,7 +132,7 @@ def create_right_panel(parent, playlist_name=None):
     right_frame.grid_columnconfigure(0, weight=1)
 
     now_playing_frame = Frame(right_frame, bg='#2d0232')
-    now_playing_frame.grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
+    now_playing_frame.grid(row=0, column=0, sticky='nsew', padx=5, pady=10)
    
     now_playing_frame.grid_rowconfigure(0, weight=0)
     now_playing_frame.grid_rowconfigure(1, weight=2)
@@ -113,17 +153,17 @@ def create_right_panel(parent, playlist_name=None):
     artist_label.grid(row=3, column=0, sticky='nsew', padx=5, pady=2)
 
     next_in_queue_frame = Frame(right_frame, bg='#2d0232')
-    next_in_queue_frame.grid(row=1, column=0, sticky='nsew', padx=5, pady=5)
+    next_in_queue_frame.grid(row=1, column=0, sticky='nsew', padx=5, pady=10)
 
     next_in_queue_frame.grid_rowconfigure(0, weight=0)  # Queue label
     next_in_queue_frame.grid_rowconfigure(1, weight=1)  # Queue content
     next_in_queue_frame.grid_columnconfigure(0, weight=1)
 
-    queue_label = Label(next_in_queue_frame, text="Next in Queue", font=("Arial", 14, "bold"), fg='white', bg='#2d0232')
+    queue_label = Label(next_in_queue_frame, text="Next in Queue", font=("Arial", 20, "bold"), fg='white', bg='#2d0232')
     queue_label.grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
 
-    queue_text_label = Label(next_in_queue_frame, bg='#2d0232', fg="white", font=("Arial", 12))
-    queue_text_label.grid(row=1, column=0, sticky='nsew', padx=5, pady=5)
+    queue_text_label = Label(next_in_queue_frame, bg='#2d0232', fg="white", font=("Arial", 16))
+    queue_text_label.grid(row=1, column=0, sticky='ew', padx=0, pady=15)
 
     return right_frame, queue_text_label, playlist_label, album_art_label, title_label, artist_label
 
@@ -182,19 +222,3 @@ def update_now_playing(playlist_label, album_art_label, title_label, artist_labe
             cursor.close()
             connection.close()
 
-
-
-def update_next_in_queue(queue_text_label, playlist_name):
-    if queue_text_label is None:
-        print("Error: queue_text_label is None")
-        return
-
-    print(f"Updating next in queue for playlist: {playlist_name}")
-    next_songs = fetch_next_in_queue(playlist_name)
-
-    if next_songs:
-        queue_text = "\n".join([f"{title} - {artist}" for title, artist in next_songs])
-    else:
-        queue_text = "No songs in queue."
-
-    queue_text_label.config(text=queue_text)

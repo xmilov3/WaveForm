@@ -112,7 +112,7 @@ def create_middle_panel(
     time_remaining_label,
     progress_slider 
 ):
-    middle_frame = Frame(parent, bg="#1E052A", width=600, height=400)
+    middle_frame = Frame(parent, bg="#1E052A", width=600)
     middle_frame.grid(row=1, column=1, sticky="nsew")
     middle_frame.grid_propagate(False)
 
@@ -125,9 +125,9 @@ def create_middle_panel(
         command=lambda: add_song_dialog(playlist_name, song_listbox)
     )
     add_song_button.grid(row=3, column=0, pady=10, sticky="ew")
-    header_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+    header_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=10)
     songlist_frame = Frame(middle_frame, bg="#2D0232")
-    songlist_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+    songlist_frame.grid(row=1, column=0, sticky="nsew", padx=5, pady=10)
 
     song_listbox = initialize_song_listbox(
         parent=songlist_frame,
