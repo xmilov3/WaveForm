@@ -12,7 +12,6 @@ class LoginPage(tk.Frame):
 
         self.configure(bg="#1E052A")
 
-
         init_logo = load_init_logo()
         logo_label = tk.Label(
             self,
@@ -61,18 +60,24 @@ class LoginPage(tk.Frame):
         password = self.password_entry.get()
 
         try:
-            cursor = self.connection.cursor()
-            query = "SELECT user_id, username FROM users WHERE username = %s AND password_hash = %s"
-            cursor.execute(query, (username, password))
+            cursor = self.connection.cursor(dictionary=True)
+            
+            query = "SELECT user_id, username, password_hash FROM users WHERE username = %s"
+            cursor.execute(query, (username,))
             user_data = cursor.fetchone()
 
             if user_data:
-                user_id, username = user_data
-                user_session.set_user(user_id, username)
-                print(f"User logged in: {username} (ID: {user_id})")
-                self.page_manager.show_page("AppWindow")
+                if authenticate_user(self.connection, username, password):
+                    user_id = user_data['user_id']
+                    username = user_data['username']
+                    user_session.set_user(user_id, username)
+                    print(f"User logged in: {username} (ID: {user_id})")
+                    self.page_manager.show_page("AppWindow")
+                else:
+                    print("Invalid login credentials.")
+                    messagebox.showerror("Login Failed", "Invalid credentials.")
             else:
-                print("Invalid login credentials.")
+                print("User not found.")
                 messagebox.showerror("Login Failed", "Invalid credentials.")
         except Exception as e:
             print(f"Error during login: {e}")
