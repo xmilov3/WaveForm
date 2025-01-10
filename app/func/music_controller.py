@@ -26,44 +26,6 @@ user_sliding = False
 
 
 
-def populate_song_listbox(song_listbox, playlist_name):
-    try:
-        connection = mysql.connector.connect(
-            host='localhost',
-            database='WaveForm_db',
-            user='root',
-            password=''
-        )
-        cursor = connection.cursor()
-
-        query = """
-            SELECT 
-                s.title AS song_title,
-                s.artist AS song_artist
-            FROM songs s
-            JOIN playlist_songs ps ON s.song_id = ps.song_id
-            JOIN playlists p ON ps.playlist_id = p.playlist_id
-            WHERE p.name = %s
-        """
-        cursor.execute(query, (playlist_name,))
-        songs = cursor.fetchall()
-
-        song_listbox.delete(0, END)
-
-        for title, artist in songs:
-            song_listbox.insert(END, f"{title} - {artist}")
-
-        if not songs:
-            song_listbox.insert(END, "Playlist is empty.")
-            print(f"Playlist is empty: {playlist_name}")
-
-    except mysql.connector.Error as e:
-        print(f"Error while loading song_listbox: {e}")
-    finally:
-        if 'connection' in locals() and connection.is_connected():
-            cursor.close()
-            connection.close()
-
 def initialize_song_listbox(parent, playlist_name, album_art_label, play_song_callback, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider):
     song_listbox = Listbox(
         parent,
