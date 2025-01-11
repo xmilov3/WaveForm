@@ -40,6 +40,22 @@ class TestUserAuth(unittest.TestCase):
         self.assertTrue(result)
         mock_hash_password.assert_called_once_with(self.test_user['password'])
 
+    # Test if the function return False when not all required fields are provided
+    def test_fail_register_user_missing_fields(self):
+        self.cursor.execute.side_effect = Exception("All fields are required!")
+        result = register_user(
+            self.connection,
+            self.test_user['username'],
+            self.test_user['email'],
+            self.test_user['password'],
+            self.test_user['birth_date'],
+            None
+        )
+
+        self.assertFalse(result)
+
+
+    # Test if the function returns False when the user already exists
     @patch('app.func.authentication.hash_password')
     def test_fail_register_user(self, mock_hash_password):
         mock_hash_password.return_value = self.test_user['hashed_password']
