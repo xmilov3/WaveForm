@@ -1,8 +1,0 @@
-README.md
-setup.py
-WaveForm.egg-info/PKG-INFO
-WaveForm.egg-info/SOURCES.txt
-WaveForm.egg-info/dependency_links.txt
-WaveForm.egg-info/top_level.txt
-tests/__init__.py
-tests/test_user_auth.py

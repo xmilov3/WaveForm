@@ -1,5 +1,5 @@
 from tkinter import Frame, Label, Scale, HORIZONTAL, ACTIVE, TOP
-from app.widgets import create_play_pause_button, create_previous_button, create_next_button
+from app.gui.widgets import create_play_pause_button, create_previous_button, create_next_button
 from app.func.config import *
 from app.func.music_controller import (
     play_pause_song, next_song, previous_song, progress_bar, slide_music, 
