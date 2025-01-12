@@ -57,7 +57,7 @@ jobs:
           MYSQL_PASSWORD: ""
           MYSQL_DATABASE: WaveForm_db
         run: |
-          python -m unittest /tests/Automated/test_security.py
+          python -m unittest discover -s tests
 
 # Run all tests command below
 
