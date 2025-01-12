@@ -12,21 +12,21 @@ class TestUserAuth(unittest.TestCase):
         self.cursor = MagicMock()
         self.connection.cursor.return_value = self.cursor
 
+        self.cursor.fetchone.return_value = None
+
         self.test_user = {
-            'username': 'testuser',
-            'email': 'test@example.com',
-            'password': 'test_password',
+            'username': 'test_reg_user',
+            'email': 'test_reg@example.com',
+            'password': 'Test_password1',
             'birth_date': '2000-01-01',
             'gender': 'men',
-            'hashed_password': 'hashed_test_password'  # Symulate hashed password
+            'hashed_password': 'hashed_test_password'
         }
 
     @patch('app.func.authentication.hash_password')
     def test_pass_register_user(self, mock_hash_password):
-        mock_hash_password.return_value = self.test_user['hashed_password'] # Configure mock to return hashed password
-        
-        self.cursor.execute.return_value = None
-        self.connection.commit.return_value = None
+        mock_hash_password.return_value = self.test_user['hashed_password']
+        self.cursor.fetchone.return_value = None
 
         result = register_user(
             self.connection,
@@ -40,37 +40,44 @@ class TestUserAuth(unittest.TestCase):
         self.assertTrue(result)
         mock_hash_password.assert_called_once_with(self.test_user['password'])
 
-    # Test if the function return False when not all required fields are provided
     def test_fail_register_user_missing_fields(self):
-        self.cursor.execute.side_effect = Exception("All fields are required!")
-        result = register_user(
-            self.connection,
-            self.test_user['username'],
-            self.test_user['email'],
-            self.test_user['password'],
-            self.test_user['birth_date'],
-            None
-        )
+        with self.assertRaises(ValueError) as context:
+            register_user(
+                self.connection,
+                self.test_user['username'],
+                self.test_user['email'],
+                self.test_user['password'],
+                self.test_user['birth_date'],
+                None
+            )
 
-        self.assertFalse(result)
-
-
-    # Test if the function returns False when the user already exists
     @patch('app.func.authentication.hash_password')
-    def test_fail_register_user(self, mock_hash_password):
+    def test_fail_register_user_duplicate(self, mock_hash_password):
         mock_hash_password.return_value = self.test_user['hashed_password']
-        self.cursor.execute.side_effect = Exception("Duplicate entry")
+        self.cursor.fetchone.return_value = {'username': 'test_reg_user'}
 
-        result = register_user(
-            self.connection,
-            self.test_user['username'],
-            self.test_user['email'],
-            self.test_user['password'],
-            self.test_user['birth_date'],
-            self.test_user['gender']
-        )
+        with self.assertRaises(Exception) as context:
+            register_user(
+                self.connection,
+                self.test_user['username'],
+                self.test_user['email'],
+                self.test_user['password'],
+                self.test_user['birth_date'],
+                self.test_user['gender']
+            )
+        self.assertIn("already exists", str(context.exception))
 
-        self.assertFalse(result)
+    def test_fail_register_user_invalid_email(self):
+        with self.assertRaises(ValueError) as context:
+            register_user(
+                self.connection,
+                self.test_user['username'],
+                "invalid_email",
+                self.test_user['password'],
+                self.test_user['birth_date'],
+                self.test_user['gender']
+            )
+        self.assertIn("Invalid email format", str(context.exception))
 
     @patch('app.func.authentication.verify_password')
     def test_pass_authenticate_user(self, mock_verify_password):
@@ -79,7 +86,6 @@ class TestUserAuth(unittest.TestCase):
             'username': self.test_user['username'],
             'password_hash': self.test_user['hashed_password']
         }
-        
         mock_verify_password.return_value = True
 
         result = authenticate_user(

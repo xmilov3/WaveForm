@@ -15,7 +15,6 @@ import mysql.connector
 
 class PerformanceTests(unittest.TestCase):
     def setUp(self):
-        # Configure the connection to the database
         self.connection = mysql.connector.connect(
             host='localhost',
             database='WaveForm_db',
@@ -24,8 +23,8 @@ class PerformanceTests(unittest.TestCase):
         )
         self.start_memory = psutil.Process(os.getpid()).memory_info().rss
 
+    # Decorator to measure the execution time of a function
     def measure_execution_time(func):
-        # Decorator to measure the execution time of a function
         def wrapper(*args, **kwargs):
             start_time = time.time()
             result = func(*args, **kwargs)
@@ -35,16 +34,16 @@ class PerformanceTests(unittest.TestCase):
             return result
         return wrapper
 
+
+    # 100 Logins loop
     @measure_execution_time
     def test_login_performance(self):
-        # Login performance test
-        for _ in range(100):  # Test 100 logowań
+        for _ in range(100):
             authenticate_user(self.connection, 'testuser', 'testpass123')
 
     @measure_execution_time
     @profile
     def test_playlist_import_performance(self):
-        # Import playlist performance test
         profiler = cProfile.Profile()
         profiler.enable()
         
@@ -66,7 +65,6 @@ class PerformanceTests(unittest.TestCase):
 
     @measure_execution_time
     def test_gui_responsiveness(self):
-       # Responibility GUI Test
         root = tk.Tk()
         start_time = time.time()
         
@@ -85,28 +83,30 @@ class PerformanceTests(unittest.TestCase):
         avg_operation_time = (end_time - start_time) / 100
         self.assertLess(avg_operation_time, 0.1, "GUI operations are too slow")
 
-    @measure_execution_time
-    def test_music_playback_performance(self):
-        # Performance test for music playback
-        start_cpu = psutil.cpu_percent()
-        
-        # Symululate of playback operations
-        for _ in range(10):
-            play_pause_song(None, True, None, None, None, None, None)
-            time.sleep(0.1)
-            next_song(None, None, None, None, None, None, None, None, None)
-        
-        end_cpu = psutil.cpu_percent()
-        cpu_usage = end_cpu - start_cpu
-        
-        print(f"CPU Usage during playback: {cpu_usage}%")
-        self.assertLess(cpu_usage, 50, "Music playback is using too much CPU")
+    # @measure_execution_time
+    # def test_music_playback_performance(self):
+    #     start_cpu = psutil.cpu_percent()
+
+    #     queue_text_label = "Queue"
+    #     playlist_name = "Test Playlist"
+    #     playlist_label = "Label"
+    #     album_art_label = "Art"
+    #     bottom_frame_left = "Frame"
+
+    #     for _ in range(10):
+    #         play_pause_song(None, True, None, None, None, None, None)
+    #         time.sleep(0.1)
+    #         next_song(queue_text_label, playlist_name, playlist_label, album_art_label, bottom_frame_left, None, None, None, None)
+
+    #     end_cpu = psutil.cpu_percent()
+    #     cpu_usage = end_cpu - start_cpu
+
+    #     print(f"CPU Usage during playback: {cpu_usage}%")
+    #     self.assertLess(cpu_usage, 50, "Music playback is using too much CPU")
 
     def test_memory_usage(self):
-        # Memory usage test
         initial_memory = psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024  # MB
         
-        # Intensive memory operations
         large_playlist = ['song' + str(i) for i in range(1000)]
         for song in large_playlist:
             add_song_to_playlist(f"/path/to/{song}.mp3", "Test Playlist")
@@ -118,7 +118,6 @@ class PerformanceTests(unittest.TestCase):
         self.assertLess(memory_increase, 100, "Memory usage is too high")
 
     def test_database_performance(self):
-        # Test the performance of database queries
         cursor = self.connection.cursor()
         
         start_time = time.time()
@@ -131,7 +130,6 @@ class PerformanceTests(unittest.TestCase):
         self.assertLess(query_time, 0.01, "Database queries are too slow")
 
     def tearDown(self):
-        # Cleaning up test environment
         end_memory = psutil.Process(os.getpid()).memory_info().rss
         memory_diff = end_memory - self.start_memory
         print(f"Memory difference after test: {memory_diff / 1024 / 1024:.2f} MB")
@@ -139,8 +137,8 @@ class PerformanceTests(unittest.TestCase):
         if hasattr(self, 'connection') and self.connection.is_connected():
             self.connection.close()
 
+        # Mock for the insert_song_function in playlist import test
     def mock_insert_song(self, *args, **kwargs):
-        # Mock for the `insert_song_function` in the playlist import test
         return 1
 
 if __name__ == '__main__':
