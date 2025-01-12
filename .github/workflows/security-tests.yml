@@ -32,4 +32,4 @@ jobs:
 
       - name: Run security tests
         run: |
-          python -m unittest test_user_security.py
+          python -m unittest tests/Automated/test_security.py
