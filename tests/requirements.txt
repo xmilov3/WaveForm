@@ -20,9 +20,9 @@ matplotlib==3.10.0
     # via -r requirements.in
 mutagen==1.47.0
     # via -r requirements.in
-mysql-connector-repackaged==0.3.1
+mysql-connector-python==8.1.0
     # via -r requirements.in
-numpy==2.2.1
+numpy==2.0.0
     # via
     #   -r requirements.in
     #   contourpy
@@ -35,6 +35,8 @@ pillow==11.1.0
     # via
     #   -r requirements.in
     #   matplotlib
+protobuf==4.21.12
+    # via mysql-connector-python
 psutil==6.1.1
     # via -r requirements.in
 pydub==0.25.1
