@@ -1,5 +1,5 @@
 customtkinter==5.2.2
-librosa==0.10.2.post1
+# librosa==0.10.2.post1
 matplotlib==3.10.0
 mutagen==1.47.0
 mysql_connector_repackaged==0.3.1
