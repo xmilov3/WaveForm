@@ -2,10 +2,27 @@ import unittest
 from unittest.mock import MagicMock, patch
 from app.func.authentication import register_user, authenticate_user
 from app.db.database import create_connection
+import mysql.connector 
 
 class TestUserSecurity(unittest.TestCase):
+    # def setUp(self):
+    #     self.connection = create_connection()
+    #     self.test_user = {
+    #         'username': 'test_security_user',
+    #         'email': 'test@security.com',
+    #         'password': 'TestPassword123!',
+    #         'birth_date': '2000-01-01',
+    #         'gender': 'men'
+    #     }
+    
     def setUp(self):
-        self.connection = create_connection()
+        self.connection = mysql.connector.connect(
+            host='mysql',
+            database='WaveForm_db',
+            user='root',
+            password=''
+        )
+        # Initialize test_user
         self.test_user = {
             'username': 'test_security_user',
             'email': 'test@security.com',
@@ -133,14 +150,18 @@ class TestUserSecurity(unittest.TestCase):
         self.assertIsNone(user_session.username)
 
     def tearDown(self):
-        cursor = self.connection.cursor()
-        cursor.execute(
-            "DELETE FROM users WHERE username = %s",
-            (self.test_user['username'],)
-        )
-        self.connection.commit()
-        cursor.close()
-        self.connection.close()
+        if hasattr(self, 'connection') and self.connection:
+            try:
+                if hasattr(self, 'test_user'):
+                    cursor = self.connection.cursor()
+                    cursor.execute(
+                        "DELETE FROM users WHERE username = %s",
+                        (self.test_user['username'],)
+                    )
+                    self.connection.commit()
+                    cursor.close()
+            finally:
+                self.connection.close()
 
 if __name__ == '__main__':
     unittest.main()
