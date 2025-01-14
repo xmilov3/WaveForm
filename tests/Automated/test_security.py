@@ -5,15 +5,6 @@ from app.db.database import create_connection
 import mysql.connector 
 
 class TestUserSecurity(unittest.TestCase):
-    # def setUp(self):
-    #     self.connection = create_connection()
-    #     self.test_user = {
-    #         'username': 'test_security_user',
-    #         'email': 'test@security.com',
-    #         'password': 'TestPassword123!',
-    #         'birth_date': '2000-01-01',
-    #         'gender': 'men'
-    #     }
     
     def setUp(self):
         self.connection = mysql.connector.connect(
@@ -22,7 +13,6 @@ class TestUserSecurity(unittest.TestCase):
             user='root',
             password=''
         )
-        # Initialize test_user
         self.test_user = {
             'username': 'test_security_user',
             'email': 'test@security.com',
@@ -162,6 +152,6 @@ class TestUserSecurity(unittest.TestCase):
                     cursor.close()
             finally:
                 self.connection.close()
-
+                
 if __name__ == '__main__':
     unittest.main()
