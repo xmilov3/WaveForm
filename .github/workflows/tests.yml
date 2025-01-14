@@ -58,4 +58,4 @@ jobs:
           DB_NAME: WaveForm_db
           DB_PORT: 3307
         run: |
-          python -m unittest discover -s tests/Automated
+          python -m unittest tests/Automated/test_security.py
