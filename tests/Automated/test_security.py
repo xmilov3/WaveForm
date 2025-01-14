@@ -8,10 +8,11 @@ class TestUserSecurity(unittest.TestCase):
     
     def setUp(self):
         self.connection = mysql.connector.connect(
-            host='mysql',
+            host='127.0.0.1',       # Changed from 'mysql' to 'localhost' to run on Github Actions
             database='WaveForm_db',
             user='root',
-            password=''
+            password='',
+            port=3307
         )
         self.test_user = {
             'username': 'test_security_user',
