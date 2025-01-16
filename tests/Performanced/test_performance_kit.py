@@ -16,7 +16,7 @@ import mysql.connector
 class PerformanceTests(unittest.TestCase):
     def setUp(self):
         self.connection = mysql.connector.connect(
-            host='localhost',
+            host='mysql',
             database='WaveForm_db',
             user='root',
             password=''
@@ -83,26 +83,6 @@ class PerformanceTests(unittest.TestCase):
         avg_operation_time = (end_time - start_time) / 100
         self.assertLess(avg_operation_time, 0.1, "GUI operations are too slow")
 
-    # @measure_execution_time
-    # def test_music_playback_performance(self):
-    #     start_cpu = psutil.cpu_percent()
-
-    #     queue_text_label = "Queue"
-    #     playlist_name = "Test Playlist"
-    #     playlist_label = "Label"
-    #     album_art_label = "Art"
-    #     bottom_frame_left = "Frame"
-
-    #     for _ in range(10):
-    #         play_pause_song(None, True, None, None, None, None, None)
-    #         time.sleep(0.1)
-    #         next_song(queue_text_label, playlist_name, playlist_label, album_art_label, bottom_frame_left, None, None, None, None)
-
-    #     end_cpu = psutil.cpu_percent()
-    #     cpu_usage = end_cpu - start_cpu
-
-    #     print(f"CPU Usage during playback: {cpu_usage}%")
-    #     self.assertLess(cpu_usage, 50, "Music playback is using too much CPU")
 
     def test_memory_usage(self):
         initial_memory = psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024  # MB

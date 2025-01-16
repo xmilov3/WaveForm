@@ -5,6 +5,7 @@ from app.func.add_song import add_song_to_playlist
 from app.db.db_operations import insert_song
 from app.func.add_playlist import create_empty_playlist, import_playlist_from_folder
 from app.func.analyze_song import analyze_song
+from app.func.sample_rate_comparsion import analyze_song_comparison
 from app.func.playlist_utils import update_playlist_buttons, show_context_menu, change_playlist_cover, delete_playlist, fetch_playlists
 from app.gui.panels.middle_panel import display_playlist_details_only
 from app.func.playlist_utils import *
@@ -22,7 +23,7 @@ def create_left_panel(parent, page_manager):
     left_frame.grid_columnconfigure(0, weight=1)
 
     buttons_frame = Frame(left_frame, bg='#2d0232')
-    buttons_frame.grid(row=0, column=0, sticky='nsew', padx=5, pady=10)
+    buttons_frame.grid(row=0, column=0, sticky='nsew', padx=5)
 
     playlist_frame = Frame(left_frame, bg='#2d0232')
     playlist_frame.grid(row=1, column=0, sticky='nsew', padx=5, pady=10)
@@ -62,9 +63,9 @@ def create_left_panel(parent, page_manager):
         file_path = filedialog.askopenfilename(
             title="Select a File to Analyze",
             filetypes=(
-                ("Pliki MP3", "*.mp3"),
-                ("Pliki WAV", "*.wav"),
-                ("Wszystkie pliki", "*.*")
+                ("Files MP3", "*.mp3"),
+                ("Files WAV", "*.wav"),
+                ("All files", "*.*")
             )
         )
         
@@ -73,13 +74,31 @@ def create_left_panel(parent, page_manager):
 
     ttk.Button(
         buttons_frame,
-        text="Analyze Song",
+        text="Basic Analize",
         style="Custom.TButton",
         command=analyze_song_with_dialog
     ).pack(fill="x", padx=10, pady=5)
-
     
-
+    def analyze_song_with_comparsion():
+        file_path = filedialog.askopenfilename(
+            title="Select a File to Analyze",
+            filetypes=(
+                ("Files MP3", "*.mp3"),
+                ("Files WAV", "*.wav"),
+                ("All files", "*.*")
+            )
+        )
+        
+        if file_path:  
+            analyze_song_comparison(file_path)
+    
+    ttk.Button(
+        buttons_frame,
+        text="Pro Analyze",
+        style="Custom.TButton",
+        command=analyze_song_with_comparsion
+    ).pack(fill="x", padx=10)
+    
     return left_frame
 
 
@@ -92,12 +111,17 @@ def on_playlist_click(playlist_name, page_manager):
     
     
 def populate_playlists(playlist_frame, page_manager):
+    
     for widget in playlist_frame.winfo_children():
         widget.destroy()
 
     playlists = fetch_playlists()
     
     if playlists:
+        
+        library_label = Label(playlist_frame, text="Library", font=("Arial", 20, "bold"), fg="gray", bg="#2d0232")
+        library_label.grid(sticky="ew", padx=5, pady=2)
+        
         for playlist_name in playlists:
             playlist_button = Button(
                 playlist_frame,

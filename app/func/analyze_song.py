@@ -26,15 +26,15 @@ def analyze_song(file_path=None):
                 return None
 
         # Load audio file
-        y, sr = librosa.load(file_path)
+        audio_data, sample_rate = librosa.load(file_path)
         
         # Count BPM
-        tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
+        tempo, _ = librosa.beat.beat_track(y=audio_data, sr=44100)
         tempo_float = float(tempo)
         tempo_rounded = round(tempo_float, 1)
         
         # Create a spectrogram
-        D = librosa.amplitude_to_db(np.abs(librosa.stft(y)), ref=np.max)
+        spectogram = librosa.amplitude_to_db(np.abs(librosa.stft(audio_data)), ref=np.max)
         
         # Open a new window for the plot
         plot_window = tk.Toplevel()
@@ -54,7 +54,7 @@ def analyze_song(file_path=None):
         ax = fig.add_subplot(111)
         
         # Draw the spectrogram
-        img = librosa.display.specshow(D, x_axis='time', y_axis='log', ax=ax)
+        img = librosa.display.specshow(spectogram, x_axis='time', y_axis='log', ax=ax)
         ax.set_title('Spectrogram')
         fig.colorbar(img, ax=ax, format="%+2.f dB")
         
