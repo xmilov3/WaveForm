@@ -5,7 +5,7 @@ from app.func.add_song import add_song_to_playlist
 from app.db.db_operations import insert_song
 from app.func.add_playlist import create_empty_playlist, import_playlist_from_folder
 from app.func.analyze_song import analyze_song
-from app.func.sample_rate_comparsion import analyze_song_comparison
+from app.func.pro_analyze_song import pro_analyze_song
 from app.func.playlist_utils import update_playlist_buttons, show_context_menu, change_playlist_cover, delete_playlist, fetch_playlists
 from app.gui.panels.middle_panel import display_playlist_details_only
 from app.func.playlist_utils import *
@@ -23,7 +23,8 @@ def create_left_panel(parent, page_manager):
     left_frame.grid_columnconfigure(0, weight=1)
 
     buttons_frame = Frame(left_frame, bg='#2d0232')
-    buttons_frame.grid(row=0, column=0, sticky='nsew', padx=5)
+    buttons_frame.grid(row=0, column=0, sticky='nsew', padx=5, pady=10)
+    buttons_frame.grid_columnconfigure(0, weight=1)
 
     playlist_frame = Frame(left_frame, bg='#2d0232')
     playlist_frame.grid(row=1, column=0, sticky='nsew', padx=5, pady=10)
@@ -79,7 +80,7 @@ def create_left_panel(parent, page_manager):
         command=analyze_song_with_dialog
     ).pack(fill="x", padx=10, pady=5)
     
-    def analyze_song_with_comparsion():
+    def analyze_song_pro():
         file_path = filedialog.askopenfilename(
             title="Select a File to Analyze",
             filetypes=(
@@ -90,14 +91,14 @@ def create_left_panel(parent, page_manager):
         )
         
         if file_path:  
-            analyze_song_comparison(file_path)
+            pro_analyze_song(file_path)
     
     ttk.Button(
         buttons_frame,
-        text="Pro Analyze",
+        text="Advanced Analyze",
         style="Custom.TButton",
-        command=analyze_song_with_comparsion
-    ).pack(fill="x", padx=10)
+        command=analyze_song_pro
+    ).pack(fill="x", padx=10, pady=5)
     
     return left_frame
 

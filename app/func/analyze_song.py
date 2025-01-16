@@ -8,7 +8,6 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 def analyze_song(file_path=None):
     try:
-        # Open file dialog if no file path is provided
         if not file_path:
             root = tk.Tk()
             root.withdraw()
@@ -25,40 +24,46 @@ def analyze_song(file_path=None):
                 print("No file selected.")
                 return None
 
-        # Load audio file
         audio_data, sample_rate = librosa.load(file_path)
         
-        # Count BPM
         tempo, _ = librosa.beat.beat_track(y=audio_data, sr=44100)
         tempo_float = float(tempo)
         tempo_rounded = round(tempo_float, 1)
         
-        # Create a spectrogram
-        spectogram = librosa.amplitude_to_db(np.abs(librosa.stft(audio_data)), ref=np.max)
+        spectogram = librosa.amplitude_to_db(
+            np.abs(librosa.stft(
+                audio_data,
+                n_fft=2048,
+                hop_length=512,
+                win_length=1024,
+                window='hann'
+            )), 
+            ref=np.max)
         
-        # Open a new window for the plot
         plot_window = tk.Toplevel()
-        plot_window.title("Audio Analysis Results")
-        plot_window.geometry("800x600")
+        plot_window.title("Basic Audio Analysis Results")
+        plot_window.geometry("1300x700")
         
-        # Create a frame for the song info
-        info_frame = tk.Frame(plot_window)
-        info_frame.pack(pady=10)
         
-        # Add song BPM Label
-        bpm_label = tk.Label(info_frame, text=f"Tempo (BPM): {tempo_rounded}", font=('Arial', 12, 'bold'))
-        bpm_label.pack()
-        
-        # Create a figure
-        fig = Figure(figsize=(10, 6))
+        fig = Figure(figsize=(12, 7))
         ax = fig.add_subplot(111)
         
-        # Draw the spectrogram
-        img = librosa.display.specshow(spectogram, x_axis='time', y_axis='log', ax=ax)
-        ax.set_title('Spectrogram')
+        img = librosa.display.specshow(
+            spectogram, 
+            x_axis='time', 
+            y_axis='log', 
+            sr=44100,
+            hop_length=1024,
+            fmin=20,
+            fmax=20000,
+            ax=ax)
+        
+        fig.suptitle(f'Tempo: {tempo_rounded:.1f} BPM')
+        ax.set_title('Basic Spectrogram')
         fig.colorbar(img, ax=ax, format="%+2.f dB")
         
-        # Add the plot to the window
+        fig.tight_layout(rect=[0, 0.03, 1, 0.95])
+        
         canvas = FigureCanvasTkAgg(fig, master=plot_window)
         canvas.draw()
         canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
