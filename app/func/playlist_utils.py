@@ -25,39 +25,23 @@ playlist_buttons = {}
 
 def update_playlist_buttons(playlist_frame, delete_playlist_callback, change_cover_callback, page_manager):
     global playlist_buttons
+    
+    for widget in playlist_frame.winfo_children():
+        widget.destroy()
 
     playlists = fetch_playlists()
-
-    existing_widgets = {widget.cget("text"): widget for widget in playlist_frame.winfo_children() if isinstance(widget, Button)}
-
-    for playlist_name in list(existing_widgets.keys()):
-        if playlist_name not in playlists:
-            existing_widgets[playlist_name].destroy()
-            if playlist_name in playlist_buttons:
-                del playlist_buttons[playlist_name]
-
+    
     for i, playlist_name in enumerate(playlists):
-        if playlist_name in existing_widgets:
-            button = existing_widgets[playlist_name]
-            button.configure(
-                text=playlist_name
-            )
-        else:
-            button = Button(
-                playlist_frame,
-                text=playlist_name,
-                font=("Arial", 14, "bold"),
-                # borderwidth=0,
-                command=lambda name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
-            )
-            button.grid(row=i, column=0, sticky="ew", padx=5, pady=5)
-            button.bind("<Button-3>", lambda event, name=playlist_name: show_context_menu(event, name, playlist_frame, page_manager))
-            button.bind("<Control-Button-1>", lambda event, name=playlist_name: show_context_menu(event, name, playlist_frame, page_manager))
-
-            playlist_buttons[playlist_name] = button
-
-    playlist_frame.grid_columnconfigure(0, weight=1)
-
+        button = Button(
+            playlist_frame,
+            text=playlist_name,
+            font=("Arial", 14, "bold"),
+            command=lambda name=playlist_name: page_manager.show_dynamic_panel("MiddlePanel", name)
+        )
+        button.grid(row=i, column=0, sticky="ew", padx=5, pady=5)
+        playlist_buttons[playlist_name] = button
+        
+    playlist_frame.update_idletasks()
 
 def show_context_menu(event, playlist_name, playlist_frame, page_manager):
     menu = Menu(None, tearoff=0)

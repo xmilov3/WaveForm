@@ -7,6 +7,7 @@ from app.func.playlist_handler import create_playlist, delete_playlist
 from tkinter import messagebox, simpledialog, filedialog, END
 from app.func.playlist_utils import fetch_playlists
 from tkinter import Toplevel, Label, Listbox, Scrollbar, Button, filedialog, messagebox
+from app.func.session import user_session
 import re
 
 def add_song_to_playlist(file_path, playlist_name):
@@ -14,31 +15,41 @@ def add_song_to_playlist(file_path, playlist_name):
     if not connection:
         print("Failed to connect to database.")
         return
+        
+    if not user_session.user_id:
+        print("No user logged in.")
+        messagebox.showerror("Error", "You must be logged in to add songs.")
+        return
 
     try:
         title_artist = os.path.basename(file_path).split('.')[0]
-
         match = re.match(r"(.*?)\s*-\s*(.*)", title_artist)
         if match:
             artist = match.group(1).strip()
             title = match.group(2).strip()
         else:
-            artist = "Unknown Artist"
+            artist = "Unknown Artist" 
             title = title_artist.strip()
 
         cursor = connection.cursor()
+        
+        check_user_query = "SELECT user_id FROM users WHERE user_id = %s"
+        cursor.execute(check_user_query, (user_session.user_id,))
+        if not cursor.fetchone():
+            raise Exception(f"User with ID {user_session.user_id} does not exist")
+
         insert_song_query = """
             INSERT INTO songs (user_id, title, artist, album, genre, file_path, cover_path)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(insert_song_query, (
-            1,
+            user_session.user_id,
             title,
             artist,
             playlist_name,
             "Unknown Genre",
             file_path,
-            "/Users/bartek/Desktop/Politechnika/Praca inżynierska/WaveForm_newest_copy/app/gui/assets/covers/playlist_covers/default_cover.png"
+            "/Users/bartek/Desktop/Politechnika/Praca inżynierska/WaveForm_newest_copy/app/gui/assets/covers/playlist_covers/default_cover.png"
         ))
         connection.commit()
 
@@ -83,9 +94,10 @@ def add_song_dialog(playlist_name, song_listbox):
     if file_path:
         try:
             add_song_to_playlist(file_path, playlist_name)
+            refresh_song_listbox(song_listbox, playlist_name)
+            song_listbox.update_idletasks()
             messagebox.showinfo("Success", f"Song added to playlist '{playlist_name}'.")
 
-            refresh_song_listbox(song_listbox, playlist_name)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to add song: {e}")
     else:

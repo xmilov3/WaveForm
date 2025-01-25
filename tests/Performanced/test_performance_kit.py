@@ -16,7 +16,7 @@ import mysql.connector
 class PerformanceTests(unittest.TestCase):
     def setUp(self):
         self.connection = mysql.connector.connect(
-            host='mysql',
+            host='localhost',
             database='WaveForm_db',
             user='root',
             password=''
