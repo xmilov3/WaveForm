@@ -113,9 +113,8 @@ def create_bottom_panel(
         )
         is_playing = True
         current_song_position = 0
-
-        update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
-
+        # update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
+        
     def previous_command():
         global is_playing, current_song_position
         previous_song(

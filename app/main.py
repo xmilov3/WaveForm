@@ -12,14 +12,13 @@ from app.func.load_pic_gui import load_top_logo
 
 def main():
     root = tk.Tk()
-    page_manager = PageManager(root)
     root.withdraw()
+    page_manager = PageManager(root)
     root.title("WaveForm")
     root.configure(bg="#1E052A")
     root.geometry("1500x1000")
     icon = load_top_logo()
     root.iconphoto(True, icon)
-    root.deiconify()
 
     connection = create_connection()
     if not connection:
