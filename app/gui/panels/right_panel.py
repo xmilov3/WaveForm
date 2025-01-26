@@ -55,33 +55,19 @@ def fetch_next_in_queue(playlist_name):
             password=''
         )
         cursor = connection.cursor()
-
-        current_song_query = """
-            SELECT ps.song_id
-            FROM playlist_songs ps
-            JOIN playlists p ON ps.playlist_id = p.playlist_id
-            WHERE p.name = %s
-            ORDER BY ps.playlist_songs_id ASC
-            LIMIT 1
-        """
-        cursor.execute(current_song_query, (playlist_name,))
-        current_song = cursor.fetchone()
-
-        if not current_song:
-            return []
-
+        
         query = """
             SELECT s.title, s.artist
             FROM songs s
             JOIN playlist_songs ps ON s.song_id = ps.song_id
             JOIN playlists p ON ps.playlist_id = p.playlist_id
             WHERE p.name = %s
-            AND ps.playlist_songs_id > (
-                SELECT ps2.playlist_songs_id
-                FROM playlist_songs ps2
-                JOIN playlists p2 ON ps2.playlist_id = p2.playlist_id
-                WHERE p2.name = %s
-                ORDER BY ps2.playlist_songs_id ASC
+            AND ps.song_id > (
+                SELECT curr.song_id
+                FROM playlist_songs curr
+                JOIN playlists pl ON curr.playlist_id = pl.playlist_id
+                WHERE pl.name = %s
+                ORDER BY curr.playlist_songs_id ASC
                 LIMIT 1
             )
             ORDER BY ps.playlist_songs_id ASC
@@ -89,21 +75,13 @@ def fetch_next_in_queue(playlist_name):
         """
         cursor.execute(query, (playlist_name, playlist_name))
         queue_songs = cursor.fetchall()
-
-        if queue_songs:
-            print(f"Next songs in queue fetched: {queue_songs}")
-        else:
-            print(f"No next songs found for playlist: {playlist_name}")
-
         return queue_songs
-    except mysql.connector.Error as e:
-        print(f"Error while fetching next songs: {e}")
-        return []
+
     finally:
         if connection.is_connected():
             cursor.close()
             connection.close()
-
+            
 def update_next_in_queue(queue_text_label, playlist_name):
     if queue_text_label is None:
         print("Error: queue_text_label is None")

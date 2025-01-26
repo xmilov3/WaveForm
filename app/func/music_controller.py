@@ -233,6 +233,10 @@ def initialize_first_song(
 
 def handle_double_click(song_listbox, play_pause_button, play_button_img, pause_button_img, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider, album_art_label):
     global currentsong
+    
+    
+
+
 
     selected_index = song_listbox.curselection()
     if not selected_index:
@@ -257,10 +261,17 @@ def handle_double_click(song_listbox, play_pause_button, play_button_img, pause_
         pause_button_img
     )
 
-    if hasattr(play_pause_button, 'queue_text_label'):
+    if hasattr(play_pause_button, 'queue_text_label') and hasattr(play_pause_button, 'current_playlist'):
         update_next_in_queue(play_pause_button.queue_text_label, play_pause_button.current_playlist)
-    if hasattr(play_pause_button, 'playlist_label'):
         update_now_playing(play_pause_button.playlist_label, album_art_label, title_label, artist_label, play_pause_button.current_playlist)
+
+    # if hasattr(play_pause_button, 'queue_text_label'):
+    #     update_next_in_queue(play_pause_button.queue_text_label, play_pause_button.current_playlist)
+    # if hasattr(play_pause_button, 'playlist_label'):
+    #     update_now_playing(play_pause_button.playlist_label, album_art_label, title_label, artist_label, play_pause_button.current_playlist)
+
+
+    
 
 def select_song_from_list(song_listbox, play_pause_button, play_button_img, pause_button_img, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider, album_art_label):
     global currentsong, song_length, current_song_position, song_start_time, is_playing
@@ -415,6 +426,7 @@ def play_pause_song(song_info, is_playing, play_button, play_button_img, pause_b
             is_playing = True
             sync_is_playing()
 
+
         return is_playing
 
     except Exception as e:
@@ -437,97 +449,86 @@ def stop_song(play_button, play_button_img):
 
 
 def next_song(song_listbox, play_pause_button, play_button_img, pause_button_img, 
-              title_label, artist_label, time_elapsed_label, time_remaining_label, 
-              progress_slider, queue_text_label, playlist_name, playlist_label, album_art_label, bottom_frame_left):
-    global currentsong, is_playing, current_song_position, song_length, song_start_time
+             title_label, artist_label, time_elapsed_label, time_remaining_label, 
+             progress_slider, queue_text_label, playlist_name, playlist_label, album_art_label, bottom_frame_left):
+   global currentsong, is_playing, current_song_position, song_length, song_start_time
 
-    if song_listbox.size() == 0:
-        print("The song list is empty!")
-        return
+   if song_listbox.size() == 0:
+       print("The song list is empty!")
+       return
 
-    current_index = song_listbox.curselection()
-    if not current_index:
-        print("No song selected!")
-        return
+   current_index = song_listbox.curselection()
+   if not current_index:
+       print("No song selected!")
+       return
 
-    next_index = (current_index[0] + 1) % song_listbox.size()
-    song_listbox.select_clear(0, END)
-    song_listbox.select_set(next_index)
-    song_listbox.activate(next_index)
+   next_index = (current_index[0] + 1) % song_listbox.size()
+   song_listbox.select_clear(0, END)
+   song_listbox.select_set(next_index)
+   song_listbox.activate(next_index)
 
-    currentsong = song_listbox.get(next_index)
-    song_title, artist_name = currentsong.split(" - ")
+   currentsong = song_listbox.get(next_index)
+   song_title, artist_name = currentsong.split(" - ")
 
-    update_next_in_queue(queue_text_label, playlist_name)
-    def update_now_playing(self, playlist_label, bottom_frame_left, album_art_label, title_label, artist_label, playlist_name, time_elapsed_label, time_remaining_label):
-        update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name, time_elapsed_label, time_remaining_label)
+   if queue_text_label:
+       update_next_in_queue(queue_text_label, playlist_name)
+   update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
+   try:
+       connection = mysql.connector.connect(
+           host='localhost',
+           database='WaveForm_db',
+           user='root',
+           password=''
+       )
+       cursor = connection.cursor()
+       query = "SELECT file_path FROM songs WHERE title = %s AND artist = %s"
+       cursor.execute(query, (song_title.strip(), artist_name.strip()))
+       result = cursor.fetchone()
 
-    try:
-        connection = mysql.connector.connect(
-            host='localhost',
-            database='WaveForm_db',
-            user='root',
-            password=''
-        )
-        cursor = connection.cursor()
-        query = "SELECT file_path FROM songs WHERE title = %s AND artist = %s"
-        cursor.execute(query, (song_title.strip(), artist_name.strip()))
-        result = cursor.fetchone()
+       if not result:
+           print(f"File for song {song_title} - {artist_name} not found.")
+           return
 
-        if not result:
-            print(f"File for song {song_title} - {artist_name} not found.")
-            return
+       file_path = result[0]
 
-        file_path = result[0]
+       if not os.path.exists(file_path):
+           print(f"File does not exist: {file_path}")
+           return
 
-        if not os.path.exists(file_path):
-            print(f"File does not exist: {file_path}")
-            return
+       file_extension = os.path.splitext(file_path)[-1].lower()
 
-        file_extension = os.path.splitext(file_path)[-1].lower()
+       if file_extension == ".mp3":
+           pygame.mixer.music.load(file_path)
+           pygame.mixer.music.play()
+           song_length = MP3(file_path).info.length
+       elif file_extension == ".wav":
+           audio = AudioSegment.from_file(file_path, format="wav")
+           pygame.mixer.music.load(file_path)
+           pygame.mixer.music.play()
+           song_length = len(audio) / 1000.0
+       else:
+           print(f"Unsupported file format: {file_extension}")
+           return
 
-        if file_extension == ".mp3":
-            try:
-                pygame.mixer.music.load(file_path)
-                pygame.mixer.music.play()
-                song_length = MP3(file_path).info.length
-            except Exception as e:
-                print(f"Error loading MP3 file: {e}")
-                return
+       current_song_position = 0
+       song_start_time = 0
+       is_playing = True
 
-        elif file_extension == ".wav":
-            try:
-                audio = AudioSegment.from_file(file_path, format="wav")
-                pygame.mixer.music.load(file_path)
-                pygame.mixer.music.play()
-                song_length = len(audio) / 1000.0
-            except Exception as e:
-                print(f"Error loading WAV file: {e}")
-                return
+       play_pause_button.config(image=pause_button_img)
+       time_elapsed_label.config(text="00:00")
+       time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(song_length)))
+       progress_slider.set(0)
+       title_label.config(text=song_title)
+       artist_label.config(text=artist_name)
 
-        else:
-            print(f"Unsupported file format: {file_extension}")
-            return
-
-        current_song_position = 0
-        song_start_time = 0
-        is_playing = True
-
-        play_pause_button.config(image=pause_button_img)
-        time_elapsed_label.config(text="00:00")
-        time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(song_length)))
-        progress_slider.set(0)
-        title_label.config(text=song_title)
-        artist_label.config(text=artist_name)
-
-    except Exception as e:
-        print(f"Error in next_song: {e}")
-    finally:
-        if 'connection' in locals() and connection.is_connected():
-            cursor.close()
-            connection.close()
-    sync_is_playing()
+   except Exception as e:
+       print(f"Error in next_song: {e}")
+   finally:
+       if 'connection' in locals() and connection.is_connected():
+           cursor.close()
+           connection.close()
+   sync_is_playing()
 
 
 
@@ -553,9 +554,9 @@ def previous_song(song_listbox, play_pause_button, play_button_img, pause_button
     currentsong = song_listbox.get(previous_index)
     song_title, artist_name = currentsong.split(" - ")
 
-    update_next_in_queue(queue_text_label, playlist_name)
-    def update_now_playing(self, playlist_label, bottom_frame_left, album_art_label, title_label, artist_label, playlist_name, time_elapsed_label, time_remaining_label):
-        update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name, time_elapsed_label, time_remaining_label)
+    if queue_text_label:
+        update_next_in_queue(queue_text_label, playlist_name)
+    update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
     try:
         connection = mysql.connector.connect(
@@ -582,24 +583,14 @@ def previous_song(song_listbox, play_pause_button, play_button_img, pause_button
         file_extension = os.path.splitext(file_path)[-1].lower()
 
         if file_extension == ".mp3":
-            try:
-                pygame.mixer.music.load(file_path)
-                pygame.mixer.music.play()
-                song_length = MP3(file_path).info.length
-            except Exception as e:
-                print(f"Error playing MP3: {e}")
-                return
-
+            pygame.mixer.music.load(file_path)
+            pygame.mixer.music.play()
+            song_length = MP3(file_path).info.length
         elif file_extension == ".wav":
-            try:
-                audio = AudioSegment.from_file(file_path, format="wav")
-                pygame.mixer.music.load(file_path)
-                pygame.mixer.music.play()
-                song_length = len(audio) / 1000.0
-            except Exception as e:
-                print(f"Error playing WAV: {e}")
-                return
-
+            audio = AudioSegment.from_file(file_path, format="wav")
+            pygame.mixer.music.load(file_path)
+            pygame.mixer.music.play()
+            song_length = len(audio) / 1000.0
         else:
             print(f"Unsupported file format: {file_extension}")
             return
@@ -614,7 +605,6 @@ def previous_song(song_listbox, play_pause_button, play_button_img, pause_button
         progress_slider.set(0)
         title_label.config(text=song_title)
         artist_label.config(text=artist_name)
-        update_now_playing(text=song_title, artist_name=artist_name)
 
     except Exception as e:
         print(f"Error in previous_song: {e}")
@@ -623,10 +613,6 @@ def previous_song(song_listbox, play_pause_button, play_button_img, pause_button
             cursor.close()
             connection.close()
     sync_is_playing()
-
-
-
-
 
 
     
