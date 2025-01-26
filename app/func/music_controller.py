@@ -143,6 +143,8 @@ def initialize_first_song(
             song_listbox.delete(0, END)
             for song in songs:
                 song_listbox.insert(END, f"{song[0]} - {song[1]}")
+                song_listbox.select_set(0)
+                song_listbox.activate(0)
 
             if not songs:
                 print(f"No songs found for playlist: {playlist_name}")
@@ -261,16 +263,12 @@ def handle_double_click(song_listbox, play_pause_button, play_button_img, pause_
         pause_button_img
     )
 
-    if hasattr(play_pause_button, 'queue_text_label') and hasattr(play_pause_button, 'current_playlist'):
-        update_next_in_queue(play_pause_button.queue_text_label, play_pause_button.current_playlist)
-        update_now_playing(play_pause_button.playlist_label, album_art_label, title_label, artist_label, play_pause_button.current_playlist)
-
-    # if hasattr(play_pause_button, 'queue_text_label'):
-    #     update_next_in_queue(play_pause_button.queue_text_label, play_pause_button.current_playlist)
-    # if hasattr(play_pause_button, 'playlist_label'):
-    #     update_now_playing(play_pause_button.playlist_label, album_art_label, title_label, artist_label, play_pause_button.current_playlist)
-
-
+    if hasattr(play_pause_button, 'current_playlist'):
+        if hasattr(play_pause_button, 'queue_text_label'):
+            update_next_in_queue(play_pause_button.queue_text_label, play_pause_button.current_playlist)
+        if hasattr(play_pause_button, 'playlist_label'):
+            update_now_playing(play_pause_button.playlist_label, album_art_label, title_label, artist_label, play_pause_button.current_playlist)
+        play_pause_button.config(image=pause_button_img)
     
 
 def select_song_from_list(song_listbox, play_pause_button, play_button_img, pause_button_img, title_label, artist_label, time_elapsed_label, time_remaining_label, progress_slider, album_art_label):
@@ -449,18 +447,20 @@ def stop_song(play_button, play_button_img):
 
 
 def next_song(song_listbox, play_pause_button, play_button_img, pause_button_img, 
-             title_label, artist_label, time_elapsed_label, time_remaining_label, 
-             progress_slider, queue_text_label, playlist_name, playlist_label, album_art_label, bottom_frame_left):
+            title_label, artist_label, time_elapsed_label, time_remaining_label, 
+            progress_slider, queue_text_label, playlist_name, playlist_label, album_art_label, bottom_frame_left):
    global currentsong, is_playing, current_song_position, song_length, song_start_time
 
    if song_listbox.size() == 0:
        print("The song list is empty!")
        return
 
-   current_index = song_listbox.curselection()
-   if not current_index:
-       print("No song selected!")
-       return
+   if not song_listbox.curselection():
+       song_listbox.select_set(0)
+       song_listbox.activate(0)
+       current_index = (0,)
+   else:
+       current_index = song_listbox.curselection()
 
    next_index = (current_index[0] + 1) % song_listbox.size()
    song_listbox.select_clear(0, END)
@@ -470,9 +470,10 @@ def next_song(song_listbox, play_pause_button, play_button_img, pause_button_img
    currentsong = song_listbox.get(next_index)
    song_title, artist_name = currentsong.split(" - ")
 
-   if queue_text_label:
-       update_next_in_queue(queue_text_label, playlist_name)
-   update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
+   if hasattr(play_pause_button, 'current_playlist'):
+       if queue_text_label:
+           update_next_in_queue(queue_text_label, playlist_name)
+       update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
    try:
        connection = mysql.connector.connect(
@@ -531,88 +532,90 @@ def next_song(song_listbox, play_pause_button, play_button_img, pause_button_img
    sync_is_playing()
 
 
-
 def previous_song(song_listbox, play_pause_button, play_button_img, pause_button_img, 
-                  title_label, artist_label, time_elapsed_label, time_remaining_label, 
-                  progress_slider, queue_text_label, playlist_name, playlist_label, album_art_label, bottom_frame_left):   
-    global currentsong, is_playing, current_song_position, song_length, song_start_time
+                 title_label, artist_label, time_elapsed_label, time_remaining_label, 
+                 progress_slider, queue_text_label, playlist_name, playlist_label, album_art_label, bottom_frame_left):   
+   global currentsong, is_playing, current_song_position, song_length, song_start_time
 
-    if song_listbox.size() == 0:
-        print("The song list is empty!")
-        return
+   if song_listbox.size() == 0:
+       print("The song list is empty!")
+       return
 
-    current_index = song_listbox.curselection()
-    if not current_index:
-        print("No song selected!")
-        return
+   if not song_listbox.curselection():
+       song_listbox.select_set(0)
+       song_listbox.activate(0)
+       current_index = (0,)
+   else:
+       current_index = song_listbox.curselection()
 
-    previous_index = (current_index[0] - 1) % song_listbox.size()
-    song_listbox.select_clear(0, END)
-    song_listbox.select_set(previous_index)
-    song_listbox.activate(previous_index)
+   previous_index = (current_index[0] - 1) % song_listbox.size()
+   song_listbox.select_clear(0, END)
+   song_listbox.select_set(previous_index)
+   song_listbox.activate(previous_index)
 
-    currentsong = song_listbox.get(previous_index)
-    song_title, artist_name = currentsong.split(" - ")
+   currentsong = song_listbox.get(previous_index)
+   song_title, artist_name = currentsong.split(" - ")
 
-    if queue_text_label:
-        update_next_in_queue(queue_text_label, playlist_name)
-    update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
+   if hasattr(play_pause_button, 'current_playlist'):
+       if queue_text_label:
+           update_next_in_queue(queue_text_label, playlist_name)
+       update_now_playing(playlist_label, album_art_label, title_label, artist_label, playlist_name)
 
-    try:
-        connection = mysql.connector.connect(
-            host='localhost',
-            database='WaveForm_db',
-            user='root',
-            password=''
-        )
-        cursor = connection.cursor()
-        query = "SELECT file_path FROM songs WHERE title = %s AND artist = %s"
-        cursor.execute(query, (song_title.strip(), artist_name.strip()))
-        result = cursor.fetchone()
+   try:
+       connection = mysql.connector.connect(
+           host='localhost',
+           database='WaveForm_db',
+           user='root',
+           password=''
+       )
+       cursor = connection.cursor()
+       query = "SELECT file_path FROM songs WHERE title = %s AND artist = %s"
+       cursor.execute(query, (song_title.strip(), artist_name.strip()))
+       result = cursor.fetchone()
 
-        if not result:
-            print(f"File for song {song_title} - {artist_name} not found.")
-            return
+       if not result:
+           print(f"File for song {song_title} - {artist_name} not found.")
+           return
 
-        file_path = result[0]
+       file_path = result[0]
 
-        if not os.path.exists(file_path):
-            print(f"File does not exist: {file_path}")
-            return
+       if not os.path.exists(file_path):
+           print(f"File does not exist: {file_path}")
+           return
 
-        file_extension = os.path.splitext(file_path)[-1].lower()
+       file_extension = os.path.splitext(file_path)[-1].lower()
 
-        if file_extension == ".mp3":
-            pygame.mixer.music.load(file_path)
-            pygame.mixer.music.play()
-            song_length = MP3(file_path).info.length
-        elif file_extension == ".wav":
-            audio = AudioSegment.from_file(file_path, format="wav")
-            pygame.mixer.music.load(file_path)
-            pygame.mixer.music.play()
-            song_length = len(audio) / 1000.0
-        else:
-            print(f"Unsupported file format: {file_extension}")
-            return
+       if file_extension == ".mp3":
+           pygame.mixer.music.load(file_path)
+           pygame.mixer.music.play()
+           song_length = MP3(file_path).info.length
+       elif file_extension == ".wav":
+           audio = AudioSegment.from_file(file_path, format="wav")
+           pygame.mixer.music.load(file_path)
+           pygame.mixer.music.play()
+           song_length = len(audio) / 1000.0
+       else:
+           print(f"Unsupported file format: {file_extension}")
+           return
 
-        current_song_position = 0
-        song_start_time = 0
-        is_playing = True
+       current_song_position = 0
+       song_start_time = 0
+       is_playing = True
 
-        play_pause_button.config(image=pause_button_img)
-        time_elapsed_label.config(text="00:00")
-        time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(song_length)))
-        progress_slider.set(0)
-        title_label.config(text=song_title)
-        artist_label.config(text=artist_name)
+       play_pause_button.config(image=pause_button_img)
+       time_elapsed_label.config(text="00:00")
+       time_remaining_label.config(text=time.strftime("-%M:%S", time.gmtime(song_length)))
+       progress_slider.set(0)
+       title_label.config(text=song_title)
+       artist_label.config(text=artist_name)
 
-    except Exception as e:
-        print(f"Error in previous_song: {e}")
-    finally:
-        if 'connection' in locals() and connection.is_connected():
-            cursor.close()
-            connection.close()
-    sync_is_playing()
+   except Exception as e:
+       print(f"Error in previous_song: {e}")
+   finally:
+       if 'connection' in locals() and connection.is_connected():
+           cursor.close()
+           connection.close()
+   sync_is_playing()
 
 
     
