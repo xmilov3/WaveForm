@@ -2,7 +2,8 @@
 
 Digital Application for playing music with an analysis tool.
 
-![Analyze Result](app/gui/assets/mockups/Analyze_track_page4.png)
+![Standard GUI](app/gui/assets/mockups/Analyze_track_page4.png)
+![Accurate Analisys](app/gui/assets/mockups/analysis.png)
 
 ---
 
